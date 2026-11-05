@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+  
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0C0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #AF4426;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF5A36;
+}
+
+/* Glassmorphism */
+.glass-panel {
+  background: rgba(20, 22, 28, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.glass-terracotta {
+  background: rgba(175, 68, 38, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Text Reflection */
+.text-reflection {
+  position: relative;
+  -webkit-box-reflect: below -15px linear-gradient(transparent 40%, rgba(255, 255, 255, 0.25) 100%);
+}
+
+.text-reflection-subtle {
+  position: relative;
+  -webkit-box-reflect: below -20px linear-gradient(transparent 60%, rgba(255, 90, 54, 0.2) 100%);
+}
+
+/* Fallback for browsers that don't support box-reflect */
+.reflection-mirror {
+  transform: scaleY(-1);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
+}
+
+/* Subtle Noise Texture Overlay */
+.noise-overlay {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Polaroids and card tilt */
+.polaroid-shadow {
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.card-hover-glow {
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover-glow:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px -10px rgba(255, 90, 54, 0.15),
+              0 0 0 1px rgba(255, 90, 54, 0.3);
+}
+
+/* Hide native cursor when custom cursor is active */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}

@@ -6,6 +6,15 @@ import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
 
 export default function Hero() {
+  const handleMeetAvatar = () => {
+    sound.playClick();
+    const sceneEl = document.getElementById('workspace-3d-scene');
+    if (sceneEl) {
+      sceneEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    window.dispatchEvent(new CustomEvent('trigger-avatar-speech'));
+  };
+
   const handleResumeDownload = () => {
     sound.playSuccess();
     try {
@@ -73,6 +82,16 @@ export default function Hero() {
 
             {/* Action Buttons & Socials */}
             <div className="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                onClick={handleMeetAvatar}
+                onMouseEnter={() => sound.playPop()}
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm sm:text-base bg-gradient-to-r from-coral to-terracotta hover:from-coral-light hover:to-coral text-white transition-all duration-300 shadow-xl shadow-coral/30 hover:-translate-y-0.5 border border-white/20 cursor-pointer active:scale-95"
+              >
+                <Sparkles className="w-4 h-4 text-amber-200" />
+                <span>Meet My 3D Avatar 🎙️</span>
+              </button>
+
               <a
                 href="#projects"
                 onMouseEnter={() => sound.playPop()}
@@ -139,10 +158,10 @@ export default function Hero() {
               {/* Bottom tag inside 3D canvas box */}
               <div className="absolute bottom-4 left-6 right-6 flex items-center justify-between text-xs font-mono text-cream/70 pointer-events-none">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  Three.js Standing Workspace
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  3D Developer Avatar & Workspace
                 </span>
-                <span>Drag to Rotate 360°</span>
+                <span>Interactive 3D • Voice Enabled</span>
               </div>
             </div>
           </div>

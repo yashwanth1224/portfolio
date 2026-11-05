@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, ExternalLink, Github, Sparkles, Star, ThumbsUp, ThumbsDown, Activity, Play, Pause, Gauge, Check } from 'lucide-react';
+import { X, ExternalLink, Github, Sparkles, Star, ThumbsUp, ThumbsDown, Activity, Play, Pause, Gauge, Check, Globe, ShieldCheck, CheckCircle2, Copy, Zap } from 'lucide-react';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import * as THREE from 'three';
@@ -16,20 +16,45 @@ export default function ProjectModal({ project, isOpen, onClose }) {
         {/* Header bar */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-obsidian/70">
           <div className="flex items-center gap-3">
-            <span className="w-2.5 h-2.5 rounded-full bg-coral animate-ping" />
-            <span className="font-mono text-xs uppercase tracking-wider text-coral font-semibold">
+            <span className={`w-2.5 h-2.5 rounded-full ${project.liveUrl ? 'bg-emerald-400' : 'bg-coral'} animate-ping`} />
+            <span className={`font-mono text-xs uppercase tracking-wider font-semibold ${
+              project.liveUrl ? 'text-emerald-400' : 'text-coral'
+            }`}>
               {project.tag}
             </span>
+            {project.liveUrl && (
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live Online
+              </span>
+            )}
           </div>
-          <button
-            onClick={() => {
-              sound.playClick();
-              onClose();
-            }}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-cream/70 hover:text-white transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          
+          <div className="flex items-center gap-2 sm:gap-3">
+            {project.liveUrl && (
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sound.playClick()}
+                onMouseEnter={() => sound.playPop()}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-bold tracking-wide uppercase transition-all shadow-md shadow-emerald-950/40"
+              >
+                <span>Launch Live Website</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+            <button
+              onClick={() => {
+                sound.playClick();
+                onClose();
+              }}
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-cream/70 hover:text-white transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content body */}
@@ -48,13 +73,19 @@ export default function ProjectModal({ project, isOpen, onClose }) {
           <div className="grid grid-cols-3 gap-3">
             {project.metrics.map((m, idx) => (
               <div key={idx} className="bg-obsidian-card p-3 rounded-xl border border-white/10 text-center">
-                <div className="font-serif text-xl sm:text-2xl font-bold text-coral">{m.value}</div>
+                <div className={`font-serif text-xl sm:text-2xl font-bold ${
+                  project.liveUrl && m.label === 'STATUS' ? 'text-emerald-400' : 'text-coral'
+                }`}>{m.value}</div>
                 <div className="text-[11px] font-mono text-cream/60 uppercase mt-0.5">{m.label}</div>
               </div>
             ))}
           </div>
 
           {/* DYNAMIC INTERACTIVE CONTENT BASED ON DEMO TYPE */}
+          {project.demoType === 'live-website' && (
+            <LiveWebsiteWidget project={project} />
+          )}
+
           {project.demoType === 'sentiment-tester' && (
             <SentimentTesterWidget />
           )}
@@ -102,17 +133,35 @@ export default function ProjectModal({ project, isOpen, onClose }) {
 
           {/* Footer Actions */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/10">
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => sound.playClick()}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-cream text-sm font-medium transition-colors border border-white/10"
-            >
-              <Github className="w-4 h-4" />
-              <span>Inspect Source on GitHub</span>
-              <ExternalLink className="w-3.5 h-3.5 ml-1 text-cream/60" />
-            </a>
+            <div className="flex flex-wrap items-center gap-3">
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => sound.playClick()}
+                  onMouseEnter={() => sound.playPop()}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-emerald-950/40 hover:-translate-y-0.5"
+                >
+                  <Globe className="w-4 h-4" />
+                  <span>Launch Live Website</span>
+                  <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                </a>
+              )}
+
+              <a
+                href={project.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => sound.playClick()}
+                onMouseEnter={() => sound.playPop()}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-cream text-sm font-medium transition-colors border border-white/10"
+              >
+                <Github className="w-4 h-4" />
+                <span>Inspect Source</span>
+                <ExternalLink className="w-3.5 h-3.5 ml-0.5 text-cream/60" />
+              </a>
+            </div>
 
             <button
               onClick={() => {
@@ -521,6 +570,145 @@ function PneumaticDetailWidget() {
           <p className="text-[11px] text-cream/70">
             Pressure sensor safety cutoff and thermal relief bypass valve preventing over-expansion or seal leakage.
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 4. LIVE PRODUCTION WEBSITE SHOWCASE WIDGET
+function LiveWebsiteWidget({ project }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyUrl = () => {
+    if (project.liveUrl) {
+      navigator.clipboard.writeText(project.liveUrl);
+      setCopied(true);
+      sound.playSuccess();
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const isZisti = project.id === 'zisti';
+
+  return (
+    <div className="bg-obsidian rounded-2xl border border-emerald-500/30 overflow-hidden shadow-2xl space-y-0">
+      {/* Mock Browser Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-obsidian-surface border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-rose-500/80 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-amber-500/80 inline-block" />
+            <span className="w-3 h-3 rounded-full bg-emerald-500/80 inline-block" />
+          </div>
+          <span className="hidden sm:inline-block text-[11px] font-mono text-cream/50 pl-2">
+            Secure Production Environment
+          </span>
+        </div>
+
+        {/* URL Pill */}
+        <div className="flex items-center gap-2 px-3.5 py-1 bg-obsidian rounded-full border border-white/15 text-xs font-mono max-w-full sm:max-w-md">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+          <span className="text-emerald-400 text-[11px] font-semibold">https://</span>
+          <span className="text-cream/90 truncate">{project.liveUrl?.replace('https://', '')}</span>
+          <button
+            onClick={handleCopyUrl}
+            title="Copy URL"
+            className="ml-1 text-cream/50 hover:text-white transition-colors"
+          >
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+          </button>
+        </div>
+
+        {/* Verified Status Indicator */}
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-mono font-medium">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span>Status: 200 OK Live</span>
+        </div>
+      </div>
+
+      {/* Showcase Body */}
+      <div className="p-6 sm:p-7 space-y-6 bg-gradient-to-b from-obsidian-card via-obsidian-surface to-obsidian">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-mono text-xs font-semibold">
+              <Globe className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{isZisti ? "India's New Food Delivery Platform" : "Sidereal Vedic Kundli & Booking Hub"}</span>
+            </div>
+            
+            <h4 className="font-serif text-2xl sm:text-3xl font-bold text-white">
+              {project.title}
+            </h4>
+            
+            <p className="text-cream/75 text-sm leading-relaxed">
+              {isZisti
+                ? "Experience the live food ordering web application with lightning-fast restaurant discovery, menu exploration, and fluid mobile-first responsiveness."
+                : "Explore the live sidereal Vedic astrology portal with real-time Kundli generation, Navamsa computations, interactive cosmic visualizers, and astrologer booking."}
+            </p>
+          </div>
+
+          {/* Quick-action buttons */}
+          <div className="flex flex-col sm:flex-row md:flex-col gap-3 shrink-0">
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => sound.playClick()}
+              onMouseEnter={() => sound.playPop()}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all duration-200 shadow-xl shadow-emerald-500/25 hover:shadow-emerald-400/40 hover:-translate-y-0.5"
+            >
+              <span>Visit Live Website</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+
+            <button
+              onClick={handleCopyUrl}
+              onMouseEnter={() => sound.playPop()}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-cream/80 text-xs font-mono border border-white/10 transition-colors"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-emerald-400 font-semibold">URL Copied to Clipboard!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copy Web Address</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Architecture Spec Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-1">
+            <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-bold uppercase">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Latency</span>
+            </div>
+            <div className="font-serif font-bold text-lg text-white">Edge CDN &lt; 100ms</div>
+            <p className="text-[11px] font-mono text-cream/60">Sub-second load times & SSL secured</p>
+          </div>
+
+          <div className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-1">
+            <div className="flex items-center gap-2 text-coral font-mono text-xs font-bold uppercase">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Production</span>
+            </div>
+            <div className="font-serif font-bold text-lg text-white">Active Users</div>
+            <p className="text-[11px] font-mono text-cream/60">Delivering value in commercial production</p>
+          </div>
+
+          <div className="bg-white/5 p-4 rounded-xl border border-white/10 space-y-1">
+            <div className="flex items-center gap-2 text-amber-400 font-mono text-xs font-bold uppercase">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Stack</span>
+            </div>
+            <div className="font-serif font-bold text-lg text-white">{isZisti ? 'React 18 + Vite' : 'Next.js + Ephemeris'}</div>
+            <p className="text-[11px] font-mono text-cream/60">Tailwind CSS & Modular UI</p>
+          </div>
         </div>
       </div>
     </div>

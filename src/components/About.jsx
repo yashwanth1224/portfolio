@@ -103,7 +103,7 @@ export default function About() {
                 <strong className="text-terracotta font-semibold">400+ hours of full-stack engineering at JSPIDERS Bengaluru</strong>. Here, I mastered Java object-oriented principles, SQL schemas, and the modern React ecosystem.
               </p>
               <p>
-                Whether crafting high-speed sentiment analysis engines, 3D WebGL mechanisms, or high-conversion user interfaces, I believe in building software that is as sturdy underneath as it is stunning on the surface.
+                I build software that solves real problems—from live production applications like <strong className="text-obsidian font-semibold">Zisti</strong> (India's food delivery platform) and <strong className="text-obsidian font-semibold">Astrovedic Jyotishya Kendra</strong> (sidereal astrology & consultation system) to 3D WebGL mechanism simulators and real-time NLP engines.
               </p>
             </div>
 

@@ -14,11 +14,11 @@ export const personalInfo = {
   github: "https://github.com/yashwanth1224",
   resumePath: "./Yashwanth_Resume.pdf",
   photoPath: "./yashwanth.jpg",
-  bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation from East West Institute of Technology (VTU) and intensive full-stack software training at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
+  bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation from East West Institute of Technology (VTU) and intensive full-stack software training at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. I have architected and shipped live commercial production applications including Zisti (India's new on-demand food delivery platform) and Astrovedic Jyotishya Kendra (sidereal astrology & consultation booking portal). My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
   stats: [
+    { label: "Production Platforms", value: "2 Live", sub: "Commercial deployments" },
     { label: "Core Projects Built", value: "8+", sub: "Web apps & simulators" },
     { label: "Full-Stack Training", value: "400+", sub: "Hours at JSPIDERS" },
-    { label: "Industry Internships", value: "3", sub: "Hands-on engineering" },
     { label: "Code Quality", value: "100%", sub: "Pixel-perfect standards" }
   ]
 };
@@ -34,6 +34,7 @@ export const experiences = [
     badge: "Current",
     highlights: [
       "Mastering enterprise-grade frontend development with React.js, modern ES6+, HTML5 semantic structures, and advanced CSS3 / Tailwind layouts.",
+      "Engineered and shipped live production commercial web platforms including Zisti (zisti.in — on-demand food delivery app) and Astrovedic Jyotishya Kendra (astrovedicjothishyakendra.in — sidereal astrology & appointment system).",
       "Developing scalable server-side solutions with Core Java, Object-Oriented Programming (OOP) paradigms, JDBC, and SQL Server / MySQL databases.",
       "Building full-stack CRUD applications with decoupled REST API architectures, token-based state, and clean modular component design."
     ],
@@ -87,6 +88,50 @@ export const experiences = [
 ];
 
 export const projects = [
+  {
+    id: "zisti",
+    title: "Zisti — Food Delivery App",
+    subtitle: "India's New On-Demand Food Delivery Platform",
+    featured: true,
+    tag: "Live Production",
+    liveUrl: "https://www.zisti.in/",
+    description: "A fast, modern on-demand food ordering and restaurant discovery platform engineered for rapid delivery across Indian metropolitan markets. Designed with mobile-first responsiveness, snappy cart-to-checkout flows, and an intuitive modern UI.",
+    techStack: ["React 18", "Tailwind CSS", "JavaScript (ES6+)", "Vite", "Mobile-First UX", "REST APIs"],
+    metrics: [
+      { label: "Performance", value: "98/100" },
+      { label: "Mobile-First", value: "100%" },
+      { label: "Status", value: "Live" }
+    ],
+    highlights: [
+      "Live in active commercial production serving real customers with ultra-responsive food delivery ordering.",
+      "Engineered with clean React component hierarchy, high-contrast accessible typography, and sub-second asset hydration.",
+      "Optimized mobile browsing experience with seamless responsive layouts, touch gestures, and interactive category carousels."
+    ],
+    demoType: "live-website",
+    githubUrl: "https://github.com/yashwanth1224"
+  },
+  {
+    id: "astrovedic",
+    title: "Astrovedic Jyotishya Kendra",
+    subtitle: "Discover Your Vedic Blueprint",
+    featured: true,
+    tag: "Live Client Website",
+    liveUrl: "https://www.astrovedicjothishyakendra.in/",
+    description: "A comprehensive sidereal Vedic astrology portal and consultation booking hub for Astrovedic Jyotishya Kendra in Bengaluru. Features precision Janma Patrika (Kundli), Navamsa calculations powered by Lahiri ephemeris, dynamic celestial visualizers, and online appointment booking.",
+    techStack: ["Next.js / React", "Tailwind CSS", "Lucide React", "Sidereal Ephemeris", "Booking Engine", "Dark/Light Mode"],
+    metrics: [
+      { label: "Status", value: "Live" },
+      { label: "Responsive", value: "100%" },
+      { label: "Booking", value: "Integrated" }
+    ],
+    highlights: [
+      "Live client platform with sidereal Vedic Kundli, Navamsa, and Vimshottari Dasha calculation engines.",
+      "Interactive celestial starfield background with responsive constellations, nebula drifts, and dual dark/light themes.",
+      "Integrated consultation booking workflows connecting seekers with verified Vedic astrologers in Rajajinagar, Bengaluru."
+    ],
+    demoType: "live-website",
+    githubUrl: "https://github.com/yashwanth1224"
+  },
   {
     id: "sentiment-engine",
     title: "Sentimental Analysis & Review Engine",

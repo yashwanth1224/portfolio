@@ -8,15 +8,16 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [filter, setFilter] = useState('All');
 
-  const categories = ['All', 'Full Stack', '3D WebGL', 'Hardware & IoT', 'Frontend'];
+  const categories = ['All', 'Live Websites', 'Full Stack', '3D WebGL', 'Hardware & IoT', 'Frontend'];
 
   const filteredProjects = projects.filter((project) => {
     if (filter === 'All') return true;
-    if (filter === 'Full Stack' && (project.id === 'sentiment-engine' || project.id === 'saas-dashboard')) return true;
-    if (filter === '3D WebGL' && (project.id === 'engine-3d-sim' || project.id === 'developer-portfolio')) return true;
-    if (filter === 'Hardware & IoT' && project.id === 'pneumatic-mobility') return true;
-    if (filter === 'Frontend' && (project.id === 'developer-portfolio' || project.id === 'saas-dashboard' || project.id === 'sentiment-engine')) return true;
-    return true;
+    if (filter === 'Live Websites') return !!project.liveUrl;
+    if (filter === 'Full Stack') return (project.id === 'sentiment-engine' || project.id === 'saas-dashboard');
+    if (filter === '3D WebGL') return (project.id === 'engine-3d-sim' || project.id === 'developer-portfolio');
+    if (filter === 'Hardware & IoT') return project.id === 'pneumatic-mobility';
+    if (filter === 'Frontend') return (project.id === 'zisti' || project.id === 'astrovedic' || project.id === 'developer-portfolio' || project.id === 'saas-dashboard' || project.id === 'sentiment-engine');
+    return false;
   });
 
   const handleOpenModal = (project) => {
@@ -96,7 +97,12 @@ export default function Projects() {
                 {/* Header Tag and Index */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-coral font-medium uppercase tracking-wider">
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium uppercase tracking-wider border ${
+                      project.liveUrl
+                        ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                        : 'bg-white/5 border-white/10 text-coral'
+                    }`}>
+                      {project.liveUrl && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
                       {project.tag}
                     </span>
                     <span className="font-mono text-xs text-cream/40 font-bold">
@@ -122,7 +128,11 @@ export default function Projects() {
                 <div className="grid grid-cols-3 gap-2 py-3 border-y border-white/10 bg-obsidian/40 rounded-xl px-3 my-2">
                   {project.metrics.map((m, mIdx) => (
                     <div key={mIdx} className="text-center">
-                      <div className="font-serif font-bold text-sm sm:text-base text-coral">{m.value}</div>
+                      <div className={`font-serif font-bold text-sm sm:text-base ${
+                        project.liveUrl && m.label === 'STATUS' ? 'text-emerald-400' : 'text-coral'
+                      }`}>
+                        {m.value}
+                      </div>
                       <div className="text-[10px] font-mono text-cream/60 uppercase">{m.label}</div>
                     </div>
                   ))}
@@ -147,26 +157,66 @@ export default function Projects() {
 
                 {/* Action Buttons */}
                 <div className="flex items-center gap-2 pt-4">
-                  <button
-                    onClick={() => handleOpenModal(project)}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-terracotta hover:bg-coral text-cream text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 shadow-lg shadow-terracotta/20 group-hover:shadow-coral/30"
-                  >
-                    <Eye className="w-3.5 h-3.5" />
-                    <span>Live Interactive Demo</span>
-                  </button>
+                  {project.liveUrl ? (
+                    <>
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onMouseEnter={() => sound.playPop()}
+                        onClick={() => sound.playClick()}
+                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 shadow-lg shadow-emerald-950/40 group-hover:shadow-emerald-600/30"
+                      >
+                        <span>Visit Live Site</span>
+                        <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                      </a>
 
-                  <a
-                    href={project.githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onMouseEnter={() => sound.playPop()}
-                    onClick={() => sound.playClick()}
-                    className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-cream border border-white/10 transition-colors"
-                    title="View GitHub Repository"
-                    aria-label="GitHub Repository"
-                  >
-                    <Github className="w-4 h-4" />
-                  </a>
+                      <button
+                        onClick={() => handleOpenModal(project)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-cream text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 border border-white/15"
+                        title="View Project Details & Architecture"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Details</span>
+                      </button>
+
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onMouseEnter={() => sound.playPop()}
+                        onClick={() => sound.playClick()}
+                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-cream border border-white/10 transition-colors"
+                        title="View GitHub Repository"
+                        aria-label="GitHub Repository"
+                      >
+                        <Github className="w-4 h-4" />
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => handleOpenModal(project)}
+                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-terracotta hover:bg-coral text-cream text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 shadow-lg shadow-terracotta/20 group-hover:shadow-coral/30"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Live Interactive Demo</span>
+                      </button>
+
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onMouseEnter={() => sound.playPop()}
+                        onClick={() => sound.playClick()}
+                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-cream border border-white/10 transition-colors"
+                        title="View GitHub Repository"
+                        aria-label="GitHub Repository"
+                      >
+                        <Github className="w-4 h-4" />
+                      </a>
+                    </>
+                  )}
                 </div>
 
               </div>

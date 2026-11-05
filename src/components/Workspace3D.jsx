@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
-import { Volume2, VolumeX, Sparkles, MessageSquare, Play, Pause } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Play, Pause } from 'lucide-react';
 import { sound } from '../utils/audio';
 
 const GREETING_SCRIPT = "Hello! I'm Yashwanth. I'm a frontend developer and software engineer. I am passionate about building scalable web applications, responsive interactive user interfaces, and modern digital experiences. Welcome to my portfolio!";
@@ -14,18 +14,20 @@ export default function Workspace3D() {
   const [showSpeechBubble, setShowSpeechBubble] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
 
-  // References to share state with Three.js animation loop without re-triggering effects
+  // References to synchronize state with Three.js 60fps animation loop
   const isSpeakingRef = useRef(false);
   const wordProgressRef = useRef(0);
   const speechUtteranceRef = useRef(null);
   const fallbackIntervalRef = useRef(null);
+  const hasStartedSpeechRef = useRef(false);
+  const walkTriggerRef = useRef(Date.now());
 
   // Synchronize ref with state
   useEffect(() => {
     isSpeakingRef.current = isSpeaking;
   }, [isSpeaking]);
 
-  // Procedural Web Audio fallback voice synth (for browsers with restricted or missing SpeechSynthesis)
+  // Procedural Web Audio fallback voice synth (for environments with restricted SpeechSynthesis)
   const playProceduralPhoneme = useCallback((word, index) => {
     try {
       sound.init();
@@ -33,24 +35,23 @@ export default function Workspace3D() {
       if (!ctx || sound.isMuted()) return;
       const now = ctx.currentTime;
 
-      // Create fundamental vocal cord oscillator (male speech pitch ~ 120-150Hz)
+      // Fundamental vocal cord pitch (~125-145Hz male speech)
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
-      // Pitch variation based on word cadence
-      const baseFreq = 125 + Math.sin(index * 0.7) * 22;
+      const baseFreq = 125 + Math.sin(index * 0.7) * 20;
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.95, now + 0.16);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.94, now + 0.16);
 
-      // Vocal formant filter (simulating open vowel / formant resonance)
+      // Vocal formant filter (simulating vocal tract resonance)
       filter.type = 'bandpass';
-      const formants = [500, 750, 1100, 1400, 850];
+      const formants = [520, 780, 1120, 1420, 880];
       filter.frequency.setValueAtTime(formants[index % formants.length], now);
-      filter.Q.setValueAtTime(4.0, now);
+      filter.Q.setValueAtTime(3.8, now);
 
-      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.setValueAtTime(0.045, now);
       gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
 
       osc.connect(filter);
@@ -79,14 +80,18 @@ export default function Workspace3D() {
   }, []);
 
   // Start speaking greeting
-  const startSpeech = useCallback(() => {
-    setHasInteracted(true);
+  const startSpeech = useCallback((isUserInitiated = true) => {
+    if (isUserInitiated) {
+      setHasInteracted(true);
+    }
     setShowSpeechBubble(true);
     stopSpeech();
 
-    // If muted, unmute for speech
+    // Ensure audio context is ready
     if (sound.isMuted()) {
       sound.toggleMute();
+    } else {
+      sound.init();
     }
 
     if (typeof window === 'undefined') return;
@@ -99,9 +104,9 @@ export default function Workspace3D() {
         const utterance = new SpeechSynthesisUtterance(GREETING_SCRIPT);
         speechUtteranceRef.current = utterance;
 
-        // Pick natural English voice
+        // Select the most natural English voice available
         const voices = synth.getVoices();
-        const englishVoice = voices.find(v => 
+        const englishVoice = voices.find(v =>
           v.lang.startsWith('en') && (
             v.name.includes('Google UK English Male') ||
             v.name.includes('Natural') ||
@@ -116,10 +121,11 @@ export default function Workspace3D() {
           utterance.voice = englishVoice;
         }
 
-        utterance.rate = 0.96; // Crisp, natural pacing
+        utterance.rate = 0.95; // Crisp, charismatic pacing
         utterance.pitch = 1.0;
 
         utterance.onstart = () => {
+          hasStartedSpeechRef.current = true;
           setIsSpeaking(true);
           isSpeakingRef.current = true;
           setCurrentWordIndex(0);
@@ -148,9 +154,9 @@ export default function Workspace3D() {
           setCurrentWordIndex(-1);
         };
 
-        // Fallback interval to guarantee live caption progression on devices where boundary events don't fire
+        // Fallback progress interval to guarantee live caption progression across all browsers
         let simulatedIndex = 0;
-        const totalDuration = 10500; // ~10.5s for 29 words
+        const totalDuration = 10500;
         const intervalTime = totalDuration / SCRIPT_WORDS.length;
 
         fallbackIntervalRef.current = setInterval(() => {
@@ -171,8 +177,9 @@ export default function Workspace3D() {
       }
     }
 
-    // Procedural voice fallback if SpeechSynthesis unavailable or failed
+    // Procedural voice fallback if SpeechSynthesis is not supported or was blocked
     if (!voiceSuccess) {
+      hasStartedSpeechRef.current = true;
       setIsSpeaking(true);
       isSpeakingRef.current = true;
       let wordIdx = 0;
@@ -195,14 +202,14 @@ export default function Workspace3D() {
     if (isSpeaking) {
       stopSpeech();
     } else {
-      startSpeech();
+      startSpeech(true);
     }
   }, [isSpeaking, startSpeech, stopSpeech]);
 
-  // Listen for external trigger from Hero.jsx
+  // Listen for external trigger from Hero.jsx or other buttons
   useEffect(() => {
     const handleExternalTrigger = () => {
-      startSpeech();
+      startSpeech(true);
     };
 
     window.addEventListener('trigger-avatar-speech', handleExternalTrigger);
@@ -211,7 +218,51 @@ export default function Workspace3D() {
     };
   }, [startSpeech]);
 
-  // Three.js 3D Workspace Scene with Full-Body Human Developer Avatar
+  // Bulletproof Autoplay Handling:
+  // 1. Attempt auto-start on load after 700ms (as avatar walks forward)
+  // 2. Attach global one-time interaction listeners so ANY click/touch/scroll immediately starts the voice intro
+  useEffect(() => {
+    // Attempt auto-speech on first visit
+    const autoPlayTimer = setTimeout(() => {
+      if (!hasStartedSpeechRef.current) {
+        try {
+          startSpeech(false);
+        } catch {
+          // Browser autoplay restriction will be unlocked by interaction listener
+        }
+      }
+    }, 900);
+
+    const handleFirstGlobalInteraction = () => {
+      if (!hasStartedSpeechRef.current) {
+        startSpeech(true);
+      }
+      cleanupListeners();
+    };
+
+    const cleanupListeners = () => {
+      window.removeEventListener('click', handleFirstGlobalInteraction);
+      window.removeEventListener('pointerdown', handleFirstGlobalInteraction);
+      window.removeEventListener('touchstart', handleFirstGlobalInteraction);
+      window.removeEventListener('scroll', handleFirstGlobalInteraction);
+      window.removeEventListener('keydown', handleFirstGlobalInteraction);
+    };
+
+    window.addEventListener('click', handleFirstGlobalInteraction, { passive: true });
+    window.addEventListener('pointerdown', handleFirstGlobalInteraction, { passive: true });
+    window.addEventListener('touchstart', handleFirstGlobalInteraction, { passive: true });
+    window.addEventListener('scroll', handleFirstGlobalInteraction, { passive: true });
+    window.addEventListener('keydown', handleFirstGlobalInteraction, { passive: true });
+
+    return () => {
+      clearTimeout(autoPlayTimer);
+      cleanupListeners();
+    };
+  }, [startSpeech]);
+
+  // =========================================================================
+  // Three.js 3D Workspace Scene with Realistic Stylized Anime Yashwanth Avatar
+  // =========================================================================
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
@@ -223,17 +274,19 @@ export default function Workspace3D() {
     let floatingBadges = [];
     let codeTextureCanvas, codeTextureContext, codeTexture;
 
-    // Avatar parts for animation
+    // Avatar articulation groups
     let avatarGroup = new THREE.Group();
     let torsoGroup = new THREE.Group();
     let headGroup = new THREE.Group();
     let eyesGroup = new THREE.Group();
     let jawGroup = new THREE.Group();
     let mouthMesh = null;
+    let leftArmGroup = new THREE.Group();
+    let leftForearmGroup = new THREE.Group();
     let rightArmGroup = new THREE.Group();
     let rightForearmGroup = new THREE.Group();
-    let rightHandMesh = null;
-    let leftArmGroup = new THREE.Group();
+    let leftLeg = null;
+    let rightLeg = null;
 
     let targetRotationX = 0;
     let targetRotationY = 0;
@@ -247,8 +300,8 @@ export default function Workspace3D() {
       // 1. Scene & Perspective Camera
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-      camera.position.set(0, 0.9, 4.6);
-      camera.lookAt(0, 0.65, 0);
+      camera.position.set(0, 0.88, 4.5);
+      camera.lookAt(0, 0.62, 0);
 
       // 2. WebGL Renderer
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
@@ -258,11 +311,11 @@ export default function Workspace3D() {
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // 3. Lighting Setup (Crisp Studio & Warm Key Lights)
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      // 3. Lighting Setup (Crisp Studio & Warm Anime Key Lights)
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.90);
       scene.add(ambientLight);
 
-      const mainLight = new THREE.DirectionalLight(0xffffff, 1.4);
+      const mainLight = new THREE.DirectionalLight(0xffffff, 1.45);
       mainLight.position.set(3, 5, 4);
       mainLight.castShadow = true;
       mainLight.shadow.mapSize.width = 1024;
@@ -270,23 +323,23 @@ export default function Workspace3D() {
       scene.add(mainLight);
 
       // Warm portrait key light focused on Yashwanth's face and shirt
-      const keyLight = new THREE.PointLight(0xffeedd, 1.8, 8);
-      keyLight.position.set(1.4, 2.0, 1.8);
+      const keyLight = new THREE.PointLight(0xffedd5, 1.85, 8);
+      keyLight.position.set(1.4, 2.1, 1.8);
       scene.add(keyLight);
 
-      // Coral rim light (matching portfolio brand accent)
-      const rimLightCoral = new THREE.PointLight(0xff5a36, 2.6, 10);
+      // Coral rim light (brand accent glow)
+      const rimLightCoral = new THREE.PointLight(0xff5a36, 2.8, 10);
       rimLightCoral.position.set(-3, 2, -1);
       scene.add(rimLightCoral);
 
       // Cyan rim light (modern digital tech glow)
-      const rimLightCyan = new THREE.PointLight(0x00d8ff, 2.2, 10);
+      const rimLightCyan = new THREE.PointLight(0x00d8ff, 2.4, 10);
       rimLightCyan.position.set(3, 1.5, -1);
       scene.add(rimLightCyan);
 
       // Soft ground contact shadow plane
-      const shadowPlaneGeo = new THREE.PlaneGeometry(6, 4);
-      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.25 });
+      const shadowPlaneGeo = new THREE.PlaneGeometry(7, 5);
+      const shadowPlaneMat = new THREE.ShadowMaterial({ opacity: 0.28 });
       const shadowPlane = new THREE.Mesh(shadowPlaneGeo, shadowPlaneMat);
       shadowPlane.rotation.x = -Math.PI / 2;
       shadowPlane.position.y = -0.71;
@@ -296,7 +349,7 @@ export default function Workspace3D() {
       // ==========================================
       // 4. STANDING DESK & WORKSPACE SETUP
       // ==========================================
-      deskGroup.position.set(-0.45, 0, 0);
+      deskGroup.position.set(-0.48, 0, 0);
 
       // Desk Top Slab
       const deskTopGeo = new THREE.BoxGeometry(3.0, 0.09, 1.5);
@@ -306,7 +359,7 @@ export default function Workspace3D() {
         metalness: 0.2,
       });
       const deskTop = new THREE.Mesh(deskTopGeo, deskMat);
-      deskTop.position.set(0, 0.7, 0);
+      deskTop.position.set(0, 0.70, 0);
       deskTop.receiveShadow = true;
       deskTop.castShadow = true;
       deskGroup.add(deskTop);
@@ -314,7 +367,7 @@ export default function Workspace3D() {
       // Desk Legs (Minimalist dual-beam standing desk)
       const legMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.5, metalness: 0.8 });
       const legGeo = new THREE.BoxGeometry(0.1, 1.4, 0.1);
-      
+
       const legLeft = new THREE.Mesh(legGeo, legMat);
       legLeft.position.set(-1.25, 0, 0);
       legLeft.castShadow = true;
@@ -352,7 +405,7 @@ export default function Workspace3D() {
       const leftScreen = new THREE.Mesh(monitorGeo, screenBezelMat);
       leftScreen.position.set(-0.65, 1.30, -0.15);
       leftScreen.rotation.y = 0.22;
-      
+
       const leftDisplay = new THREE.Mesh(new THREE.PlaneGeometry(1.20, 0.73), screenMat);
       leftDisplay.position.set(0, 0, 0.021);
       leftScreen.add(leftDisplay);
@@ -428,123 +481,178 @@ export default function Workspace3D() {
 
       mainGroup.add(deskGroup);
 
-      // ==========================================
-      // 6. FULL-BODY 3D DEVELOPER AVATAR (YASHWANTH)
-      // ==========================================
-      avatarGroup.position.set(1.35, -0.7, 0.35);
-      avatarGroup.rotation.y = -0.22; // Angled naturally towards camera and desk
+      // =========================================================================
+      // 6. REALISTIC HIGH-END ANIME YASHWANTH AVATAR (EXACT REFERENCE REPLICA)
+      // =========================================================================
+      // Initial starting position: behind/beside desk; will physically walk forward!
+      avatarGroup.position.set(1.65, -0.71, -1.05);
+      avatarGroup.rotation.y = -0.42;
 
-      // Materials for Stylized Developer Character
-      const skinMat = new THREE.MeshStandardMaterial({ color: 0xf2be9f, roughness: 0.65, metalness: 0.05 });
-      const lipsMat = new THREE.MeshStandardMaterial({ color: 0xd98b7a, roughness: 0.6 });
-      const teethMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
-      const mouthInnerMat = new THREE.MeshStandardMaterial({ color: 0x2b0d0d, roughness: 0.5 });
-      const hairMat = new THREE.MeshStandardMaterial({ color: 0x16161a, roughness: 0.85, metalness: 0.1 });
-      const beardMat = new THREE.MeshStandardMaterial({ color: 0x18191e, roughness: 0.9, metalness: 0.05 });
-      const shirtMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.75, metalness: 0.05 });
-      const shirtDetailMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.8 });
-      const buttonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.4 });
-      const pantsMat = new THREE.MeshStandardMaterial({ color: 0x232731, roughness: 0.65, metalness: 0.15 });
-      const beltMat = new THREE.MeshStandardMaterial({ color: 0x111215, roughness: 0.5, metalness: 0.2 });
-      const buckleMat = new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.2, metalness: 0.9 });
-      const sneakerWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
-      const sneakerSoleMat = new THREE.MeshStandardMaterial({ color: 0x1a1c20, roughness: 0.8 });
-      const earringMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.1, metalness: 0.95 });
+      // Premium Anime Stylized Materials
+      const animeSkinMat = new THREE.MeshStandardMaterial({
+        color: 0xF5C2A4, // Warm, soft anime skin tone matching user prompt & photo
+        roughness: 0.50,
+        metalness: 0.02,
+      });
+      const animeBlushMat = new THREE.MeshBasicMaterial({
+        color: 0xff8a75,
+        transparent: true,
+        opacity: 0.24,
+      });
+      const lipsMat = new THREE.MeshStandardMaterial({ color: 0xd98070, roughness: 0.55 });
+      const teethMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.25 });
+      const mouthInnerMat = new THREE.MeshStandardMaterial({ color: 0x220b0b, roughness: 0.6 });
+      const hairMat = new THREE.MeshStandardMaterial({
+        color: 0x141418, // Yashwanth's rich dark pompadour hair
+        roughness: 0.72,
+        metalness: 0.15,
+      });
+      const beardMat = new THREE.MeshStandardMaterial({
+        color: 0x18181c, // Neat mustache and trimmed jawline beard
+        roughness: 0.85,
+        metalness: 0.05,
+      });
+      const shirtMat = new THREE.MeshStandardMaterial({
+        color: 0xfefefe, // Fitted crisp white button-down
+        roughness: 0.70,
+        metalness: 0.05,
+      });
+      const shirtDetailMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.75 });
+      const buttonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.2, metalness: 0.5 });
+      const pantsMat = new THREE.MeshStandardMaterial({
+        color: 0x1c222e, // Slim cuffed dark navy trousers
+        roughness: 0.60,
+        metalness: 0.15,
+      });
+      const beltMat = new THREE.MeshStandardMaterial({ color: 0x0f1115, roughness: 0.5, metalness: 0.2 });
+      const buckleMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.15, metalness: 0.95 });
+      const sneakerWhiteMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff, // Modern white designer sneakers
+        roughness: 0.35,
+        metalness: 0.05,
+      });
+      const sneakerSoleMat = new THREE.MeshStandardMaterial({ color: 0x181a20, roughness: 0.85 });
+      const earringMat = new THREE.MeshStandardMaterial({
+        color: 0xf0f2f5, // Silver earring stud on left earlobe
+        roughness: 0.10,
+        metalness: 0.95,
+      });
       const watchBandMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6 });
-      const watchCaseMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.2, metalness: 0.8 });
-      const watchScreenMat = new THREE.MeshBasicMaterial({ color: 0x00d8ff });
+      const watchCaseMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.15, metalness: 0.9 });
+      const watchScreenMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff }); // Glowing cyan dev screen
 
-      // --- A. LEGS & SNEAKERS ---
+      // --- A. ARTICULATED WALKING LEGS & SNEAKERS ---
       const legsGroup = new THREE.Group();
 
-      const createLeg = (isLeft) => {
-        const leg = new THREE.Group();
-        const sign = isLeft ? -1 : 1;
-        leg.position.x = sign * 0.13;
-
-        // Thigh
-        const thighGeo = new THREE.CylinderGeometry(0.08, 0.072, 0.42, 16);
-        const thigh = new THREE.Mesh(thighGeo, pantsMat);
-        thigh.position.y = 0.81;
-        thigh.castShadow = true;
-        leg.add(thigh);
-
-        // Knee
-        const kneeGeo = new THREE.SphereGeometry(0.072, 12, 12);
-        const knee = new THREE.Mesh(kneeGeo, pantsMat);
-        knee.position.y = 0.59;
-        leg.add(knee);
-
-        // Calf
-        const calfGeo = new THREE.CylinderGeometry(0.072, 0.062, 0.42, 16);
-        const calf = new THREE.Mesh(calfGeo, pantsMat);
-        calf.position.y = 0.38;
-        calf.castShadow = true;
-        leg.add(calf);
-
-        // Modern White Designer Sneaker with Dark Sole
-        const shoe = new THREE.Group();
-        shoe.position.set(0, 0, isLeft ? 0.02 : 0.04);
-        if (!isLeft) shoe.rotation.y = 0.08;
-
-        // Dark rubber outsole
-        const soleGeo = new THREE.BoxGeometry(0.14, 0.038, 0.32);
-        const sole = new THREE.Mesh(soleGeo, sneakerSoleMat);
-        sole.position.y = 0.019;
-        sole.castShadow = true;
-        shoe.add(sole);
-
-        // Crisp white upper
-        const upperGeo = new THREE.BoxGeometry(0.132, 0.085, 0.28);
-        const upper = new THREE.Mesh(upperGeo, sneakerWhiteMat);
-        upper.position.y = 0.075;
-        upper.position.z = -0.01;
-        upper.castShadow = true;
-        shoe.add(upper);
-
-        // Rounded toe cap
-        const toeGeo = new THREE.SphereGeometry(0.064, 14, 14);
-        const toe = new THREE.Mesh(toeGeo, sneakerWhiteMat);
-        toe.scale.set(1.0, 0.65, 1.25);
-        toe.position.set(0, 0.055, 0.11);
-        toe.castShadow = true;
-        shoe.add(toe);
-
-        // Subtle sneaker accent line
-        const stripeGeo = new THREE.BoxGeometry(0.136, 0.012, 0.18);
-        const stripeMat = new THREE.MeshStandardMaterial({ color: 0xff5a36, roughness: 0.5 });
-        const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-        stripe.position.set(0, 0.06, -0.01);
-        shoe.add(stripe);
-
-        leg.add(shoe);
-        return leg;
-      };
-
-      legsGroup.add(createLeg(true));  // Left leg
-      legsGroup.add(createLeg(false)); // Right leg
-
-      // Pelvis / Hips & Belt
-      const hipsGeo = new THREE.BoxGeometry(0.38, 0.18, 0.23);
+      // Hips & Pelvis
+      const hipsGeo = new THREE.BoxGeometry(0.36, 0.16, 0.22);
       const hips = new THREE.Mesh(hipsGeo, pantsMat);
-      hips.position.y = 1.05;
+      hips.position.y = 1.02;
       hips.castShadow = true;
       legsGroup.add(hips);
 
-      const beltGeo = new THREE.BoxGeometry(0.39, 0.045, 0.24);
+      const beltGeo = new THREE.BoxGeometry(0.37, 0.045, 0.23);
       const belt = new THREE.Mesh(beltGeo, beltMat);
-      belt.position.y = 1.13;
+      belt.position.y = 1.10;
       legsGroup.add(belt);
 
       const buckleGeo = new THREE.BoxGeometry(0.06, 0.05, 0.015);
       const buckle = new THREE.Mesh(buckleGeo, buckleMat);
-      buckle.position.set(0, 1.13, 0.125);
+      buckle.position.set(0, 1.10, 0.12);
       legsGroup.add(buckle);
 
+      // Hierarchical Leg Builder for Lifelike Strides
+      const buildArticulatedLeg = (isLeft) => {
+        const hipJoint = new THREE.Group();
+        const sign = isLeft ? -1 : 1;
+        hipJoint.position.set(sign * 0.12, 0.98, 0);
+
+        // Thigh
+        const thighGroup = new THREE.Group();
+        const thighGeo = new THREE.CylinderGeometry(0.076, 0.066, 0.44, 16);
+        const thighMesh = new THREE.Mesh(thighGeo, pantsMat);
+        thighMesh.position.y = -0.22;
+        thighMesh.castShadow = true;
+        thighGroup.add(thighMesh);
+
+        // Knee Joint
+        const kneeJoint = new THREE.Group();
+        kneeJoint.position.y = -0.46;
+
+        const kneeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.066, 12, 12), pantsMat);
+        kneeJoint.add(kneeMesh);
+
+        // Calf & Trouser Cuff
+        const calfGeo = new THREE.CylinderGeometry(0.066, 0.056, 0.38, 16);
+        const calfMesh = new THREE.Mesh(calfGeo, pantsMat);
+        calfMesh.position.y = -0.19;
+        calfMesh.castShadow = true;
+        kneeJoint.add(calfMesh);
+
+        // Signature folded pant cuff (matches screenshot!)
+        const cuffGeo = new THREE.CylinderGeometry(0.062, 0.059, 0.045, 16);
+        const cuff = new THREE.Mesh(cuffGeo, pantsMat);
+        cuff.position.y = -0.34;
+        kneeJoint.add(cuff);
+
+        // Exposed Ankle Skin above sneakers (exact match to screenshot!)
+        const ankleGeo = new THREE.CylinderGeometry(0.046, 0.043, 0.07, 16);
+        const ankle = new THREE.Mesh(ankleGeo, animeSkinMat);
+        ankle.position.y = -0.39;
+        kneeJoint.add(ankle);
+
+        // Foot / Ankle Joint
+        const footJoint = new THREE.Group();
+        footJoint.position.y = -0.44;
+
+        // Modern White Designer Sneaker
+        const shoeGroup = new THREE.Group();
+        shoeGroup.position.set(0, -0.01, 0.04);
+
+        // Dark outsole tread
+        const soleGeo = new THREE.BoxGeometry(0.134, 0.038, 0.32);
+        const sole = new THREE.Mesh(soleGeo, sneakerSoleMat);
+        sole.position.y = 0.019;
+        sole.castShadow = true;
+        shoeGroup.add(sole);
+
+        // Crisp white upper
+        const upperGeo = new THREE.BoxGeometry(0.126, 0.082, 0.28);
+        const upper = new THREE.Mesh(upperGeo, sneakerWhiteMat);
+        upper.position.y = 0.075;
+        upper.position.z = -0.01;
+        upper.castShadow = true;
+        shoeGroup.add(upper);
+
+        // Aerodynamic rounded toe cap
+        const toeGeo = new THREE.SphereGeometry(0.060, 14, 14);
+        const toe = new THREE.Mesh(toeGeo, sneakerWhiteMat);
+        toe.scale.set(1.0, 0.65, 1.25);
+        toe.position.set(0, 0.055, 0.11);
+        toe.castShadow = true;
+        shoeGroup.add(toe);
+
+        // Subtle Coral Accent Stripe
+        const stripeGeo = new THREE.BoxGeometry(0.130, 0.012, 0.16);
+        const stripe = new THREE.Mesh(stripeGeo, new THREE.MeshStandardMaterial({ color: 0xff5a36, roughness: 0.4 }));
+        stripe.position.set(0, 0.062, -0.01);
+        shoeGroup.add(stripe);
+
+        footJoint.add(shoeGroup);
+        kneeJoint.add(footJoint);
+        thighGroup.add(kneeJoint);
+        hipJoint.add(thighGroup);
+        legsGroup.add(hipJoint);
+
+        return { hipJoint, thighGroup, kneeJoint, footJoint };
+      };
+
+      leftLeg = buildArticulatedLeg(true);
+      rightLeg = buildArticulatedLeg(false);
       avatarGroup.add(legsGroup);
 
-      // --- B. TORSO & CRISP WHITE BUTTON-DOWN SHIRT ---
-      torsoGroup.position.set(0, 1.15, 0);
+      // --- B. TORSO & FITTED WHITE BUTTON-DOWN SHIRT ---
+      torsoGroup.position.set(0, 1.12, 0);
 
       // Shirt Body
       const torsoBodyGeo = new THREE.BoxGeometry(0.40, 0.50, 0.24);
@@ -561,8 +669,7 @@ export default function Workspace3D() {
 
       // Shirt Buttons
       const buttonGeo = new THREE.CylinderGeometry(0.009, 0.009, 0.006, 12);
-      const buttonPositions = [0.10, 0.20, 0.30, 0.40];
-      buttonPositions.forEach(bY => {
+      [0.10, 0.20, 0.30, 0.40].forEach(bY => {
         const btn = new THREE.Mesh(buttonGeo, buttonMat);
         btn.rotation.x = Math.PI / 2;
         btn.position.set(0, bY, 0.134);
@@ -581,7 +688,7 @@ export default function Workspace3D() {
       collarBand.position.set(0, 0.51, 0);
       torsoGroup.add(collarBand);
 
-      // Left and right collar folded points
+      // Folded collar flaps
       const collarFlapGeo = new THREE.BoxGeometry(0.07, 0.075, 0.015);
       const leftCollarFlap = new THREE.Mesh(collarFlapGeo, shirtMat);
       leftCollarFlap.rotation.set(0.2, -0.25, -0.4);
@@ -595,177 +702,217 @@ export default function Workspace3D() {
 
       // Neck
       const neckGeo = new THREE.CylinderGeometry(0.065, 0.072, 0.12, 16);
-      const neck = new THREE.Mesh(neckGeo, skinMat);
+      const neck = new THREE.Mesh(neckGeo, animeSkinMat);
       neck.position.set(0, 0.55, 0);
       neck.castShadow = true;
       torsoGroup.add(neck);
 
-      // --- C. HEAD & FACE MATCHING YASHWANTH'S PORTRAIT ---
+      // --- C. ANIME YASHWANTH HEAD & CHARISMATIC EXPRESSIONS ---
       headGroup.position.set(0, 0.62, 0); // Head pivot
 
-      // Main Head Mesh
-      const headCraniumGeo = new THREE.SphereGeometry(0.175, 24, 24);
-      const headCranium = new THREE.Mesh(headCraniumGeo, skinMat);
-      headCranium.scale.set(0.95, 1.12, 1.0);
+      // Main Head Mesh (Stylized Anime proportions)
+      const headCraniumGeo = new THREE.SphereGeometry(0.175, 26, 26);
+      const headCranium = new THREE.Mesh(headCraniumGeo, animeSkinMat);
+      headCranium.scale.set(0.96, 1.10, 1.02);
       headCranium.position.y = 0.16;
       headCranium.castShadow = true;
       headGroup.add(headCranium);
 
       // Sculpted masculine jaw & chin
       const jawBoxGeo = new THREE.BoxGeometry(0.165, 0.11, 0.15);
-      const jawBox = new THREE.Mesh(jawBoxGeo, skinMat);
+      const jawBox = new THREE.Mesh(jawBoxGeo, animeSkinMat);
       jawBox.position.set(0, 0.07, 0.04);
       headGroup.add(jawBox);
 
+      // Soft anime cheek blush
+      const blushGeo = new THREE.SphereGeometry(0.038, 12, 12);
+      const leftBlush = new THREE.Mesh(blushGeo, animeBlushMat);
+      leftBlush.scale.set(1.0, 0.45, 0.5);
+      leftBlush.position.set(-0.09, 0.13, 0.15);
+      headGroup.add(leftBlush);
+
+      const rightBlush = new THREE.Mesh(blushGeo, animeBlushMat);
+      rightBlush.scale.set(1.0, 0.45, 0.5);
+      rightBlush.position.set(0.09, 0.13, 0.15);
+      headGroup.add(rightBlush);
+
       // Ears
       const earGeo = new THREE.SphereGeometry(0.045, 12, 12);
-      const leftEar = new THREE.Mesh(earGeo, skinMat);
+      const leftEar = new THREE.Mesh(earGeo, animeSkinMat);
       leftEar.scale.set(0.35, 1.0, 0.7);
       leftEar.position.set(-0.175, 0.16, -0.01);
       headGroup.add(leftEar);
 
-      const rightEar = new THREE.Mesh(earGeo, skinMat);
+      const rightEar = new THREE.Mesh(earGeo, animeSkinMat);
       rightEar.scale.set(0.35, 1.0, 0.7);
       rightEar.position.set(0.175, 0.16, -0.01);
       headGroup.add(rightEar);
 
       // Silver Earring Stud on Left Ear (Exact match to Yashwanth's portrait photo!)
-      const earringGeo = new THREE.SphereGeometry(0.012, 12, 12);
+      const earringGeo = new THREE.SphereGeometry(0.013, 14, 14);
       const earring = new THREE.Mesh(earringGeo, earringMat);
-      earring.position.set(-0.182, 0.13, -0.01);
+      earring.position.set(-0.184, 0.13, -0.01);
       headGroup.add(earring);
 
-      // Modern Black Hair with Quiff / Pompadour Volume
-      const hairCrownGeo = new THREE.SphereGeometry(0.192, 22, 22);
+      // Yashwanth's Styled Pompadour Hair with Anime Volume & Silhouette
+      const hairCrownGeo = new THREE.SphereGeometry(0.194, 24, 24);
       const hairCrown = new THREE.Mesh(hairCrownGeo, hairMat);
       hairCrown.scale.set(0.98, 1.08, 1.08);
       hairCrown.position.set(0, 0.21, -0.02);
       headGroup.add(hairCrown);
 
-      // Styled upward swept pompadour quiff
-      const quiffGeo = new THREE.BoxGeometry(0.20, 0.09, 0.15);
+      // Upward swept pompadour quiff
+      const quiffGeo = new THREE.BoxGeometry(0.22, 0.11, 0.16);
       const quiff = new THREE.Mesh(quiffGeo, hairMat);
-      quiff.rotation.x = -0.32;
-      quiff.position.set(0, 0.31, 0.06);
+      quiff.rotation.x = -0.34;
+      quiff.position.set(0, 0.32, 0.06);
       headGroup.add(quiff);
 
-      const quiffTuftGeo = new THREE.SphereGeometry(0.08, 12, 12);
+      const quiffTuftGeo = new THREE.SphereGeometry(0.082, 14, 14);
       const quiffTuft1 = new THREE.Mesh(quiffTuftGeo, hairMat);
-      quiffTuft1.scale.set(1.1, 0.7, 1.2);
-      quiffTuft1.position.set(-0.04, 0.34, 0.07);
+      quiffTuft1.scale.set(1.15, 0.75, 1.25);
+      quiffTuft1.position.set(-0.05, 0.35, 0.07);
       headGroup.add(quiffTuft1);
 
       const quiffTuft2 = new THREE.Mesh(quiffTuftGeo, hairMat);
-      quiffTuft2.scale.set(1.0, 0.65, 1.1);
-      quiffTuft2.position.set(0.05, 0.33, 0.06);
+      quiffTuft2.scale.set(1.05, 0.70, 1.20);
+      quiffTuft2.position.set(0.05, 0.34, 0.06);
       headGroup.add(quiffTuft2);
 
-      // Eyebrows
-      const browGeo = new THREE.BoxGeometry(0.072, 0.018, 0.02);
+      const crestTuft = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), hairMat);
+      crestTuft.scale.set(1.2, 0.6, 1.1);
+      crestTuft.position.set(0.0, 0.38, 0.02);
+      headGroup.add(crestTuft);
+
+      // Eyebrows (Strong, masculine anime arches matching Yashwanth)
+      const browGeo = new THREE.BoxGeometry(0.076, 0.020, 0.022);
       const leftBrow = new THREE.Mesh(browGeo, hairMat);
       leftBrow.rotation.set(0, 0.12, -0.08);
-      leftBrow.position.set(-0.068, 0.22, 0.165);
+      leftBrow.position.set(-0.068, 0.225, 0.168);
       headGroup.add(leftBrow);
 
       const rightBrow = new THREE.Mesh(browGeo, hairMat);
       rightBrow.rotation.set(0, -0.12, 0.08);
-      rightBrow.position.set(0.068, 0.22, 0.165);
+      rightBrow.position.set(0.068, 0.225, 0.168);
       headGroup.add(rightBrow);
 
-      // Eyes Group (Allows blinking by scaling Y)
+      // Charismatic Anime Eyes with Specular Twinkle Catchlights
       eyesGroup.position.set(0, 0.17, 0.155);
 
-      const createEye = (isLeft) => {
+      const createAnimeEye = (isLeft) => {
         const eye = new THREE.Group();
-        eye.position.x = isLeft ? -0.065 : 0.065;
+        const sign = isLeft ? -1 : 1;
+        eye.position.x = sign * 0.068;
 
-        // White eyeball
-        const eyeBallGeo = new THREE.SphereGeometry(0.03, 16, 16);
+        // Crisp white sclera
+        const eyeBallGeo = new THREE.SphereGeometry(0.033, 20, 20);
         const eyeBall = new THREE.Mesh(eyeBallGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        eyeBall.scale.set(1.1, 0.95, 0.7);
         eye.add(eyeBall);
 
-        // Warm dark brown iris
-        const irisGeo = new THREE.CylinderGeometry(0.016, 0.016, 0.005, 16);
-        const irisMat = new THREE.MeshStandardMaterial({ color: 0x1a120c, roughness: 0.2 });
-        const iris = new THREE.Mesh(irisGeo, irisMat);
-        iris.rotation.x = Math.PI / 2;
-        iris.position.z = 0.027;
-        eye.add(iris);
+        // Dark anime top eyeliner / lash rim
+        const lashGeo = new THREE.BoxGeometry(0.064, 0.012, 0.012);
+        const lash = new THREE.Mesh(lashGeo, new THREE.MeshBasicMaterial({ color: 0x0f1115 }));
+        lash.position.set(0, 0.026, 0.026);
+        lash.rotation.z = sign * -0.06;
+        eye.add(lash);
+
+        // Large expressive iris (warm amber/espresso ring)
+        const irisOuterGeo = new THREE.CylinderGeometry(0.019, 0.019, 0.005, 20);
+        const irisOuterMat = new THREE.MeshStandardMaterial({ color: 0x4a2c18, roughness: 0.2 });
+        const irisOuter = new THREE.Mesh(irisOuterGeo, irisOuterMat);
+        irisOuter.rotation.x = Math.PI / 2;
+        irisOuter.position.z = 0.026;
+        eye.add(irisOuter);
+
+        // Deep espresso center
+        const irisInnerGeo = new THREE.CylinderGeometry(0.014, 0.014, 0.006, 20);
+        const irisInnerMat = new THREE.MeshStandardMaterial({ color: 0x1c110a, roughness: 0.2 });
+        const irisInner = new THREE.Mesh(irisInnerGeo, irisInnerMat);
+        irisInner.rotation.x = Math.PI / 2;
+        irisInner.position.z = 0.027;
+        eye.add(irisInner);
 
         // Pupil
-        const pupilGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.006, 16);
+        const pupilGeo = new THREE.CylinderGeometry(0.008, 0.008, 0.007, 20);
         const pupil = new THREE.Mesh(pupilGeo, new THREE.MeshBasicMaterial({ color: 0x050505 }));
         pupil.rotation.x = Math.PI / 2;
         pupil.position.z = 0.028;
         eye.add(pupil);
 
-        // Catchlight highlight dot
-        const highlightGeo = new THREE.SphereGeometry(0.004, 8, 8);
-        const highlight = new THREE.Mesh(highlightGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        highlight.position.set(isLeft ? 0.005 : -0.005, 0.007, 0.03);
-        eye.add(highlight);
+        // Primary Specular Twinkle Catchlight (top-right twinkle)
+        const twinkle1Geo = new THREE.SphereGeometry(0.0048, 10, 10);
+        const twinkle1 = new THREE.Mesh(twinkle1Geo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        twinkle1.position.set(sign * 0.006, 0.007, 0.030);
+        eye.add(twinkle1);
+
+        // Secondary Twinkle Catchlight (bottom-left star twinkle)
+        const twinkle2Geo = new THREE.SphereGeometry(0.0028, 8, 8);
+        const twinkle2 = new THREE.Mesh(twinkle2Geo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        twinkle2.position.set(-sign * 0.004, -0.005, 0.030);
+        eye.add(twinkle2);
 
         return eye;
       };
 
-      eyesGroup.add(createEye(true));
-      eyesGroup.add(createEye(false));
+      eyesGroup.add(createAnimeEye(true));
+      eyesGroup.add(createAnimeEye(false));
       headGroup.add(eyesGroup);
 
-      // Nose
+      // Stylized Anime Nose
       const noseGeo = new THREE.ConeGeometry(0.026, 0.065, 8);
-      const nose = new THREE.Mesh(noseGeo, skinMat);
+      const nose = new THREE.Mesh(noseGeo, animeSkinMat);
       nose.rotation.x = Math.PI;
-      nose.position.set(0, 0.135, 0.185);
+      nose.position.set(0, 0.135, 0.188);
       headGroup.add(nose);
 
-      // Trimmed Mustache (Matching Yashwanth's portrait)
-      const mustacheWingGeo = new THREE.BoxGeometry(0.055, 0.022, 0.022);
+      // Yashwanth's Neat Mustache (Matching portrait)
+      const mustacheWingGeo = new THREE.BoxGeometry(0.058, 0.022, 0.024);
       const leftMustache = new THREE.Mesh(mustacheWingGeo, beardMat);
       leftMustache.rotation.set(0, 0.22, 0.18);
-      leftMustache.position.set(-0.038, 0.086, 0.17);
+      leftMustache.position.set(-0.038, 0.086, 0.174);
       headGroup.add(leftMustache);
 
       const rightMustache = new THREE.Mesh(mustacheWingGeo, beardMat);
       rightMustache.rotation.set(0, -0.22, -0.18);
-      rightMustache.position.set(0.038, 0.086, 0.17);
+      rightMustache.position.set(0.038, 0.086, 0.174);
       headGroup.add(rightMustache);
 
       // Trimmed Beard / Chinstrap along Jawline
-      const chinBeardGeo = new THREE.BoxGeometry(0.09, 0.05, 0.055);
+      const chinBeardGeo = new THREE.BoxGeometry(0.092, 0.052, 0.058);
       const chinBeard = new THREE.Mesh(chinBeardGeo, beardMat);
-      chinBeard.position.set(0, 0.015, 0.13);
+      chinBeard.position.set(0, 0.015, 0.135);
       headGroup.add(chinBeard);
 
-      const jawBeardGeo = new THREE.BoxGeometry(0.028, 0.045, 0.13);
+      const jawBeardGeo = new THREE.BoxGeometry(0.028, 0.045, 0.135);
       const leftJawBeard = new THREE.Mesh(jawBeardGeo, beardMat);
-      leftJawBeard.position.set(-0.10, 0.045, 0.03);
+      leftJawBeard.position.set(-0.102, 0.045, 0.032);
       headGroup.add(leftJawBeard);
 
       const rightJawBeard = new THREE.Mesh(jawBeardGeo, beardMat);
-      rightJawBeard.position.set(0.10, 0.045, 0.03);
+      rightJawBeard.position.set(0.102, 0.045, 0.032);
       headGroup.add(rightJawBeard);
 
-      // Articulated Mouth & Jaw (Opens dynamically when speaking!)
-      const mouthCavityGeo = new THREE.BoxGeometry(0.08, 0.032, 0.035);
+      // Articulated Mouth & Jaw (Opens dynamically during speech!)
+      const mouthCavityGeo = new THREE.BoxGeometry(0.082, 0.034, 0.035);
       mouthMesh = new THREE.Mesh(mouthCavityGeo, mouthInnerMat);
-      mouthMesh.position.set(0, 0.055, 0.155);
+      mouthMesh.position.set(0, 0.055, 0.158);
 
       // Upper white teeth row
-      const upperTeethGeo = new THREE.BoxGeometry(0.065, 0.012, 0.015);
+      const upperTeethGeo = new THREE.BoxGeometry(0.068, 0.013, 0.015);
       const upperTeeth = new THREE.Mesh(upperTeethGeo, teethMat);
-      upperTeeth.position.set(0, 0.065, 0.168);
+      upperTeeth.position.set(0, 0.065, 0.170);
       headGroup.add(upperTeeth);
 
-      // Lower Jaw & Lip Group (Moves down on speech)
-      jawGroup.position.set(0, 0.045, 0.168);
+      // Lower Jaw & Lip Group (articulated downwards on syllables)
+      jawGroup.position.set(0, 0.045, 0.170);
 
-      const lowerTeethGeo = new THREE.BoxGeometry(0.06, 0.01, 0.015);
+      const lowerTeethGeo = new THREE.BoxGeometry(0.062, 0.011, 0.015);
       const lowerTeeth = new THREE.Mesh(lowerTeethGeo, teethMat);
       lowerTeeth.position.set(0, 0.002, 0);
       jawGroup.add(lowerTeeth);
 
-      const lowerLipGeo = new THREE.BoxGeometry(0.075, 0.015, 0.018);
+      const lowerLipGeo = new THREE.BoxGeometry(0.078, 0.016, 0.018);
       const lowerLip = new THREE.Mesh(lowerLipGeo, lipsMat);
       lowerLip.position.set(0, -0.007, 0.002);
       jawGroup.add(lowerLip);
@@ -774,11 +921,10 @@ export default function Workspace3D() {
       headGroup.add(jawGroup);
       torsoGroup.add(headGroup);
 
-      // --- D. LEFT ARM & SMARTWATCH ---
+      // --- D. LEFT ARM & DEVELOPER SMARTWATCH ---
       leftArmGroup.position.set(-0.25, 0.48, 0); // Left shoulder pivot
 
-      const leftShoulderGeo = new THREE.SphereGeometry(0.065, 12, 12);
-      const leftShoulder = new THREE.Mesh(leftShoulderGeo, shirtMat);
+      const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 12), shirtMat);
       leftArmGroup.add(leftShoulder);
 
       const leftUpperArmGeo = new THREE.CylinderGeometry(0.058, 0.05, 0.28, 16);
@@ -786,15 +932,20 @@ export default function Workspace3D() {
       leftUpperArm.position.y = -0.14;
       leftArmGroup.add(leftUpperArm);
 
-      const leftForearmGroup = new THREE.Group();
+      // Rolled sleeve cuff (as seen in screenshot!)
+      const leftSleeveCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.056, 0.045, 16), shirtDetailMat);
+      leftSleeveCuff.position.y = -0.27;
+      leftArmGroup.add(leftSleeveCuff);
+
       leftForearmGroup.position.y = -0.28;
 
-      const leftForearmGeo = new THREE.CylinderGeometry(0.05, 0.044, 0.26, 16);
-      const leftForearm = new THREE.Mesh(leftForearmGeo, shirtMat);
+      // Forearm with bare skin from rolled cuffs
+      const leftForearmGeo = new THREE.CylinderGeometry(0.048, 0.042, 0.26, 16);
+      const leftForearm = new THREE.Mesh(leftForearmGeo, animeSkinMat);
       leftForearm.position.y = -0.13;
       leftForearmGroup.add(leftForearm);
 
-      // Smartwatch on Left Wrist
+      // Developer Smartwatch on Left Wrist
       const watchBandGeo = new THREE.CylinderGeometry(0.048, 0.048, 0.035, 16);
       const watchBand = new THREE.Mesh(watchBandGeo, watchBandMat);
       watchBand.position.y = -0.23;
@@ -813,39 +964,40 @@ export default function Workspace3D() {
 
       // Left Hand
       const handGeo = new THREE.BoxGeometry(0.065, 0.085, 0.028);
-      const leftHand = new THREE.Mesh(handGeo, skinMat);
+      const leftHand = new THREE.Mesh(handGeo, animeSkinMat);
       leftHand.position.y = -0.29;
       leftForearmGroup.add(leftHand);
 
-      // Position left arm naturally resting near the desk edge
-      leftArmGroup.rotation.set(0.3, 0.1, 0.25);
-      leftForearmGroup.rotation.set(0.4, 0.2, -0.3);
       leftArmGroup.add(leftForearmGroup);
       torsoGroup.add(leftArmGroup);
 
-      // --- E. RIGHT ARM (WAVES & GESTURES TO VIEWER) ---
+      // --- E. RIGHT ARM (EXPRESSIVE WELCOMING & TALKING GESTURES) ---
       rightArmGroup.position.set(0.25, 0.48, 0); // Right shoulder pivot
 
-      const rightShoulder = new THREE.Mesh(leftShoulderGeo, shirtMat);
+      const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.065, 12, 12), shirtMat);
       rightArmGroup.add(rightShoulder);
 
       const rightUpperArm = new THREE.Mesh(leftUpperArmGeo, shirtMat);
       rightUpperArm.position.y = -0.14;
       rightArmGroup.add(rightUpperArm);
 
-      rightForearmGroup.position.y = -0.28; // Right elbow pivot
+      // Rolled sleeve cuff
+      const rightSleeveCuff = new THREE.Mesh(new THREE.CylinderGeometry(0.056, 0.056, 0.045, 16), shirtDetailMat);
+      rightSleeveCuff.position.y = -0.27;
+      rightArmGroup.add(rightSleeveCuff);
 
-      const rightForearm = new THREE.Mesh(leftForearmGeo, shirtMat);
+      rightForearmGroup.position.y = -0.28; // Elbow pivot
+
+      const rightForearm = new THREE.Mesh(leftForearmGeo, animeSkinMat);
       rightForearm.position.y = -0.13;
       rightForearmGroup.add(rightForearm);
 
-      rightHandMesh = new THREE.Mesh(handGeo, skinMat);
+      const rightHandMesh = new THREE.Mesh(handGeo, animeSkinMat);
       rightHandMesh.position.y = -0.29;
       rightForearmGroup.add(rightHandMesh);
 
-      // Thumb
-      const thumbGeo = new THREE.BoxGeometry(0.02, 0.04, 0.02);
-      const rightThumb = new THREE.Mesh(thumbGeo, skinMat);
+      const rightThumbGeo = new THREE.BoxGeometry(0.02, 0.04, 0.02);
+      const rightThumb = new THREE.Mesh(rightThumbGeo, animeSkinMat);
       rightThumb.position.set(-0.038, -0.28, 0.01);
       rightForearmGroup.add(rightThumb);
 
@@ -856,7 +1008,7 @@ export default function Workspace3D() {
       mainGroup.add(avatarGroup);
 
       // ==========================================
-      // 7. FLOATING TECH SPHERES / PILLS
+      // 7. FLOATING TECH PILLS & BADGES
       // ==========================================
       const techItems = [
         { name: 'React', color: 0x61dafb, pos: [-2.1, 2.2, 0.5], scale: 0.20 },
@@ -893,13 +1045,12 @@ export default function Workspace3D() {
         const rect = container.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width - 0.5;
         const y = (e.clientY - rect.top) / rect.height - 0.5;
-        targetRotationY = x * 0.4;
-        targetRotationX = y * 0.22;
+        targetRotationY = x * 0.35;
+        targetRotationX = y * 0.20;
       };
-
       window.addEventListener('mousemove', handleMouseMove);
 
-      // Resize handler
+      // Window resize handler
       const handleResize = () => {
         if (!container || !renderer || !camera) return;
         const w = container.clientWidth;
@@ -910,9 +1061,9 @@ export default function Workspace3D() {
       };
       window.addEventListener('resize', handleResize);
 
-      // ==========================================
-      // 8. HIGH-PERFORMANCE 60FPS ANIMATION LOOP
-      // ==========================================
+      // =========================================================================
+      // 8. 60FPS ANIMATION LOOP: WALKING FORWARD, SPEECH LIP-SYNC & GESTURES
+      // =========================================================================
       let clock = new THREE.Clock();
       let lineCounter = 0;
 
@@ -929,6 +1080,11 @@ export default function Workspace3D() {
         'const metrics = { accuracy: "98%", fps: 60 };',
       ];
 
+      // Physical Walking Path Parameters
+      const WALK_START_POS = new THREE.Vector3(1.65, -0.71, -1.05);
+      const WALK_END_POS = new THREE.Vector3(1.26, -0.71, 0.40);
+      const WALK_DURATION = 3.2; // seconds for natural, charismatic entrance walk
+
       const render = () => {
         animationFrameId = requestAnimationFrame(render);
         const elapsedTime = clock.getElapsedTime();
@@ -940,22 +1096,149 @@ export default function Workspace3D() {
         mainGroup.rotation.y = currentRotationY;
         mainGroup.rotation.x = currentRotationX;
 
-        // --- A. IDLE BREATHING & POSTURE ---
-        const breath = Math.sin(elapsedTime * 2.2);
-        torsoGroup.position.y = 1.15 + breath * 0.012;
-        torsoGroup.scale.set(1 + breath * 0.008, 1 + breath * 0.012, 1 + breath * 0.008);
+        // -------------------------------------------------------------
+        // A. WALKING AROUND & STEPPING-FORWARD ANIMATION
+        // -------------------------------------------------------------
+        const walkT = Math.min(1.0, elapsedTime / WALK_DURATION);
+        // Ease-out cubic: starts with energetic purposeful stride, smoothly decelerates to charismatic stop
+        const easeWalk = walkT < 0.5 
+          ? 4 * walkT * walkT * walkT 
+          : 1 - Math.pow(-2 * walkT + 2, 3) / 2;
 
-        // Subtle realistic weight shift
-        avatarGroup.rotation.z = Math.sin(elapsedTime * 0.7) * 0.01;
+        const isWalking = walkT < 0.98;
 
-        // --- B. HEAD TRACKING & LOOK-AT ---
-        // Smoothly rotate head towards the user's cursor
-        const targetHeadY = currentRotationY * 0.8 - 0.15;
-        const targetHeadX = -currentRotationX * 0.6;
+        if (isWalking) {
+          // Physical forward translation along curved path
+          avatarGroup.position.x = THREE.MathUtils.lerp(WALK_START_POS.x, WALK_END_POS.x, easeWalk);
+          avatarGroup.position.z = THREE.MathUtils.lerp(WALK_START_POS.z, WALK_END_POS.z, easeWalk);
+          avatarGroup.position.y = -0.71;
+
+          // Face slightly along walking direction, turning towards user
+          avatarGroup.rotation.y = THREE.MathUtils.lerp(-0.45, -0.24, easeWalk);
+
+          // Stride rhythm (frequency ~8 rad/s)
+          const walkStep = elapsedTime * 8.0;
+          const strideAmp = (1 - easeWalk * 0.45) * 0.44;
+
+          const legCycle = Math.sin(walkStep);
+
+          // Alternating thigh strides
+          if (leftLeg && rightLeg) {
+            leftLeg.thighGroup.rotation.x = legCycle * strideAmp;
+            rightLeg.thighGroup.rotation.x = -legCycle * strideAmp;
+
+            // Knee bend backwards during swing
+            leftLeg.kneeJoint.rotation.x = Math.max(0, -legCycle) * 0.68;
+            rightLeg.kneeJoint.rotation.x = Math.max(0, legCycle) * 0.68;
+
+            // Ankle flexion
+            leftLeg.footJoint.rotation.x = -legCycle * 0.22;
+            rightLeg.footJoint.rotation.x = legCycle * 0.22;
+          }
+
+          // Hips & torso vertical bobbing (twice per stride cycle)
+          const stepBob = Math.abs(Math.sin(walkStep * 2)) * 0.035;
+          torsoGroup.position.y = 1.12 + stepBob;
+
+          // Pelvis sway and weight transfer
+          avatarGroup.rotation.z = Math.sin(walkStep) * 0.022;
+          torsoGroup.rotation.y = Math.sin(walkStep) * 0.06;
+          torsoGroup.rotation.x = 0.08; // subtle forward stride posture
+
+          // Arms swing in counter-rhythm to legs
+          leftArmGroup.rotation.x = -legCycle * 0.36;
+          rightArmGroup.rotation.x = legCycle * 0.36;
+          leftForearmGroup.rotation.x = 0.32 + Math.max(0, -legCycle) * 0.2;
+          rightForearmGroup.rotation.x = 0.32 + Math.max(0, legCycle) * 0.2;
+        } else {
+          // Finished walking: avatar arrives at front-right of desk!
+          avatarGroup.position.copy(WALK_END_POS);
+
+          // Settle legs into stable, charismatic standing stance
+          if (leftLeg && rightLeg) {
+            leftLeg.thighGroup.rotation.x += (-0.08 - leftLeg.thighGroup.rotation.x) * 0.1;
+            leftLeg.kneeJoint.rotation.x += (0.10 - leftLeg.kneeJoint.rotation.x) * 0.1;
+            leftLeg.footJoint.rotation.x += (0.0 - leftLeg.footJoint.rotation.x) * 0.1;
+
+            rightLeg.thighGroup.rotation.x += (0.10 - rightLeg.thighGroup.rotation.x) * 0.1;
+            rightLeg.kneeJoint.rotation.x += (0.06 - rightLeg.kneeJoint.rotation.x) * 0.1;
+            rightLeg.footJoint.rotation.x += (0.0 - rightLeg.footJoint.rotation.x) * 0.1;
+          }
+
+          // CHARISMATIC REFERENCE POSE (Exact match to user's video screenshot!):
+          // Turns warmly toward user and leans charmingly forward (~10° tilt)
+          torsoGroup.rotation.x += (0.16 - torsoGroup.rotation.x) * 0.08;
+          torsoGroup.rotation.y += (0.0 - torsoGroup.rotation.y) * 0.08;
+          avatarGroup.rotation.y += (-0.24 - avatarGroup.rotation.y) * 0.08;
+
+          // Gentle breathing idle
+          const breath = Math.sin(elapsedTime * 2.2);
+          torsoGroup.position.y += (1.12 + breath * 0.008 - torsoGroup.position.y) * 0.1;
+          avatarGroup.rotation.z += (Math.sin(elapsedTime * 0.8) * 0.01 - avatarGroup.rotation.z) * 0.1;
+
+          // -------------------------------------------------------------
+          // B. SPEAKING LIP-SYNC ARTICULATION & WELCOMING GESTURES
+          // -------------------------------------------------------------
+          if (speakingNow) {
+            // Dynamic mouth opening and closing synchronized with speech rhythm
+            const speechPulse = Math.sin(elapsedTime * 14) * 0.5 + 0.5;
+            const syllableMod = Math.sin(elapsedTime * 7.5) * 0.3 + 0.7;
+            const openAmount = speechPulse * syllableMod;
+
+            jawGroup.position.y = 0.045 - openAmount * 0.024;
+            if (mouthMesh) {
+              mouthMesh.scale.y = 1.0 + openAmount * 1.6;
+              mouthMesh.position.y = 0.055 - openAmount * 0.012;
+            }
+
+            // Head nods naturally with speech cadence
+            headGroup.position.y = 0.62 + Math.sin(elapsedTime * 7) * 0.01;
+
+            // Expressive welcoming gesture with right arm
+            const gestureWave = Math.sin(elapsedTime * 3.2);
+            const gestureWave2 = Math.cos(elapsedTime * 2.8);
+
+            rightArmGroup.rotation.x = -0.55 + gestureWave * 0.12;
+            rightArmGroup.rotation.z = -0.35 + gestureWave2 * 0.08;
+            rightArmGroup.rotation.y = 0.25 + gestureWave * 0.10;
+
+            rightForearmGroup.rotation.x = 0.55 + gestureWave * 0.15;
+            rightForearmGroup.rotation.z = -0.45 + gestureWave2 * 0.10;
+            rightForearmGroup.rotation.y = 0.30;
+
+            // Left arm comfortably at side near desk
+            leftArmGroup.rotation.x += (0.15 - leftArmGroup.rotation.x) * 0.08;
+            leftArmGroup.rotation.z += (0.22 - leftArmGroup.rotation.z) * 0.08;
+            leftForearmGroup.rotation.x += (0.42 - leftForearmGroup.rotation.x) * 0.08;
+          } else {
+            // Reset mouth to warm smile
+            jawGroup.position.y += (0.045 - jawGroup.position.y) * 0.15;
+            if (mouthMesh) {
+              mouthMesh.scale.y += (1.0 - mouthMesh.scale.y) * 0.15;
+              mouthMesh.position.y += (0.055 - mouthMesh.position.y) * 0.15;
+            }
+            headGroup.position.y += (0.62 - headGroup.position.y) * 0.15;
+
+            // Relaxed confident developer posture
+            rightArmGroup.rotation.x += (-0.08 - rightArmGroup.rotation.x) * 0.06;
+            rightArmGroup.rotation.z += (-0.14 - rightArmGroup.rotation.z) * 0.06;
+            rightArmGroup.rotation.y += (0.0 - rightArmGroup.rotation.y) * 0.06;
+            rightForearmGroup.rotation.x += (0.20 - rightForearmGroup.rotation.x) * 0.06;
+            rightForearmGroup.rotation.z += (-0.08 - rightForearmGroup.rotation.z) * 0.06;
+
+            leftArmGroup.rotation.x += (0.12 - leftArmGroup.rotation.x) * 0.06;
+            leftArmGroup.rotation.z += (0.20 - leftArmGroup.rotation.z) * 0.06;
+            leftForearmGroup.rotation.x += (0.38 - leftForearmGroup.rotation.x) * 0.06;
+          }
+        }
+
+        // --- C. HEAD TRACKING & LOOK-AT ---
+        const targetHeadY = currentRotationY * 0.8 - 0.12;
+        const targetHeadX = -currentRotationX * 0.55;
         headGroup.rotation.y += (targetHeadY - headGroup.rotation.y) * 0.08;
         headGroup.rotation.x += (targetHeadX - headGroup.rotation.x) * 0.08;
 
-        // --- C. BLINKING ANIMATION (Every 3.5s) ---
+        // --- D. ANIME EYE BLINKING (Every 3.6s) ---
         const blinkCycle = elapsedTime % 3.6;
         if (blinkCycle < 0.14) {
           const blinkScale = Math.sin((blinkCycle / 0.14) * Math.PI);
@@ -964,60 +1247,7 @@ export default function Workspace3D() {
           eyesGroup.scale.y = 1.0;
         }
 
-        // --- D. SPEAKING ARTICULATION & WELCOMING GESTURES ---
-        if (speakingNow) {
-          // Dynamic mouth opening and closing synchronized with speech rhythm
-          const speechPulse = Math.sin(elapsedTime * 14) * 0.5 + 0.5;
-          const syllableMod = Math.sin(elapsedTime * 7.5) * 0.3 + 0.7;
-          const openAmount = speechPulse * syllableMod;
-
-          jawGroup.position.y = 0.045 - openAmount * 0.024;
-          if (mouthMesh) {
-            mouthMesh.scale.y = 1.0 + openAmount * 1.6;
-            mouthMesh.position.y = 0.055 - openAmount * 0.012;
-          }
-
-          // Subtle rhythmic head nodding with speech cadence
-          headGroup.position.y = 0.62 + Math.sin(elapsedTime * 7) * 0.01;
-
-          // Welcoming expressive hand gestures while speaking!
-          const gestureWave = Math.sin(elapsedTime * 3.2);
-          const gestureWave2 = Math.cos(elapsedTime * 2.8);
-
-          // Raise right arm forward into open palm welcoming gesture
-          rightArmGroup.rotation.x = -0.55 + gestureWave * 0.12;
-          rightArmGroup.rotation.z = -0.35 + gestureWave2 * 0.08;
-          rightArmGroup.rotation.y = 0.25 + gestureWave * 0.10;
-
-          rightForearmGroup.rotation.x = 0.55 + gestureWave * 0.15;
-          rightForearmGroup.rotation.z = -0.45 + gestureWave2 * 0.10;
-          rightForearmGroup.rotation.y = 0.30;
-        } else {
-          // Reset mouth to gentle warm smile
-          jawGroup.position.y += (0.045 - jawGroup.position.y) * 0.15;
-          if (mouthMesh) {
-            mouthMesh.scale.y += (1.0 - mouthMesh.scale.y) * 0.15;
-            mouthMesh.position.y += (0.055 - mouthMesh.position.y) * 0.15;
-          }
-          headGroup.position.y += (0.62 - headGroup.position.y) * 0.15;
-
-          // Initial friendly welcome wave on page load (first 2.8 seconds)
-          if (elapsedTime < 2.8) {
-            const waveProgress = Math.min(1, elapsedTime / 0.6);
-            rightArmGroup.rotation.x = -1.2 * waveProgress;
-            rightArmGroup.rotation.z = -0.9 * waveProgress;
-            rightForearmGroup.rotation.z = -0.7 + Math.sin(elapsedTime * 8) * 0.35;
-          } else {
-            // Natural relaxed idle posture
-            rightArmGroup.rotation.x += (-0.1 - rightArmGroup.rotation.x) * 0.06;
-            rightArmGroup.rotation.z += (-0.12 - rightArmGroup.rotation.z) * 0.06;
-            rightArmGroup.rotation.y += (0 - rightArmGroup.rotation.y) * 0.06;
-            rightForearmGroup.rotation.x += (0.15 - rightForearmGroup.rotation.x) * 0.06;
-            rightForearmGroup.rotation.z += (-0.05 - rightForearmGroup.rotation.z) * 0.06;
-          }
-        }
-
-        // --- E. FLOATING TECH PILLS ORBIT & BOBBING ---
+        // --- E. FLOATING TECH PILLS BOBBING ---
         floatingBadges.forEach((mesh) => {
           mesh.position.y = mesh.userData.baseY + Math.sin(elapsedTime * mesh.userData.speed + mesh.userData.offset) * 0.12;
           mesh.rotation.y += 0.015;
@@ -1103,13 +1333,13 @@ export default function Workspace3D() {
       {/* Floating Glassmorphism Speech Bubble & Voice Greeting Controls */}
       {showSpeechBubble && (
         <div className="absolute top-3 right-3 sm:top-5 sm:right-5 max-w-[280px] sm:max-w-[340px] z-20 transition-all duration-300">
-          <div className="relative rounded-2xl bg-black/60 backdrop-blur-xl border border-white/20 p-3.5 sm:p-4 shadow-2xl text-cream">
+          <div className="relative rounded-2xl bg-black/65 backdrop-blur-xl border border-white/20 p-3.5 sm:p-4 shadow-2xl text-cream">
             {/* Header: Avatar identity + Equalizer bars */}
             <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
                 <span className={`w-2.5 h-2.5 rounded-full ${isSpeaking ? 'bg-coral animate-ping' : 'bg-emerald-400'}`} />
                 <span className="text-xs font-mono font-bold tracking-wide text-cream">
-                  Yashwanth (3D Avatar)
+                  Yashwanth (3D Anime Avatar)
                 </span>
               </div>
 
@@ -1190,17 +1420,21 @@ export default function Workspace3D() {
             </div>
 
             {/* Bubble tail pointing toward Yashwanth's 3D avatar */}
-            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-black/60 border-r border-b border-white/20 transform rotate-45" />
+            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-black/65 border-r border-b border-white/20 transform rotate-45" />
           </div>
         </div>
       )}
 
-      {/* Auto-Prompt Callout Badge on Load */}
+      {/* Auto-Prompt Callout Badge on Load (First Visit Guidance) */}
       {!hasInteracted && !isSpeaking && (
-        <div className="absolute bottom-12 right-6 hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-coral/90 backdrop-blur-md border border-white/30 text-white font-mono text-xs font-semibold shadow-xl shadow-coral/30 animate-bounce z-10 pointer-events-none">
-          <Sparkles className="w-3.5 h-3.5 text-amber-200" />
-          <span>Click "Hear Voice Intro" to hear Yashwanth speak!</span>
-        </div>
+        <button
+          type="button"
+          onClick={() => startSpeech(true)}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-coral/95 hover:bg-coral text-white font-mono text-xs sm:text-sm font-semibold shadow-2xl shadow-coral/50 border border-white/30 backdrop-blur-md animate-bounce cursor-pointer z-30 transition-all hover:scale-105 active:scale-95"
+        >
+          <Sparkles className="w-4 h-4 text-amber-200 animate-spin" style={{ animationDuration: '3s' }} />
+          <span>👋 Click anywhere to hear Yashwanth's 3D Voice Intro 🔊</span>
+        </button>
       )}
 
       {/* Fallback if WebGL isn't supported */}

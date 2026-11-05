@@ -89,7 +89,7 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 onMouseEnter={() => sound.playPop()}
-                onClick={() => sound.playClick()}
+                onClick={() => sound.playNavChime(link.label)}
                 className="px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-white/5 transition-all duration-200"
               >
                 {link.label}
@@ -155,7 +155,7 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 onClick={() => {
-                  sound.playClick();
+                  sound.playNavChime(link.label);
                   setMobileMenuOpen(false);
                 }}
                 className="px-3 py-2 text-base font-medium text-slate-200 hover:text-accent hover:bg-white/5 rounded-lg transition-colors"

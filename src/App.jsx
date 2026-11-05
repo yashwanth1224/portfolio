@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -8,8 +8,27 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import Certificates from './components/Certificates';
 import Contact from './components/Contact';
+import { sound } from './utils/audio';
 
 export default function App() {
+  // Global ultra-low latency touch voice acoustic feedback on every click and touch tap
+  useEffect(() => {
+    const handlePointerDown = (e) => {
+      sound.playTouchClick(e.target);
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown, {
+      capture: true,
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener('pointerdown', handlePointerDown, {
+        capture: true,
+      });
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-obsidian text-cream font-sans selection:bg-accent selection:text-navy-deep">
       {/* Magnetic Custom Cursor */}

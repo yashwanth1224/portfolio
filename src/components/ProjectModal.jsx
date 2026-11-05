@@ -168,7 +168,7 @@ export default function ProjectModal({ project, isOpen, onClose }) {
                 sound.playClick();
                 onClose();
               }}
-              className="px-6 py-2.5 rounded-xl bg-terracotta hover:bg-coral text-cream text-sm font-semibold transition-colors"
+              className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-sm font-semibold transition-colors shadow-lg shadow-sky-500/25"
             >
               Close Window
             </button>

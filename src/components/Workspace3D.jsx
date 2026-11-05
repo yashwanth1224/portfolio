@@ -311,8 +311,8 @@ export default function Workspace3D() {
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // 3. Lighting Setup (Crisp Studio & Warm Anime Key Lights)
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.90);
+      // 3. Lighting Setup (Crisp Studio & Cool Tech Lights)
+      const ambientLight = new THREE.AmbientLight(0xf8fafc, 0.95);
       scene.add(ambientLight);
 
       const mainLight = new THREE.DirectionalLight(0xffffff, 1.45);
@@ -322,18 +322,18 @@ export default function Workspace3D() {
       mainLight.shadow.mapSize.height = 1024;
       scene.add(mainLight);
 
-      // Warm portrait key light focused on Yashwanth's face and shirt
-      const keyLight = new THREE.PointLight(0xffedd5, 1.85, 8);
+      // Portrait key light focused on Yashwanth's face and shirt
+      const keyLight = new THREE.PointLight(0xffffff, 1.85, 8);
       keyLight.position.set(1.4, 2.1, 1.8);
       scene.add(keyLight);
 
-      // Coral rim light (brand accent glow)
-      const rimLightCoral = new THREE.PointLight(0xff5a36, 2.8, 10);
-      rimLightCoral.position.set(-3, 2, -1);
-      scene.add(rimLightCoral);
+      // Cobalt blue rim light (brand accent glow)
+      const rimLightCobalt = new THREE.PointLight(0x2563eb, 3.0, 10);
+      rimLightCobalt.position.set(-3, 2, -1);
+      scene.add(rimLightCobalt);
 
       // Cyan rim light (modern digital tech glow)
-      const rimLightCyan = new THREE.PointLight(0x00d8ff, 2.4, 10);
+      const rimLightCyan = new THREE.PointLight(0x38bdf8, 2.8, 10);
       rimLightCyan.position.set(3, 1.5, -1);
       scene.add(rimLightCyan);
 
@@ -474,7 +474,7 @@ export default function Workspace3D() {
       deskGroup.add(mouse);
 
       const mugGeo = new THREE.CylinderGeometry(0.065, 0.055, 0.15, 24);
-      const mugMat = new THREE.MeshStandardMaterial({ color: 0xaf4426, roughness: 0.1 });
+      const mugMat = new THREE.MeshStandardMaterial({ color: 0x0b1b2b, roughness: 0.2 });
       const mug = new THREE.Mesh(mugGeo, mugMat);
       mug.position.set(0.95, 0.82, 0.25);
       deskGroup.add(mug);
@@ -632,9 +632,9 @@ export default function Workspace3D() {
         toe.castShadow = true;
         shoeGroup.add(toe);
 
-        // Subtle Coral Accent Stripe
+        // Subtle Cyan Accent Stripe
         const stripeGeo = new THREE.BoxGeometry(0.130, 0.012, 0.16);
-        const stripe = new THREE.Mesh(stripeGeo, new THREE.MeshStandardMaterial({ color: 0xff5a36, roughness: 0.4 }));
+        const stripe = new THREE.Mesh(stripeGeo, new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.4 }));
         stripe.position.set(0, 0.062, -0.01);
         shoeGroup.add(stripe);
 
@@ -1263,11 +1263,11 @@ export default function Workspace3D() {
           // Editor tab bar
           codeTextureContext.fillStyle = '#161b22';
           codeTextureContext.fillRect(0, 0, 512, 35);
-          codeTextureContext.fillStyle = '#ff5a36';
+          codeTextureContext.fillStyle = '#38bdf8';
           codeTextureContext.fillRect(20, 10, 14, 14);
-          codeTextureContext.fillStyle = '#f7df1e';
+          codeTextureContext.fillStyle = '#60a5fa';
           codeTextureContext.fillRect(40, 10, 14, 14);
-          codeTextureContext.fillStyle = '#68a063';
+          codeTextureContext.fillStyle = '#34d399';
           codeTextureContext.fillRect(60, 10, 14, 14);
 
           codeTextureContext.fillStyle = '#8b949e';
@@ -1333,21 +1333,21 @@ export default function Workspace3D() {
       {/* Floating Glassmorphism Speech Bubble & Voice Greeting Controls */}
       {showSpeechBubble && (
         <div className="absolute top-3 right-3 sm:top-5 sm:right-5 max-w-[280px] sm:max-w-[340px] z-20 transition-all duration-300">
-          <div className="relative rounded-2xl bg-black/65 backdrop-blur-xl border border-white/20 p-3.5 sm:p-4 shadow-2xl text-cream">
+          <div className="relative rounded-2xl bg-[#07111A]/90 backdrop-blur-xl border border-sky-400/30 p-3.5 sm:p-4 shadow-2xl text-cream">
             {/* Header: Avatar identity + Equalizer bars */}
             <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${isSpeaking ? 'bg-coral animate-ping' : 'bg-emerald-400'}`} />
+                <span className={`w-2.5 h-2.5 rounded-full ${isSpeaking ? 'bg-sky-400 animate-ping' : 'bg-emerald-400'}`} />
                 <span className="text-xs font-mono font-bold tracking-wide text-cream">
                   Yashwanth (3D Anime Avatar)
                 </span>
               </div>
 
-              {/* Animated Audio Equalizer */}
-              <div className="flex items-end gap-1 h-3.5 px-1.5 py-0.5 rounded bg-black/40 border border-white/10">
-                <span className={`w-0.5 bg-coral rounded-full transition-all duration-150 ${isSpeaking ? 'h-3 animate-pulse' : 'h-1'}`} />
-                <span className={`w-0.5 bg-amber-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-1.5'}`} style={{ animationDuration: '300ms' }} />
-                <span className={`w-0.5 bg-cyan-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-2.5' : 'h-1'}`} style={{ animationDuration: '450ms' }} />
+              {/* Animated Audio Equalizer with Cyan and Blue Bars */}
+              <div className="flex items-end gap-1 h-3.5 px-1.5 py-0.5 rounded bg-black/50 border border-white/10">
+                <span className={`w-0.5 bg-sky-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3 animate-pulse' : 'h-1'}`} />
+                <span className={`w-0.5 bg-blue-500 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-1.5'}`} style={{ animationDuration: '300ms' }} />
+                <span className={`w-0.5 bg-cyan-300 rounded-full transition-all duration-150 ${isSpeaking ? 'h-2.5' : 'h-1'}`} style={{ animationDuration: '450ms' }} />
                 <span className={`w-0.5 bg-emerald-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-2'}`} style={{ animationDuration: '200ms' }} />
               </div>
             </div>
@@ -1361,7 +1361,7 @@ export default function Workspace3D() {
                       key={idx}
                       className={`inline-block mr-1 transition-colors duration-150 ${
                         idx === currentWordIndex
-                          ? 'text-coral font-bold scale-110 drop-shadow-[0_0_8px_rgba(255,90,54,0.8)]'
+                          ? 'text-sky-400 font-bold scale-110 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]'
                           : idx < currentWordIndex
                           ? 'text-cream font-medium'
                           : 'text-cream/50'
@@ -1386,13 +1386,13 @@ export default function Workspace3D() {
                 onMouseEnter={() => sound.playPop()}
                 className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-md ${
                   isSpeaking
-                    ? 'bg-obsidian text-coral border border-coral/40 hover:bg-black'
-                    : 'bg-gradient-to-r from-coral to-terracotta hover:from-coral-light hover:to-coral text-white shadow-coral/30 hover:scale-[1.02]'
+                    ? 'bg-navy-dark text-sky-400 border border-sky-400/40 hover:bg-black'
+                    : 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-sky-500/25 hover:scale-[1.02]'
                 }`}
               >
                 {isSpeaking ? (
                   <>
-                    <Pause className="w-3.5 h-3.5 animate-pulse text-coral" />
+                    <Pause className="w-3.5 h-3.5 animate-pulse text-sky-400" />
                     <span>Pause Voice Intro</span>
                   </>
                 ) : (
@@ -1415,12 +1415,12 @@ export default function Workspace3D() {
                 title={sound.isMuted() ? 'Unmute Audio' : 'Mute Audio'}
                 aria-label="Toggle Sound"
               >
-                {sound.isMuted() ? <VolumeX className="w-3.5 h-3.5 text-coral" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {sound.isMuted() ? <VolumeX className="w-3.5 h-3.5 text-sky-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
               </button>
             </div>
 
             {/* Bubble tail pointing toward Yashwanth's 3D avatar */}
-            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-black/65 border-r border-b border-white/20 transform rotate-45" />
+            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-[#07111A]/90 border-r border-b border-sky-400/30 transform rotate-45" />
           </div>
         </div>
       )}
@@ -1430,9 +1430,9 @@ export default function Workspace3D() {
         <button
           type="button"
           onClick={() => startSpeech(true)}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-coral/95 hover:bg-coral text-white font-mono text-xs sm:text-sm font-semibold shadow-2xl shadow-coral/50 border border-white/30 backdrop-blur-md animate-bounce cursor-pointer z-30 transition-all hover:scale-105 active:scale-95"
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-mono text-xs sm:text-sm font-semibold shadow-2xl shadow-sky-500/50 border border-white/30 backdrop-blur-md animate-bounce cursor-pointer z-30 transition-all hover:scale-105 active:scale-95"
         >
-          <Sparkles className="w-4 h-4 text-amber-200 animate-spin" style={{ animationDuration: '3s' }} />
+          <Sparkles className="w-4 h-4 text-sky-200 animate-spin" style={{ animationDuration: '3s' }} />
           <span>👋 Click anywhere to hear Yashwanth's 3D Voice Intro 🔊</span>
         </button>
       )}
@@ -1440,7 +1440,7 @@ export default function Workspace3D() {
       {/* Fallback if WebGL isn't supported */}
       {loadError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-obsidian-surface/80 backdrop-blur-md rounded-2xl border border-white/10 text-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-coral mb-4 shadow-xl">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-sky-400 mb-4 shadow-xl">
             <img src="./yashwanth.jpg" alt="Yashwanth S" className="w-full h-full object-cover" />
           </div>
           <h3 className="text-xl font-serif font-bold text-cream">Yashwanth S</h3>

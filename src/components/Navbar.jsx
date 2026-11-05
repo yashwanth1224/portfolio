@@ -28,10 +28,10 @@ export default function Navbar() {
     sound.playSuccess();
     try {
       confetti({
-        particleCount: 50,
-        spread: 60,
+        particleCount: 55,
+        spread: 65,
         origin: { y: 0.2, x: 0.8 },
-        colors: ['#AF4426', '#FF5A36', '#F7F5F0', '#EFEBE2']
+        colors: ['#0B1B2B', '#38BDF8', '#0284C7', '#2563EB', '#FFFFFF']
       });
     } catch {
       // Confetti fallback
@@ -51,7 +51,7 @@ export default function Navbar() {
     <header
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
         isScrolled
-          ? 'bg-obsidian/85 backdrop-blur-md border-b border-white/10 shadow-lg py-3'
+          ? 'bg-navy-dark/90 backdrop-blur-md border-b border-white/10 shadow-lg py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -65,14 +65,14 @@ export default function Navbar() {
             onClick={() => sound.playClick()}
             className="flex items-center gap-3 group focus:outline-none"
           >
-            <div className="w-10 h-10 rounded-xl bg-terracotta flex items-center justify-center text-cream font-serif font-bold text-xl shadow-md group-hover:scale-105 transition-transform duration-200 border border-white/20">
+            <div className="w-10 h-10 rounded-xl bg-navy flex items-center justify-center text-white font-serif font-bold text-xl shadow-md group-hover:scale-105 transition-transform duration-200 border border-sky-400/30">
               Y
             </div>
             <div className="flex flex-col">
-              <span className="font-serif font-bold text-lg tracking-tight text-cream group-hover:text-coral transition-colors">
+              <span className="font-serif font-bold text-lg tracking-tight text-white group-hover:text-accent transition-colors">
                 Yashwanth S
               </span>
-              <div className="flex items-center gap-1.5 text-xs text-cream/70">
+              <div className="flex items-center gap-1.5 text-xs text-slate-400">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -90,7 +90,7 @@ export default function Navbar() {
                 href={link.href}
                 onMouseEnter={() => sound.playPop()}
                 onClick={() => sound.playClick()}
-                className="px-3 py-1.5 text-sm font-medium text-cream/80 hover:text-white rounded-lg hover:bg-white/5 transition-all duration-200"
+                className="px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white rounded-lg hover:bg-white/5 transition-all duration-200"
               >
                 {link.label}
               </a>
@@ -103,10 +103,10 @@ export default function Navbar() {
               onClick={handleSoundToggle}
               onMouseEnter={() => sound.playPop()}
               title={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
-              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-cream/80 hover:text-coral transition-all border border-white/10 focus:outline-none"
+              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-accent transition-all border border-white/10 focus:outline-none"
               aria-label="Toggle Sound Effects"
             >
-              {isMuted ? <VolumeX className="w-4 h-4 text-cream/40" /> : <Volume2 className="w-4 h-4 text-coral animate-pulse" />}
+              {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-accent animate-pulse" />}
             </button>
 
             <a
@@ -116,7 +116,7 @@ export default function Navbar() {
               download="Yashwanth_Resume.pdf"
               onClick={handleResumeClick}
               onMouseEnter={() => sound.playPop()}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-terracotta hover:bg-coral text-cream transition-all duration-300 shadow-lg shadow-terracotta/25 hover:shadow-coral/40 hover:-translate-y-0.5 active:translate-y-0 border border-white/15"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white transition-all duration-300 shadow-lg shadow-sky-500/25 hover:-translate-y-0.5 active:translate-y-0 border border-white/15"
             >
               <FileDown className="w-4 h-4" />
               <span>Resume</span>
@@ -127,10 +127,10 @@ export default function Navbar() {
           <div className="flex md:hidden items-center gap-2">
             <button
               onClick={handleSoundToggle}
-              className="p-2 rounded-lg bg-white/5 text-cream/80 border border-white/10"
+              className="p-2 rounded-lg bg-white/5 text-slate-300 border border-white/10"
               aria-label="Toggle Sound"
             >
-              {isMuted ? <VolumeX className="w-4 h-4 text-cream/40" /> : <Volume2 className="w-4 h-4 text-coral" />}
+              {isMuted ? <VolumeX className="w-4 h-4 text-slate-500" /> : <Volume2 className="w-4 h-4 text-accent" />}
             </button>
             <button
               onClick={() => {
@@ -148,7 +148,7 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-obsidian/95 backdrop-blur-xl border-b border-white/10 px-4 pt-3 pb-6 space-y-3">
+        <div className="md:hidden bg-navy-dark/95 backdrop-blur-xl border-b border-white/10 px-4 pt-3 pb-6 space-y-3">
           <div className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <a
@@ -158,7 +158,7 @@ export default function Navbar() {
                   sound.playClick();
                   setMobileMenuOpen(false);
                 }}
-                className="px-3 py-2 text-base font-medium text-cream/90 hover:text-coral hover:bg-white/5 rounded-lg transition-colors"
+                className="px-3 py-2 text-base font-medium text-slate-200 hover:text-accent hover:bg-white/5 rounded-lg transition-colors"
               >
                 {link.label}
               </a>
@@ -174,7 +174,7 @@ export default function Navbar() {
                 handleResumeClick();
                 setMobileMenuOpen(false);
               }}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-terracotta text-cream shadow-md"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md"
             >
               <FileDown className="w-4 h-4" />
               <span>Download Resume PDF</span>

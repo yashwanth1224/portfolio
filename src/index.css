@@ -13,44 +13,45 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Resume Theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B0C0E;
+  background: #07111A;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #AF4426;
+  background: #132A40;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #FF5A36;
+  background: #38BDF8;
 }
 
 /* Glassmorphism */
 .glass-panel {
-  background: rgba(20, 22, 28, 0.7);
+  background: rgba(11, 27, 43, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-panel-light {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(11, 27, 43, 0.08);
 }
 
-.glass-terracotta {
-  background: rgba(175, 68, 38, 0.85);
+.glass-terracotta,
+.glass-navy {
+  background: rgba(11, 27, 43, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
 /* Text Reflection */
@@ -61,14 +62,14 @@
 
 .text-reflection-subtle {
   position: relative;
-  -webkit-box-reflect: below -20px linear-gradient(transparent 60%, rgba(255, 90, 54, 0.2) 100%);
+  -webkit-box-reflect: below -20px linear-gradient(transparent 60%, rgba(56, 189, 248, 0.2) 100%);
 }
 
 /* Fallback for browsers that don't support box-reflect */
 .reflection-mirror {
   transform: scaleY(-1);
-  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
-  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.35) 0%, transparent 70%);
+  mask-image: linear-gradient(to top, rgba(255, 255, 255, 0.28) 0%, transparent 70%);
+  -webkit-mask-image: linear-gradient(to top, rgba(255, 255, 255, 0.28) 0%, transparent 70%);
 }
 
 /* Subtle Noise Texture Overlay */
@@ -79,8 +80,8 @@
 
 /* Polaroids and card tilt */
 .polaroid-shadow {
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.3),
-              0 0 0 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 20px 40px -15px rgba(11, 27, 43, 0.25),
+              0 0 0 1px rgba(11, 27, 43, 0.08);
 }
 
 .card-hover-glow {
@@ -89,8 +90,8 @@
 
 .card-hover-glow:hover {
   transform: translateY(-4px);
-  box-shadow: 0 15px 30px -10px rgba(255, 90, 54, 0.15),
-              0 0 0 1px rgba(255, 90, 54, 0.3);
+  box-shadow: 0 15px 30px -10px rgba(56, 189, 248, 0.2),
+              0 0 0 1px rgba(56, 189, 248, 0.35);
 }
 
 /* Hide native cursor when custom cursor is active */

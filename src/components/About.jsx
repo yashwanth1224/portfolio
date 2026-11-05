@@ -1,7 +1,7 @@
 import React from 'react';
 import { personalInfo } from '../data/portfolioData';
 import { sound } from '../utils/audio';
-import { CheckCircle2, Compass, Cpu, Layers, Sparkles, Award } from 'lucide-react';
+import { CheckCircle2, Compass, Cpu, Layers, Sparkles, Award, User } from 'lucide-react';
 
 export default function About() {
   const pillars = [
@@ -28,25 +28,22 @@ export default function About() {
   ];
 
   return (
-    <section id="about" className="relative bg-cream text-obsidian py-24 lg:py-32 overflow-hidden">
-      {/* Subtle background noise texture */}
+    <section id="about" className="relative bg-cream text-slate-800 py-24 lg:py-32 overflow-hidden border-b border-slateBanner-border/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Tag */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className="w-8 h-0.5 bg-terracotta" />
-          <span className="font-mono text-xs uppercase tracking-widest text-terracotta font-semibold">
-            ABOUT YASHWANTH S
-          </span>
+        {/* Resume-Style Section Header Banner (Soft Silver-Slate Banner with Bold Navy Text) */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slateBanner border border-slateBanner-border text-navy font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
+          <User className="w-3.5 h-3.5 text-accent-royal" />
+          <span>ABOUT YASHWANTH S</span>
         </div>
 
-        {/* Heading (Video frames 11-13 replica) */}
+        {/* Heading in Deep Charcoal Navy */}
         <div className="max-w-3xl mb-16">
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-obsidian leading-[1.18] mb-6">
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-navy leading-[1.18] mb-6">
             From responsive interactive layouts to{' '}
-            <span className="text-terracotta italic font-normal">pixel-perfect code.</span>
+            <span className="text-accent-royal italic font-normal">pixel-perfect code.</span>
           </h2>
-          <p className="text-obsidian/75 text-base sm:text-lg leading-relaxed">
+          <p className="text-slate-600 text-base sm:text-lg leading-relaxed">
             I don’t just write code; I engineer digital experiences where interface fluidity, responsive architecture, and bulletproof logic meet.
           </p>
         </div>
@@ -58,77 +55,77 @@ export default function About() {
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative group max-w-sm sm:max-w-md w-full">
               {/* Decorative tape sticker effect */}
-              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-28 h-7 bg-white/70 backdrop-blur-md border border-neutral-300 shadow-sm rotate-2 z-20 pointer-events-none rounded-sm" />
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-28 h-7 bg-white/90 backdrop-blur-md border border-slateBanner-border shadow-sm rotate-2 z-20 pointer-events-none rounded-sm" />
 
               {/* Polaroid Outer Frame */}
               <div 
                 onMouseEnter={() => sound.playPop()}
-                className="bg-white p-4 sm:p-5 pb-7 rounded-2xl shadow-2xl border border-neutral-200/80 -rotate-1 group-hover:rotate-0 transition-all duration-500 transform hover:-translate-y-1.5"
+                className="bg-white p-4 sm:p-5 pb-7 rounded-2xl shadow-2xl border border-slateBanner-border -rotate-1 group-hover:rotate-0 transition-all duration-500 transform hover:-translate-y-1.5"
               >
                 {/* Photo Container */}
-                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-neutral-900 border border-neutral-100 shadow-inner">
+                <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-navy border border-slate-100 shadow-inner">
                   <img
                     src="./yashwanth.jpg"
                     alt="Yashwanth S"
                     className="w-full h-full object-cover object-top filter grayscale contrast-105 group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
                   />
                   {/* Subtle lighting gradient over photo */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-obsidian/40 via-transparent to-transparent opacity-60" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent opacity-60" />
                 </div>
 
                 {/* Polaroid Bottom Caption */}
-                <div className="mt-4 pt-2 text-center border-t border-neutral-100">
-                  <h4 className="font-serif font-bold text-lg text-obsidian">Yashwanth S</h4>
-                  <p className="text-xs font-mono text-terracotta tracking-wider uppercase mt-0.5">
+                <div className="mt-4 pt-2 text-center border-t border-slateBanner">
+                  <h4 className="font-serif font-bold text-lg text-navy">Yashwanth S</h4>
+                  <p className="text-xs font-mono text-accent-blue tracking-wider uppercase mt-0.5 font-semibold">
                     Bengaluru, India • Frontend & Software Engineer
                   </p>
                 </div>
               </div>
 
-              {/* Decorative background shadow glow */}
-              <div className="absolute -inset-4 bg-terracotta/10 rounded-3xl blur-2xl -z-10" />
+              {/* Decorative background shadow glow in Navy/Cyan */}
+              <div className="absolute -inset-4 bg-sky-500/10 rounded-3xl blur-2xl -z-10" />
             </div>
           </div>
 
           {/* Right Column: Bio Narrative & Stat Cards */}
           <div className="lg:col-span-7 flex flex-col justify-between h-full space-y-8">
             
-            <div className="space-y-4 text-obsidian/85 text-base sm:text-lg leading-relaxed">
+            <div className="space-y-4 text-slate-700 text-base sm:text-lg leading-relaxed">
               <p>
                 My journey began in the mechanical engineering labs at{' '}
-                <strong className="text-obsidian font-semibold">East West Institute of Technology (VTU)</strong>, where I developed a deep appreciation for mathematical rigor, fluid dynamics, and systematic tolerances.
+                <strong className="text-navy font-semibold">East West Institute of Technology (VTU)</strong>, where I developed a deep appreciation for mathematical rigor, fluid dynamics, and systematic tolerances.
               </p>
               <p>
                 Recognizing the boundless creativity of the web, I transitioned into software development, undergoing over{' '}
-                <strong className="text-terracotta font-semibold">400+ hours of full-stack engineering at JSPIDERS Bengaluru</strong>. Here, I mastered Java object-oriented principles, SQL schemas, and the modern React ecosystem.
+                <strong className="text-accent-royal font-semibold">400+ hours of full-stack engineering at JSPIDERS Bengaluru</strong>. Here, I mastered Java object-oriented principles, SQL schemas, and the modern React ecosystem.
               </p>
               <p>
-                I build software that solves real problems—from live production applications like <strong className="text-obsidian font-semibold">Zisti</strong> (India's food delivery platform) and <strong className="text-obsidian font-semibold">Astrovedic Jyotishya Kendra</strong> (sidereal astrology & consultation system) to 3D WebGL mechanism simulators and real-time NLP engines.
+                I build software that solves real problems—from live production applications like <strong className="text-navy font-semibold">Zisti</strong> (India's food delivery platform) and <strong className="text-navy font-semibold">Astrovedic Jyotishya Kendra</strong> (sidereal astrology & consultation system) to 3D WebGL mechanism simulators and real-time NLP engines.
               </p>
             </div>
 
-            {/* Stat Counters Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-neutral-300">
+            {/* Stat Counters Grid in Crisp White & Soft Slate */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slateBanner-border">
               {personalInfo.stats.map((stat, idx) => (
                 <div
                   key={idx}
                   onMouseEnter={() => sound.playPop()}
-                  className="bg-white/80 backdrop-blur-sm p-4 rounded-xl border border-neutral-200/90 shadow-sm hover:border-terracotta/40 transition-colors"
+                  className="bg-white p-4 rounded-xl border border-slateBanner-border shadow-sm hover:border-accent-royal/50 transition-colors"
                 >
-                  <div className="font-serif text-3xl sm:text-4xl font-extrabold text-terracotta tracking-tight">
+                  <div className="font-serif text-3xl sm:text-4xl font-extrabold text-navy tracking-tight">
                     {stat.value}
                   </div>
-                  <div className="text-xs font-bold text-obsidian mt-1 uppercase tracking-wider">
+                  <div className="text-xs font-bold text-navy mt-1 uppercase tracking-wider">
                     {stat.label}
                   </div>
-                  <div className="text-[11px] text-obsidian/60 mt-0.5">
+                  <div className="text-[11px] text-slate-500 mt-0.5">
                     {stat.sub}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Four Core Pillars */}
+            {/* Four Core Pillars in Silver-Slate & Navy Accent */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {pillars.map((pillar, i) => {
                 const IconComponent = pillar.icon;
@@ -136,15 +133,15 @@ export default function About() {
                   <div
                     key={i}
                     onMouseEnter={() => sound.playPop()}
-                    className="p-4 rounded-xl bg-white/70 border border-neutral-200 hover:shadow-md hover:border-terracotta/30 transition-all duration-300"
+                    className="p-4 rounded-xl bg-white border border-slateBanner-border hover:shadow-md hover:border-accent/40 transition-all duration-300"
                   >
                     <div className="flex items-center gap-3 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-terracotta/10 text-terracotta flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg bg-slateBanner text-accent-royal flex items-center justify-center font-bold">
                         <IconComponent className="w-4 h-4" />
                       </div>
-                      <h4 className="font-semibold text-sm text-obsidian">{pillar.title}</h4>
+                      <h4 className="font-semibold text-sm text-navy">{pillar.title}</h4>
                     </div>
-                    <p className="text-xs text-obsidian/70 leading-normal">
+                    <p className="text-xs text-slate-600 leading-normal">
                       {pillar.desc}
                     </p>
                   </div>

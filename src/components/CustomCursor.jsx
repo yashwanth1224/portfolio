@@ -62,7 +62,7 @@ export default function CustomCursor() {
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden hidden md:block">
       {/* Inner pinpoint dot */}
       <div
-        className={`fixed top-0 left-0 w-2.5 h-2.5 rounded-full bg-coral transition-transform duration-75 ease-out -translate-x-1/2 -translate-y-1/2 ${
+        className={`fixed top-0 left-0 w-2.5 h-2.5 rounded-full bg-accent transition-transform duration-75 ease-out -translate-x-1/2 -translate-y-1/2 ${
           isHovered ? 'scale-150' : 'scale-100'
         }`}
         style={{
@@ -71,12 +71,12 @@ export default function CustomCursor() {
       />
       {/* Outer magnetic trailing ring */}
       <div
-        className={`fixed top-0 left-0 rounded-full border border-coral/60 transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2 backdrop-blur-[0.5px] ${
+        className={`fixed top-0 left-0 rounded-full border border-accent/60 transition-all duration-200 ease-out -translate-x-1/2 -translate-y-1/2 backdrop-blur-[0.5px] ${
           isPointer
-            ? 'w-12 h-12 bg-coral/10 border-coral scale-110'
+            ? 'w-12 h-12 bg-accent/15 border-accent scale-110'
             : isHovered
-            ? 'w-10 h-10 bg-coral/20 border-coral scale-95'
-            : 'w-7 h-7 bg-transparent border-coral/40'
+            ? 'w-10 h-10 bg-accent/25 border-accent scale-95'
+            : 'w-7 h-7 bg-transparent border-accent/40'
         }`}
         style={{
           transform: `translate3d(${trailingPos.x}px, ${trailingPos.y}px, 0) translate(-50%, -50%)`,

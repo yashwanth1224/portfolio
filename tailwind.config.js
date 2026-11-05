@@ -7,22 +7,45 @@ export default {
   theme: {
     extend: {
       colors: {
-        terracotta: {
-          DEFAULT: '#AF4426',
-          dark: '#8C331B',
-          light: '#C85A3D',
+        // Yashwanth Resume Palette
+        navy: {
+          DEFAULT: '#0B1B2B',
+          dark: '#07131F',
+          light: '#132A40',
+          deep: '#050D15',
+        },
+        accent: {
+          DEFAULT: '#38BDF8',
+          blue: '#0284C7',
+          royal: '#2563EB',
+          light: '#7DD3FC',
+        },
+        slateBanner: {
+          DEFAULT: '#E8ECF2',
+          light: '#F1F5F9',
+          border: '#CBD5E1',
         },
         cream: {
-          DEFAULT: '#F7F5F0',
-          dark: '#EFEBE2',
+          DEFAULT: '#F8FAFC',
+          dark: '#E2E8F0',
           light: '#FFFFFF',
         },
         obsidian: {
-          DEFAULT: '#0B0C0E',
-          surface: '#14161C',
-          card: '#1C1F26',
+          DEFAULT: '#07111A',
+          surface: '#0B1B28',
+          card: '#102232',
         },
-        coral: '#FF5A36',
+        // Backward compatibility mappings so existing classes inherit the resume palette
+        terracotta: {
+          DEFAULT: '#0B1B2B',
+          dark: '#07131F',
+          light: '#132A40',
+        },
+        coral: {
+          DEFAULT: '#38BDF8',
+          light: '#7DD3FC',
+          dark: '#0284C7',
+        },
       },
       fontFamily: {
         serif: ['"Playfair Display"', '"Fraunces"', 'serif'],

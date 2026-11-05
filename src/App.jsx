@@ -11,7 +11,7 @@ import Contact from './components/Contact';
 
 export default function App() {
   return (
-    <div className="relative min-h-screen bg-obsidian text-cream font-sans selection:bg-coral selection:text-white">
+    <div className="relative min-h-screen bg-obsidian text-cream font-sans selection:bg-accent selection:text-navy-deep">
       {/* Magnetic Custom Cursor */}
       <CustomCursor />
 
@@ -20,13 +20,13 @@ export default function App() {
 
       {/* Main Content Sections */}
       <main>
-        {/* Frame 1-8: Terracotta Hero with 3D Workspace */}
+        {/* Frame 1-8: Deep Midnight Navy Hero with 3D Workspace */}
         <Hero />
 
-        {/* Frame 11-13: Cream About with Framed Polaroid */}
+        {/* Frame 11-13: Soft Slate White About with Framed Polaroid */}
         <About />
 
-        {/* Frame 14-15: Two-column Experience Timeline */}
+        {/* Frame 14-15: Career Experience Timeline */}
         <Experience />
 
         {/* Frame 16: Obsidian Projects with Mirrored Reflection & Live Demos */}

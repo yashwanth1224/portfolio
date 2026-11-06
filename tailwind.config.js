@@ -7,49 +7,74 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Yashwanth Resume Palette
-        navy: {
-          DEFAULT: '#0B1B2B',
-          dark: '#07131F',
-          light: '#132A40',
-          deep: '#050D15',
-        },
-        accent: {
-          DEFAULT: '#38BDF8',
-          blue: '#0284C7',
-          royal: '#2563EB',
-          light: '#7DD3FC',
-        },
-        slateBanner: {
-          DEFAULT: '#E8ECF2',
-          light: '#F1F5F9',
-          border: '#CBD5E1',
+        // Cinematic Palette
+        'cinematic-cream': '#F5F2EB',
+        'cinematic-sand': '#E8DEC9',
+        'cinematic-charcoal': '#1A1A1A',
+        'cinematic-accent': '#D95D39',
+        'cinematic-accent-hover': '#C04D2B',
+        
+        // Semantic color aliases
+        charcoal: {
+          DEFAULT: '#1A1A1A',
+          dark: '#111111',
+          surface: '#222222',
+          card: '#252525',
+          border: '#333333',
         },
         cream: {
-          DEFAULT: '#F8FAFC',
-          dark: '#E2E8F0',
+          DEFAULT: '#F5F2EB',
           light: '#FFFFFF',
+          soft: '#FAF8F5',
+          dark: '#E8DEC9',
         },
+        sand: {
+          DEFAULT: '#E8DEC9',
+          light: '#F2EBDC',
+          dark: '#D8CBB2',
+          border: '#D0C2A4',
+        },
+        burntOrange: {
+          DEFAULT: '#D95D39',
+          hover: '#C04D2B',
+          light: '#E77553',
+          glow: 'rgba(217, 93, 57, 0.35)',
+        },
+        accent: {
+          DEFAULT: '#D95D39',
+          hover: '#C04D2B',
+          blue: '#D95D39',
+          royal: '#D95D39',
+          light: '#E77553',
+        },
+
+        // Legacy compatibility mappings
         obsidian: {
-          DEFAULT: '#07111A',
-          surface: '#0B1B28',
-          card: '#102232',
+          DEFAULT: '#1A1A1A',
+          surface: '#222222',
+          card: '#252525',
         },
-        // Backward compatibility mappings so existing classes inherit the resume palette
-        terracotta: {
-          DEFAULT: '#0B1B2B',
-          dark: '#07131F',
-          light: '#132A40',
+        navy: {
+          DEFAULT: '#1A1A1A',
+          dark: '#111111',
+          light: '#282828',
+          deep: '#0D0D0D',
+        },
+        slateBanner: {
+          DEFAULT: '#E8DEC9',
+          light: '#F5F2EB',
+          border: '#D0C2A4',
         },
         coral: {
-          DEFAULT: '#38BDF8',
-          light: '#7DD3FC',
-          dark: '#0284C7',
+          DEFAULT: '#D95D39',
+          light: '#E77553',
+          dark: '#C04D2B',
         },
       },
       fontFamily: {
-        serif: ['"Playfair Display"', '"Fraunces"', 'serif'],
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        heading: ['"Space Grotesk"', '"Inter"', 'sans-serif'],
+        sans: ['"Inter"', '"Plus Jakarta Sans"', 'sans-serif'],
+        serif: ['"Space Grotesk"', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       animation: {

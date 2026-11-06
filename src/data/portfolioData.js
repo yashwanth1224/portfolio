@@ -1,12 +1,13 @@
-// Complete Portfolio Data for Yashwanth S
+// Complete Portfolio Data for Yashwanth S - Cinematic Edition
 
 export const personalInfo = {
   name: "Yashwanth S",
-  tagline: "Frontend Developer & Software Engineer",
-  heroSubtitle: "Crafting pixel-perfect interfaces and the modern experiences that power them.",
+  tagline: "Building fast, accessible web applications.",
+  heroSubtitle: "Building fast, accessible web applications.",
+  role: "Frontend Developer & Software Engineer",
   email: "YashuYashn1224@gmail.com",
   phone: "+91 9902688480",
-  location: "Bengaluru, Karnataka, India",
+  location: "Bengaluru, India",
   postalCode: "560091",
   availableForWork: true,
   status: "Available for full-time opportunities",
@@ -15,12 +16,17 @@ export const personalInfo = {
   resumePath: "./Yashwanth_Resume.pdf",
   photoPath: "./yashwanth.jpg",
   avatarPath: "./avatar-3d.png",
-  bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation from East West Institute of Technology (VTU) and intensive full-stack software training at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. I have architected and shipped live commercial production applications including Zisti (India's new on-demand food delivery platform) and Astrovedic Jyotishya Kendra (sidereal astrology & consultation booking portal). My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
+  bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation in Mechanical Engineering from East West Institute of Technology (VTU) and intensive full-stack software development at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. I have architected and shipped live commercial production applications including Zisti (India's new on-demand food delivery platform) and Astrovedic Jyotishya Kendra (sidereal astrology & consultation booking portal). My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
   stats: [
-    { label: "Production Platforms", value: "2 Live", sub: "Commercial deployments" },
-    { label: "Core Projects Built", value: "8+", sub: "Web apps & simulators" },
-    { label: "Full-Stack Training", value: "400+", sub: "Hours at JSPIDERS" },
-    { label: "Code Quality", value: "100%", sub: "Pixel-perfect standards" }
+    { label: "Location", value: "Bengaluru, India", sub: "Karnataka" },
+    { label: "Focus", value: "Frontend Development", sub: "React & Modern JS" },
+    { label: "Background", value: "B.E. Mechanical", sub: "Transitioned to Tech" },
+    { label: "Production Platforms", value: "2 Live", sub: "Commercial deployments" }
+  ],
+  heroStats: [
+    { label: "Location", value: "Bengaluru, India" },
+    { label: "Focus", value: "Frontend Development" },
+    { label: "Background", value: "B.E. Mechanical Transitioned to Tech" }
   ]
 };
 
@@ -57,21 +63,6 @@ export const experiences = [
     skills: ["Process Optimization", "Solid Edge CAD", "Quality Engineering", "Workflow Digitization"]
   },
   {
-    id: "tqs",
-    role: "Machine Learning & Node.js Intern",
-    company: "TQS Lab",
-    location: "Bengaluru, India",
-    period: "2022 — 2023",
-    type: "Internship",
-    badge: "Research & Dev",
-    highlights: [
-      "Engineered text preprocessing scripts and sentiment classification algorithms utilizing Node.js pipelines and algorithmic scoring models.",
-      "Designed RESTful endpoints to ingest user review feeds and compute polarity scores (1-5 star ratings) with detailed keyword sentiment metrics.",
-      "Performed data cleansing, tokenization, and stop-word filtering across thousands of raw review records."
-    ],
-    skills: ["Node.js", "JavaScript", "REST APIs", "Data Preprocessing", "Sentiment Modeling"]
-  },
-  {
     id: "ewit",
     role: "Bachelor of Engineering (Mechanical)",
     company: "East West Institute of Technology, VTU",
@@ -82,7 +73,8 @@ export const experiences = [
     highlights: [
       "Rigorous 4-year engineering curriculum focused on mathematical modeling, thermodynamics, computational mechanics, and control systems.",
       "Maintained First Class with Distinction (8.2 CGPA equivalent), leading academic capstone projects in pneumatic mobility and 3D simulation.",
-      "Spearheaded tech symposiums and served on the campus athletics squad representing the institution at the national level."
+      "Successfully transitioned analytical problem-solving foundation into modern frontend web engineering.",
+      "Spearheaded tech symposiums and served on the athletics squad representing the institution at the national level."
     ],
     skills: ["Applied Mathematics", "Analytical Problem Solving", "Systems Design", "Leadership"]
   }
@@ -135,8 +127,8 @@ export const projects = [
   },
   {
     id: "sentiment-engine",
-    title: "Sentimental Analysis & Review Engine",
-    subtitle: "Real-Time NLP Polarity Classifier",
+    title: "Sentiment Analysis Web Interface",
+    subtitle: "Real-Time NLP Polarity Classifier & Review Engine",
     featured: true,
     tag: "Node.js & Machine Learning",
     description: "An interactive sentiment scoring system that analyzes text input in real-time, calculates sentiment polarity, extracts key emotional triggers, and estimates a 1 to 5 star customer satisfaction rating with word frequency visualization.",
@@ -155,10 +147,52 @@ export const projects = [
     githubUrl: "https://github.com/yashwanth1224"
   },
   {
+    id: "developer-portfolio",
+    title: "Personal Portfolio Website",
+    subtitle: "Cinematic Portfolio with Interactive 3D Avatar & Synthesizer",
+    featured: true,
+    tag: "React 18 & Three.js",
+    description: "The cinematic digital home of Yashwanth S, crafted with full-bleed video backgrounds, cream & sand narrative sections, dark charcoal project showcases, burnt orange accents, procedural Web Audio sound synthesis, and an interactive 3D avatar workspace.",
+    techStack: ["React 18", "Vite", "Three.js", "Tailwind CSS", "Framer Motion", "Web Audio API"],
+    metrics: [
+      { label: "Performance", value: "100/100" },
+      { label: "Audio Size", value: "0 KB" },
+      { label: "Theme Contrast", value: "WCAG AAA" }
+    ],
+    highlights: [
+      "Synthesized sound engine using browser Web Audio API oscillator nodes without downloading external MP3s.",
+      "Dynamic scroll-aware navigation switching between crisp white and charcoal depending on background luminosity.",
+      "Interactive 3D avatar with real-time phoneme lip-sync and speech synthesis greeting."
+    ],
+    demoType: "portfolio-overview",
+    githubUrl: "https://github.com/yashwanth1224"
+  },
+  {
+    id: "pneumatic-mobility",
+    title: "Pneumatic Bicycle",
+    subtitle: "Zero-Emission Compressed Air Micro-Mobility Vehicle",
+    featured: true,
+    tag: "IoT & Embedded Hardware",
+    description: "A sustainable zero-emission personal mobility bicycle propelled by regulated compressed air, controlled via an Arduino microcontroller, digital solenoid manifold, and throttle hall-effect sensor.",
+    techStack: ["Arduino C++", "Embedded Sensors", "Solenoid Automation", "Pneumatic Circuits", "Solid Edge CAD"],
+    metrics: [
+      { label: "Range / Charge", value: "5.2 km" },
+      { label: "Emissions", value: "0.00 g/km" },
+      { label: "Max Speed", value: "24 km/h" }
+    ],
+    highlights: [
+      "Engineered automated high-pressure solenoid valve timing sequence for optimum pneumatic torque output.",
+      "Implemented safety auto-cutoff logic for pressure threshold management and low-tank alerts.",
+      "Recognized by East West Institute of Technology engineering faculty as a standout sustainable capstone."
+    ],
+    demoType: "pneumatic-detail",
+    githubUrl: "https://github.com/yashwanth1224"
+  },
+  {
     id: "engine-3d-sim",
     title: "Interactive 3D Engine Mechanism Simulator",
     subtitle: "High-Performance WebGL Mechanism Kinematics",
-    featured: true,
+    featured: false,
     tag: "Three.js & WebGL",
     description: "A hardware-accelerated 3D simulator demonstrating internal combustion four-stroke kinematics (Intake, Compression, Power, Exhaust) with a transparent cylinder casing, dynamic piston-crank coupling, and live RPM control.",
     techStack: ["Three.js", "WebGL", "React 18", "Tailwind CSS", "Mathematical Kinematics"],
@@ -176,50 +210,8 @@ export const projects = [
     githubUrl: "https://github.com/yashwanth1224"
   },
   {
-    id: "pneumatic-mobility",
-    title: "Pneumatic Renewable Mobility System",
-    subtitle: "Eco-Friendly Micro-Mobility Vehicle",
-    featured: true,
-    tag: "IoT & Embedded Hardware",
-    description: "A sustainable zero-emission personal mobility vehicle propelled by regulated compressed air, controlled via an Arduino microcontroller, digital solenoid manifold, and throttle hall-effect sensor.",
-    techStack: ["Arduino C++", "Embedded Sensors", "Solenoid Automation", "Pneumatic Circuits", "Solid Edge CAD"],
-    metrics: [
-      { label: "Range / Charge", value: "5.2 km" },
-      { label: "Emissions", value: "0.00 g/km" },
-      { label: "Max Speed", value: "24 km/h" }
-    ],
-    highlights: [
-      "Engineered automated high-pressure solenoid valve timing sequence for optimum pneumatic torque output.",
-      "Implemented safety auto-cutoff logic for pressure threshold management and low-tank alerts.",
-      "Recognized by East West Institute of Technology engineering faculty as a standout sustainable capstone."
-    ],
-    demoType: "pneumatic-detail",
-    githubUrl: "https://github.com/yashwanth1224"
-  },
-  {
-    id: "developer-portfolio",
-    title: "Bespoke Modern Developer Portfolio",
-    subtitle: "Interactive 3D Workspace & Synthesizer Architecture",
-    featured: false,
-    tag: "React 18 & Three.js",
-    description: "The digital home of Yashwanth S, designed with dual-contrast terracotta and obsidian aesthetic, procedural Web Audio sound synthesis, 3D interactive workspace, and automated GitHub Actions CI/CD deployment.",
-    techStack: ["React 18", "Vite", "Three.js", "Tailwind CSS", "Web Audio API", "Confetti"],
-    metrics: [
-      { label: "Performance", value: "100/100" },
-      { label: "Audio Size", value: "0 KB" },
-      { label: "Theme Contrast", value: "WCAG AAA" }
-    ],
-    highlights: [
-      "Synthesized sound engine using browser Web Audio API oscillator nodes without downloading external MP3s.",
-      "3D interactive standing desk scene with responsive dual screens and floating tech badges.",
-      "True mirrored text reflection effect and tailored polaroid photograph integration."
-    ],
-    demoType: "portfolio-overview",
-    githubUrl: "https://github.com/yashwanth1224"
-  },
-  {
     id: "saas-dashboard",
-    title: "Enterprise SaaS Analytics & Product Dashboard",
+    title: "Enterprise SaaS Analytics Dashboard",
     subtitle: "High-Performance Data Visualization Interface",
     featured: false,
     tag: "React & Architecture",
@@ -305,20 +297,9 @@ export const certifications = [
     year: "National Level Athlete",
     badge: "National Sports Achievement",
     description: "Represented Karnataka state at the prestigious 29th Junior National Tug-of-War Championship. Honed extreme grit, team synchronization, strategic endurance, and athletic dedication under high pressure.",
-    color: "from-amber-500/20 to-orange-500/20",
-    border: "border-amber-500/30",
+    color: "from-orange-500/20 to-amber-500/20",
+    border: "border-[#D95D39]/40",
     icon: "Trophy"
-  },
-  {
-    id: "gk-merit",
-    title: "All India General Knowledge Examination (Merit Level 3)",
-    issuer: "HRD Foundation / National Educational Board",
-    year: "National Merit Holder",
-    badge: "Academic Merit",
-    description: "Secured top merit percentile nationwide in advanced analytical aptitude, critical thinking, global economics, and general scientific proficiency.",
-    color: "from-blue-500/20 to-indigo-500/20",
-    border: "border-blue-500/30",
-    icon: "Award"
   },
   {
     id: "jspiders-cert",
@@ -327,9 +308,20 @@ export const certifications = [
     year: "2024 — 2025",
     badge: "Software Engineering",
     description: "Comprehensive enterprise software program mastering Core Java, J2EE architectures, Spring concepts, SQL database engineering, React.js, and modern full-stack workflows.",
-    color: "from-emerald-500/20 to-teal-500/20",
-    border: "border-emerald-500/30",
+    color: "from-orange-500/10 to-amber-500/10",
+    border: "border-[#D95D39]/30",
     icon: "Code2"
+  },
+  {
+    id: "gk-merit",
+    title: "All India General Knowledge Examination (Merit Level 3)",
+    issuer: "HRD Foundation / National Educational Board",
+    year: "National Merit Holder",
+    badge: "Academic Merit",
+    description: "Secured top merit percentile nationwide in advanced analytical aptitude, critical thinking, global economics, and general scientific proficiency.",
+    color: "from-neutral-700/30 to-neutral-800/30",
+    border: "border-neutral-700",
+    icon: "Award"
   },
   {
     id: "manjushree-cert",
@@ -338,30 +330,8 @@ export const certifications = [
     year: "2023 — 2024",
     badge: "Industrial Experience",
     description: "Hands-on industrial certification in manufacturing operations, computerized workflow integration, quality engineering assurance, and design tolerances.",
-    color: "from-purple-500/20 to-pink-500/20",
-    border: "border-purple-500/30",
+    color: "from-neutral-700/30 to-neutral-800/30",
+    border: "border-neutral-700",
     icon: "Briefcase"
-  },
-  {
-    id: "gandhi-merit",
-    title: "Gandhi Vichar Sanskar Pariksha",
-    issuer: "Sanskriti Pariksha Board",
-    year: "State Merit Award",
-    badge: "Ethical Leadership",
-    description: "State-level distinction in ethics, social integrity, human values, and peaceful dispute resolution principles.",
-    color: "from-rose-500/20 to-orange-500/20",
-    border: "border-rose-500/30",
-    icon: "HeartHandshake"
-  },
-  {
-    id: "acc-cert",
-    title: "Advanced Computer Course & Programming",
-    issuer: "Computer Education Council",
-    year: "Certified Grade A",
-    badge: "Technical Foundation",
-    description: "Foundational mastery in computer architectures, computational logic, operating systems, data handling, and automation utilities.",
-    color: "from-cyan-500/20 to-blue-500/20",
-    border: "border-cyan-500/30",
-    icon: "Sparkles"
   }
 ];

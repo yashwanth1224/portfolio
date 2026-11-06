@@ -2,21 +2,20 @@ import React, { useState } from 'react';
 import { projects } from '../data/portfolioData';
 import ProjectModal from './ProjectModal';
 import { sound } from '../utils/audio';
-import { ExternalLink, Github, Sparkles, Layers, ArrowUpRight, Play, Eye, FolderKanban } from 'lucide-react';
+import { ExternalLink, Github, Sparkles, FolderKanban, Play, ArrowUpRight, Cpu, Layers, Globe, Bot } from 'lucide-react';
 
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [filter, setFilter] = useState('All');
 
-  const categories = ['All', 'Live Websites', 'Full Stack', '3D WebGL', 'Hardware & IoT', 'Frontend'];
+  const categories = ['All', 'Live Websites', 'Frontend & Full Stack', 'AI & Machine Learning', 'Hardware & 3D'];
 
   const filteredProjects = projects.filter((project) => {
     if (filter === 'All') return true;
     if (filter === 'Live Websites') return !!project.liveUrl;
-    if (filter === 'Full Stack') return (project.id === 'sentiment-engine' || project.id === 'saas-dashboard');
-    if (filter === '3D WebGL') return (project.id === 'engine-3d-sim' || project.id === 'developer-portfolio');
-    if (filter === 'Hardware & IoT') return project.id === 'pneumatic-mobility';
-    if (filter === 'Frontend') return (project.id === 'zisti' || project.id === 'astrovedic' || project.id === 'developer-portfolio' || project.id === 'saas-dashboard' || project.id === 'sentiment-engine');
+    if (filter === 'Frontend & Full Stack') return (project.id === 'zisti' || project.id === 'astrovedic' || project.id === 'developer-portfolio' || project.id === 'saas-dashboard');
+    if (filter === 'AI & Machine Learning') return project.id === 'sentiment-engine';
+    if (filter === 'Hardware & 3D') return (project.id === 'pneumatic-mobility' || project.id === 'engine-3d-sim');
     return false;
   });
 
@@ -25,41 +24,138 @@ export default function Projects() {
     setSelectedProject(project);
   };
 
+  // Helper to render abstract graphic patterns for cards
+  const renderAbstractGraphic = (projectId) => {
+    switch (projectId) {
+      case 'zisti':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#241a18] via-[#1a1a1a] to-[#2a1712] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#D95D39_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="absolute w-28 h-28 rounded-full bg-[#D95D39]/15 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-[#D95D39]/20 border border-[#D95D39]/40 flex items-center justify-center text-[#D95D39] font-heading font-black text-xl shadow-lg">
+                Z
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                On-Demand Food Delivery
+              </span>
+            </div>
+            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE IN PRODUCTION
+            </div>
+          </div>
+        );
+      case 'astrovedic':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#1d1b24] via-[#1a1a1a] to-[#261d2b] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#a855f7_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="absolute w-28 h-28 rounded-full bg-purple-500/15 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 font-heading font-black text-xl shadow-lg">
+                ✨
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Sidereal Astrology & Kundli
+              </span>
+            </div>
+            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              LIVE CLIENT HUB
+            </div>
+          </div>
+        );
+      case 'sentiment-engine':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#1a221f] via-[#1a1a1a] to-[#15241b] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="absolute w-28 h-28 rounded-full bg-emerald-500/15 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-heading font-black text-xl shadow-lg">
+                <Bot className="w-6 h-6" />
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Real-Time NLP Classifier
+              </span>
+            </div>
+          </div>
+        );
+      case 'developer-portfolio':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#291e19] via-[#1a1a1a] to-[#211612] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#D95D39_1px,transparent_1px)] [background-size:16px_16px] opacity-25" />
+            <div className="absolute w-28 h-28 rounded-full bg-[#D95D39]/20 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-[#D95D39]/20 border border-[#D95D39]/40 flex items-center justify-center text-[#D95D39] font-heading font-black text-xl shadow-lg">
+                3D
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Three.js & Speech Synthesis
+              </span>
+            </div>
+          </div>
+        );
+      case 'pneumatic-mobility':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#18202b] via-[#1a1a1a] to-[#121c27] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="absolute w-28 h-28 rounded-full bg-sky-500/15 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-300 font-heading font-black text-xl shadow-lg">
+                ⚙️
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Zero-Emission Micro-Mobility
+              </span>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#222222] via-[#1a1a1a] to-[#202020] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] opacity-10" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-white font-heading font-black text-xl">
+                <Cpu className="w-6 h-6 text-[#D95D39]" />
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Interactive Engineering Model
+              </span>
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
-    <section id="projects" className="relative bg-obsidian text-cream py-24 lg:py-36 overflow-hidden">
+    <section
+      id="projects"
+      className="relative bg-[#1A1A1A] text-[#F5F2EB] py-24 lg:py-36 overflow-hidden border-b border-white/10 font-sans"
+    >
       {/* Background ambient lighting */}
-      <div className="absolute top-1/4 right-0 w-[550px] h-[550px] bg-sky-500/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/4 right-0 w-[550px] h-[550px] bg-[#D95D39]/10 rounded-full blur-[170px] pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-[#D95D39]/8 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header Banner in Resume Silver-Slate Format */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slateBanner border border-slateBanner-border text-navy font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
-          <FolderKanban className="w-3.5 h-3.5 text-accent-royal" />
+        {/* Section Header Tag */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F5F2EB] font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
+          <FolderKanban className="w-3.5 h-3.5 text-[#D95D39]" />
           <span>FEATURED PORTFOLIO WORKS</span>
         </div>
 
-        {/* Video Frame 16 Title with True Mirrored Reflection */}
-        <div className="mb-20">
-          <div className="relative inline-block">
-            <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white leading-tight">
-              Things I’ve built
-            </h2>
-            {/* Mirrored reflection effect */}
-            <div 
-              aria-hidden="true" 
-              className="absolute top-full left-0 right-0 font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white/20 select-none pointer-events-none reflection-mirror mt-1"
-            >
-              Things I’ve built
-            </div>
-          </div>
-          <p className="text-slate-300 text-base sm:text-lg max-w-2xl mt-8">
-            Each project is built with architectural discipline, real-time interactivity, and full responsiveness. Click any card to launch interactive demos.
+        {/* Section Heading */}
+        <div className="mb-16">
+          <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight">
+            Things I’ve <span className="text-[#D95D39]">built.</span>
+          </h2>
+          <p className="text-[#F5F2EB]/75 text-base sm:text-lg max-w-2xl mt-4">
+            From live production platforms serving active customers to hardware kinematics and NLP models. Each project emphasizes clean architecture, responsiveness, and performance.
           </p>
         </div>
 
-        {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-12">
+        {/* Category Filter Pills */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-12">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -70,8 +166,8 @@ export default function Projects() {
               onMouseEnter={() => sound.playPop()}
               className={`px-4 py-2 rounded-xl text-xs font-mono transition-all duration-200 border ${
                 filter === cat
-                  ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white border-sky-400 shadow-lg shadow-sky-500/25 scale-105'
-                  : 'bg-obsidian-card text-slate-300 border-white/10 hover:border-sky-400/40 hover:text-white'
+                  ? 'bg-[#D95D39] text-white border-[#D95D39] shadow-lg shadow-[#D95D39]/25 font-bold scale-105'
+                  : 'bg-[#222222] text-[#F5F2EB]/80 border-white/10 hover:border-[#D95D39]/50 hover:text-white'
               }`}
             >
               {cat}
@@ -79,142 +175,112 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* Projects Grid */}
+        {/* Projects Grid: Card grid with abstract graphics, hover scale, burnt orange border */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {filteredProjects.map((project, index) => (
             <div
               key={project.id}
               onMouseEnter={() => sound.playPop()}
-              className="group relative bg-obsidian-card rounded-2xl border border-white/10 hover:border-accent/50 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl hover:-translate-y-1.5"
+              className="group relative bg-[#222222] rounded-2xl border border-white/10 hover:border-[#D95D39] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl hover:scale-[1.02] hover:-translate-y-1"
             >
-              {/* Glowing Cyan & Electric Blue Top Indicator Bar */}
-              <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-300 opacity-80 group-hover:opacity-100 transition-opacity" />
+              {/* Burnt Orange Top Indicator Bar */}
+              <div className="h-1.5 w-full bg-[#D95D39] opacity-80 group-hover:opacity-100 transition-opacity" />
 
               <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                 
+                {/* Abstract Graphic Preview */}
+                {renderAbstractGraphic(project.id)}
+
                 {/* Header Tag and Index */}
                 <div>
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2.5 mt-2">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium uppercase tracking-wider border ${
                       project.liveUrl
                         ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                        : 'bg-sky-500/15 border-sky-400/30 text-sky-300'
+                        : 'bg-white/5 border-white/15 text-[#D95D39]'
                     }`}>
                       {project.liveUrl && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
                       {project.tag}
                     </span>
-                    <span className="font-mono text-xs text-slate-500 font-bold">
+                    <span className="font-mono text-xs text-white/40 font-bold">
                       0{index + 1}
                     </span>
                   </div>
 
                   {/* Title & Subtitle */}
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-white group-hover:text-accent transition-colors">
+                  <h3 className="font-heading text-xl sm:text-2xl font-bold text-white group-hover:text-[#D95D39] transition-colors">
                     {project.title}
                   </h3>
-                  <p className="text-xs font-mono text-slate-400 mt-1">
+                  <p className="text-xs font-mono text-white/50 mt-1">
                     {project.subtitle}
                   </p>
 
                   {/* Description */}
-                  <p className="text-sm text-slate-300 mt-3.5 leading-relaxed line-clamp-3">
+                  <p className="text-sm text-[#F5F2EB]/75 mt-3 leading-relaxed line-clamp-3">
                     {project.description}
                   </p>
                 </div>
 
-                {/* Key Metrics Strip */}
-                <div className="grid grid-cols-3 gap-2 py-3 border-y border-white/10 bg-obsidian/40 rounded-xl px-3 my-2">
-                  {project.metrics.map((m, mIdx) => (
-                    <div key={mIdx} className="text-center">
-                      <div className={`font-serif font-bold text-sm sm:text-base ${
-                        project.liveUrl && m.label === 'STATUS' ? 'text-emerald-400' : 'text-accent'
-                      }`}>
-                        {m.value}
-                      </div>
-                      <div className="text-[10px] font-mono text-slate-400 uppercase">{m.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tech Pills */}
-                <div className="flex flex-wrap gap-1.5">
+                {/* Tech Stack Chips */}
+                <div className="flex flex-wrap gap-1.5 pt-2">
                   {project.techStack.slice(0, 4).map((tech) => (
                     <span
                       key={tech}
-                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-navy-light/60 text-slate-200 border border-white/10"
+                      className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 text-white/80 border border-white/10"
                     >
                       {tech}
                     </span>
                   ))}
                   {project.techStack.length > 4 && (
-                    <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-navy-light/60 text-slate-400 border border-white/10">
+                    <span className="px-2 py-0.5 rounded text-[11px] font-mono bg-white/5 text-white/50 border border-white/10">
                       +{project.techStack.length - 4}
                     </span>
                   )}
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 pt-4">
-                  {project.liveUrl ? (
-                    <>
+                {/* Interactive Action Footer */}
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenModal(project)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-heading font-semibold bg-white/10 hover:bg-[#D95D39] text-white transition-all duration-200 border border-white/15 hover:border-[#D95D39]"
+                  >
+                    <Play className="w-3.5 h-3.5 text-[#D95D39] group-hover:text-white" />
+                    <span>Open Interactive Demo</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    {project.liveUrl && (
                       <a
                         href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        onMouseEnter={() => sound.playPop()}
-                        onClick={() => sound.playClick()}
-                        className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 shadow-lg shadow-emerald-950/40 group-hover:shadow-emerald-600/30"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sound.playClick();
+                        }}
+                        className="p-2 rounded-xl bg-white/5 hover:bg-emerald-600 text-white transition-all border border-white/10"
+                        title="Visit Live Website"
+                        aria-label="Visit Live Website"
                       >
-                        <span>Visit Live Site</span>
-                        <ExternalLink className="w-3.5 h-3.5 ml-0.5" />
+                        <Globe className="w-4 h-4" />
                       </a>
-
-                      <button
-                        onClick={() => handleOpenModal(project)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-cream text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 border border-white/15"
-                        title="View Project Details & Architecture"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-accent" />
-                        <span>Details</span>
-                      </button>
-
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onMouseEnter={() => sound.playPop()}
-                        onClick={() => sound.playClick()}
-                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-cream border border-white/10 transition-colors"
-                        title="View GitHub Repository"
-                        aria-label="GitHub Repository"
-                      >
-                        <Github className="w-4 h-4" />
-                      </a>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onClick={() => handleOpenModal(project)}
-                        className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-mono font-semibold tracking-wide uppercase transition-all duration-200 shadow-lg shadow-sky-500/25"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Live Interactive Demo</span>
-                      </button>
-
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onMouseEnter={() => sound.playPop()}
-                        onClick={() => sound.playClick()}
-                        className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-cream border border-white/10 transition-colors"
-                        title="View GitHub Repository"
-                        aria-label="GitHub Repository"
-                      >
-                        <Github className="w-4 h-4" />
-                      </a>
-                    </>
-                  )}
+                    )}
+                    <a
+                      href={project.githubUrl || "https://github.com/yashwanth1224"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        sound.playClick();
+                      }}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/15 text-white transition-all border border-white/10"
+                      title="Source Code"
+                      aria-label="GitHub Repository"
+                    >
+                      <Github className="w-4 h-4" />
+                    </a>
+                  </div>
                 </div>
 
               </div>
@@ -224,12 +290,14 @@ export default function Projects() {
 
       </div>
 
-      {/* Interactive Project Modal */}
-      <ProjectModal
-        project={selectedProject}
-        isOpen={!!selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
+      {/* Interactive Modal View */}
+      {selectedProject && (
+        <ProjectModal
+          project={selectedProject}
+          isOpen={!!selectedProject}
+          onClose={() => setSelectedProject(null)}
+        />
+      )}
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { skillCategories } from '../data/portfolioData';
 import { sound } from '../utils/audio';
-import { Layout, Database, Wrench, Cpu, CheckCircle2, Sparkles, Terminal, Code2 } from 'lucide-react';
+import { Layout, Database, Wrench, Cpu, Terminal, Code2 } from 'lucide-react';
 
 export default function Skills() {
   const [activeTab, setActiveTab] = useState(0);
@@ -9,24 +9,24 @@ export default function Skills() {
   const icons = [Layout, Database, Wrench, Cpu];
 
   return (
-    <section id="skills" className="relative bg-obsidian-surface text-cream py-24 lg:py-32 overflow-hidden border-t border-white/5">
-      {/* Background glow in Sky Blue */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/5 rounded-full blur-[150px] pointer-events-none" />
+    <section id="skills" className="relative bg-[#1A1A1A] text-[#F5F2EB] py-24 lg:py-32 overflow-hidden border-t border-white/10 font-sans">
+      {/* Background ambient lighting */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#D95D39]/5 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* Section Header Banner in Resume Silver-Slate Format */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slateBanner border border-slateBanner-border text-navy font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
-          <Code2 className="w-3.5 h-3.5 text-accent-royal" />
+        {/* Section Header Tag */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F5F2EB] font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
+          <Code2 className="w-3.5 h-3.5 text-[#D95D39]" />
           <span>TECHNICAL REPERTOIRE</span>
         </div>
 
         <div className="max-w-3xl mb-14">
-          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
+          <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
             Skills, Tools &{' '}
-            <span className="italic font-normal text-accent">Architectural Mastery</span>
+            <span className="text-[#D95D39]">Engineering Mastery</span>
           </h2>
-          <p className="text-slate-300 text-base sm:text-lg mt-3">
+          <p className="text-[#F5F2EB]/75 text-base sm:text-lg mt-3">
             A comprehensive inventory of modern languages, component frameworks, database management, and engineering competencies.
           </p>
         </div>
@@ -47,15 +47,15 @@ export default function Skills() {
                 onMouseEnter={() => sound.playPop()}
                 className={`p-4 rounded-2xl flex flex-col items-start justify-between text-left transition-all duration-300 border ${
                   isActive
-                    ? 'bg-gradient-to-r from-navy-light to-navy text-white border-accent shadow-xl shadow-navy-deep/60 -translate-y-1'
-                    : 'bg-obsidian-card text-slate-300 border-white/10 hover:border-white/20 hover:text-white'
+                    ? 'bg-[#282828] text-white border-[#D95D39] shadow-xl shadow-black/40 -translate-y-1'
+                    : 'bg-[#222222] text-[#F5F2EB]/70 border-white/10 hover:border-[#D95D39]/40 hover:text-white'
                 }`}
               >
                 <div className="p-2 rounded-xl bg-white/10 mb-3">
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-accent' : 'text-cream'}`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#D95D39]' : 'text-white'}`} />
                 </div>
                 <div>
-                  <div className="font-serif font-bold text-sm sm:text-base leading-snug">
+                  <div className="font-heading font-bold text-sm sm:text-base leading-snug">
                     {cat.category}
                   </div>
                   <div className="text-[11px] font-mono opacity-70 mt-1 line-clamp-1">
@@ -68,18 +68,18 @@ export default function Skills() {
         </div>
 
         {/* Active Tab Skills Grid */}
-        <div className="bg-obsidian-card/90 rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl">
+        <div className="bg-[#222222] rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-white/10 gap-2">
             <div>
-              <h3 className="font-serif text-2xl font-bold text-white">
+              <h3 className="font-heading text-2xl font-bold text-white">
                 {skillCategories[activeTab].category}
               </h3>
-              <p className="text-xs font-mono text-slate-400 mt-0.5">
+              <p className="text-xs font-mono text-white/50 mt-0.5">
                 {skillCategories[activeTab].description}
               </p>
             </div>
-            <span className="text-xs font-mono text-accent bg-sky-500/10 px-3 py-1 rounded-full border border-sky-400/20 w-fit">
+            <span className="text-xs font-mono text-[#D95D39] bg-[#D95D39]/10 px-3 py-1 rounded-full border border-[#D95D39]/30 w-fit">
               Mastery Matrix
             </span>
           </div>
@@ -89,26 +89,26 @@ export default function Skills() {
               <div
                 key={skill.name}
                 onMouseEnter={() => sound.playPop()}
-                className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-accent/40 transition-all duration-200"
+                className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D95D39]/40 transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-sm sm:text-base text-cream group-hover:text-accent transition-colors">
+                  <span className="font-semibold text-sm sm:text-base text-white group-hover:text-[#D95D39] transition-colors">
                     {skill.name}
                   </span>
-                  <span className="font-mono text-xs text-accent font-semibold group-hover:text-white transition-colors">
+                  <span className="font-mono text-xs text-[#D95D39] font-semibold group-hover:text-white transition-colors">
                     {skill.level}%
                   </span>
                 </div>
 
-                {/* Progress Meter Bar with Deep Navy Track & Cyan/Blue Electric Gradient */}
-                <div className="w-full h-2 rounded-full bg-navy-deep/80 border border-white/5 overflow-hidden mb-2">
+                {/* Progress track */}
+                <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-blue-600 via-sky-400 to-cyan-300 transition-all duration-700 ease-out shadow-sm shadow-sky-500/50"
+                    className="h-full rounded-full bg-gradient-to-r from-[#D95D39] to-orange-400 transition-all duration-700"
                     style={{ width: `${skill.level}%` }}
                   />
                 </div>
 
-                <div className="text-[11px] font-mono text-slate-400 group-hover:text-slate-200 transition-colors">
+                <div className="text-[11px] font-mono text-white/50 mt-2">
                   {skill.note}
                 </div>
               </div>

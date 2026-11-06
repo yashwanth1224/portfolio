@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CustomCursor from './components/CustomCursor';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -10,8 +10,39 @@ import Certificates from './components/Certificates';
 import Contact from './components/Contact';
 import { sound } from './utils/audio';
 
+function FadeInSection({ children, className = '' }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const domRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.unobserve(entry.target);
+        }
+      },
+      { rootMargin: '-60px' }
+    );
+
+    if (domRef.current) observer.observe(domRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={domRef}
+      className={`transition-all duration-700 ease-out transform ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
-  // Global ultra-low latency touch voice acoustic feedback on every click and touch tap
+  // Global tactile acoustic feedback on touch / click
   useEffect(() => {
     const handlePointerDown = (e) => {
       sound.playTouchClick(e.target);
@@ -23,42 +54,52 @@ export default function App() {
     });
 
     return () => {
-      window.removeEventListener('pointerdown', handlePointerDown, {
-        capture: true,
-      });
+      window.removeEventListener('pointerdown', handlePointerDown);
     };
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-obsidian text-cream font-sans selection:bg-accent selection:text-navy-deep">
+    <div className="relative min-h-screen bg-[#1A1A1A] text-[#F5F2EB] font-sans selection:bg-[#D95D39] selection:text-white">
       {/* Magnetic Custom Cursor */}
       <CustomCursor />
 
-      {/* Persistent Glassmorphic Header */}
+      {/* Dynamic Color-Shifting Sticky Navbar */}
       <Navbar />
 
       {/* Main Content Sections */}
       <main>
-        {/* Frame 1-8: Deep Midnight Navy Hero with 3D Workspace */}
+        {/* Full-Bleed 100vh Cinematic Video Hero */}
         <Hero />
 
-        {/* Frame 11-13: Soft Slate White About with Framed Polaroid */}
-        <About />
+        {/* Cream Section: Photo/Avatar Card + Engineering Bio */}
+        <FadeInSection>
+          <About />
+        </FadeInSection>
 
-        {/* Frame 14-15: Career Experience Timeline */}
-        <Experience />
+        {/* Sand Section: Reverse-Chronological Experience Timeline */}
+        <FadeInSection>
+          <Experience />
+        </FadeInSection>
 
-        {/* Frame 16: Obsidian Projects with Mirrored Reflection & Live Demos */}
-        <Projects />
+        {/* Dark Charcoal Section: Card Grid with Abstract Graphics & Burnt Orange Borders */}
+        <FadeInSection>
+          <Projects />
+        </FadeInSection>
 
-        {/* Technical Repertoire & Skills Matrix */}
-        <Skills />
+        {/* Technical Repertoire Skills Matrix */}
+        <FadeInSection>
+          <Skills />
+        </FadeInSection>
 
-        {/* National Sports & Professional Honors */}
-        <Certificates />
+        {/* Honors & Credentials */}
+        <FadeInSection>
+          <Certificates />
+        </FadeInSection>
 
-        {/* Interactive Dispatch & Contact CTA */}
-        <Contact />
+        {/* Dark Charcoal Section: Interactive Dispatch & Contact CTA */}
+        <FadeInSection>
+          <Contact />
+        </FadeInSection>
       </main>
     </div>
   );

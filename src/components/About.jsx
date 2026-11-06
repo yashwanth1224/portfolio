@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { personalInfo } from '../data/portfolioData';
 import { sound } from '../utils/audio';
 import { CheckCircle2, Compass, Cpu, Layers, Sparkles, Award, User } from 'lucide-react';
 
 export default function About() {
+  const [photoMode, setPhotoMode] = useState('avatar'); // 'avatar' | 'real'
   const pillars = [
     {
       icon: Cpu,
@@ -62,15 +63,74 @@ export default function About() {
                 onMouseEnter={() => sound.playPop()}
                 className="bg-white p-4 sm:p-5 pb-7 rounded-2xl shadow-2xl border border-slateBanner-border -rotate-1 group-hover:rotate-0 transition-all duration-500 transform hover:-translate-y-1.5"
               >
+                {/* Interactive Toggle Switch: 3D Avatar vs Real Photo */}
+                <div className="flex items-center justify-center mb-3">
+                  <div className="inline-flex p-1 bg-slateBanner/80 rounded-full border border-slateBanner-border shadow-inner">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playPop();
+                        setPhotoMode('avatar');
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                        photoMode === 'avatar'
+                          ? 'bg-navy text-accent shadow-sm'
+                          : 'text-slate-600 hover:text-navy'
+                      }`}
+                    >
+                      <Sparkles className="w-3 h-3 text-accent" />
+                      <span>3D Avatar</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        sound.playPop();
+                        setPhotoMode('real');
+                      }}
+                      className={`px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all duration-300 flex items-center gap-1.5 ${
+                        photoMode === 'real'
+                          ? 'bg-navy text-cream shadow-sm'
+                          : 'text-slate-600 hover:text-navy'
+                      }`}
+                    >
+                      <User className="w-3 h-3 text-accent-royal" />
+                      <span>Real Photo</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Photo Container */}
                 <div className="relative w-full aspect-[4/5] overflow-hidden rounded-xl bg-navy border border-slate-100 shadow-inner">
-                  <img
-                    src="./yashwanth.jpg"
-                    alt="Yashwanth S"
-                    className="w-full h-full object-cover object-top filter grayscale contrast-105 group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
-                  />
-                  {/* Subtle lighting gradient over photo */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent opacity-60" />
+                  {photoMode === 'avatar' ? (
+                    <div className="relative w-full h-full flex items-center justify-center bg-gradient-to-b from-[#0B1B2B] via-[#07111A] to-[#03070D] overflow-hidden">
+                      {/* Holographic Concentric Cyan Glow behind 3D avatar */}
+                      <div className="absolute w-44 h-44 rounded-full border border-sky-400/30 bg-sky-500/10 blur-sm animate-pulse pointer-events-none" />
+                      <div className="absolute w-56 h-56 rounded-full border border-blue-500/20 pointer-events-none" />
+                      
+                      <img
+                        src={personalInfo.avatarPath || "./avatar-3d.png"}
+                        alt="Yashwanth S - 3D Avatar"
+                        className="relative z-10 w-full h-full object-contain p-2 filter drop-shadow-[0_12px_24px_rgba(56,189,248,0.25)] group-hover:scale-105 transition-all duration-500"
+                      />
+                      
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-sky-400/30 text-[10px] font-mono text-sky-300 uppercase tracking-wider z-20">
+                        3D Cutout Render
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={personalInfo.photoPath || "./yashwanth.jpg"}
+                        alt="Yashwanth S"
+                        className="w-full h-full object-cover object-top filter grayscale contrast-105 group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                      />
+                      {/* Subtle lighting gradient over photo */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent opacity-60" />
+                      <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-sm border border-white/20 text-[10px] font-mono text-cream/80 uppercase tracking-wider z-20">
+                        Portrait Photo
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Polaroid Bottom Caption */}

@@ -14,6 +14,7 @@ export const personalInfo = {
   github: "https://github.com/yashwanth1224",
   resumePath: "./Yashwanth_Resume.pdf",
   photoPath: "./yashwanth.jpg",
+  avatarPath: "./avatar-3d.png",
   bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation from East West Institute of Technology (VTU) and intensive full-stack software training at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. I have architected and shipped live commercial production applications including Zisti (India's new on-demand food delivery platform) and Astrovedic Jyotishya Kendra (sidereal astrology & consultation booking portal). My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
   stats: [
     { label: "Production Platforms", value: "2 Live", sub: "Commercial deployments" },

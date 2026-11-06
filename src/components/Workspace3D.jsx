@@ -135,12 +135,12 @@ export default function Workspace3D() {
         const utterance = new SpeechSynthesisUtterance(GREETING_SCRIPT);
         speechUtteranceRef.current = utterance;
 
-        // Enhanced natural male voice selection across all platforms
+        // Enhanced natural male voice selection across platforms
         const availableVoices = (voicesRef.current && voicesRef.current.length > 0)
           ? voicesRef.current
           : synth.getVoices();
 
-        const englishVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+        const englishVoices = availableVoices.filter(v => v.lang && v.lang.startsWith('en'));
 
         const preferredMaleNames = [
           'google uk english male',
@@ -178,9 +178,11 @@ export default function Workspace3D() {
           utterance.voice = chosenVoice;
         }
 
-        // Natural male voice pitch and 0.95 pacing
-        utterance.rate = 0.95; // Crisp, charismatic pacing
-        utterance.pitch = 0.98; // Natural male voice pitch
+        // Charismatic 0.95 pacing & natural male pitch
+        utterance.rate = 0.95;
+        utterance.pitch = 0.98;
+
+        let hasFiredBoundary = false;
 
         utterance.onstart = () => {
           hasStartedSpeechRef.current = true;
@@ -193,6 +195,7 @@ export default function Workspace3D() {
         // Synchronize karaoke word highlighting on speech boundary
         utterance.onboundary = (e) => {
           if (e.name === 'word') {
+            hasFiredBoundary = true;
             const charIdx = e.charIndex;
             const textSoFar = GREETING_SCRIPT.substring(0, charIdx);
             const wordIdx = textSoFar.trim() === '' ? 0 : textSoFar.trim().split(/\s+/).length - 1;
@@ -222,20 +225,22 @@ export default function Workspace3D() {
           setCurrentWordIndex(-1);
         };
 
-        // Fallback progress interval to guarantee live caption progression across all browsers
+        // Fallback progress interval: if onboundary is not supported by browser, advance smoothly
         let simulatedIndex = 0;
-        const totalDuration = 13500; // ~13.5 seconds for 35 words at 0.95 rate
+        const totalDuration = 12500; // ~12.5 seconds for ~36 words at 0.95 rate
         const intervalTime = totalDuration / SCRIPT_WORDS.length;
 
         fallbackIntervalRef.current = setInterval(() => {
-          simulatedIndex++;
-          if (simulatedIndex < SCRIPT_WORDS.length) {
-            setCurrentWordIndex(prev => Math.max(prev, simulatedIndex));
-            wordProgressRef.current = simulatedIndex;
-          } else {
-            if (fallbackIntervalRef.current) {
-              clearInterval(fallbackIntervalRef.current);
-              fallbackIntervalRef.current = null;
+          if (!hasFiredBoundary) {
+            simulatedIndex++;
+            if (simulatedIndex < SCRIPT_WORDS.length) {
+              setCurrentWordIndex(simulatedIndex);
+              wordProgressRef.current = simulatedIndex;
+            } else {
+              if (fallbackIntervalRef.current) {
+                clearInterval(fallbackIntervalRef.current);
+                fallbackIntervalRef.current = null;
+              }
             }
           }
         }, intervalTime);
@@ -263,7 +268,7 @@ export default function Workspace3D() {
         } else {
           stopSpeech();
         }
-      }, 380);
+      }, 360);
     }
   }, [stopSpeech, playProceduralPhoneme]);
 
@@ -276,7 +281,7 @@ export default function Workspace3D() {
     }
   }, [isSpeaking, startSpeech, stopSpeech]);
 
-  // Listen for external trigger from Hero.jsx or other buttons
+  // Listen for external trigger from Hero.jsx action buttons
   useEffect(() => {
     const handleExternalTrigger = () => {
       startSpeech(true);
@@ -288,16 +293,14 @@ export default function Workspace3D() {
     };
   }, [startSpeech]);
 
-  // Bulletproof Autoplay Handling:
-  // 1. Attempt auto-start on load after 900ms
-  // 2. Attach global one-time interaction listeners so ANY click/touch/scroll immediately starts the voice intro
+  // Autoplay Handling with interaction listeners
   useEffect(() => {
     const autoPlayTimer = setTimeout(() => {
       if (!hasStartedSpeechRef.current) {
         try {
           startSpeech(false);
         } catch {
-          // Handled by interaction listener
+          // Handled by user interaction
         }
       }
     }, 900);
@@ -330,7 +333,7 @@ export default function Workspace3D() {
   }, [startSpeech]);
 
   // =========================================================================
-  // Three.js 3D Interactive Stage with Official 3D Avatar & Parallax Depth
+  // Three.js 3D Interactive Stage with Centered 3D Avatar & Futuristic Pedestal
   // =========================================================================
   useEffect(() => {
     const container = mountRef.current;
@@ -342,7 +345,7 @@ export default function Workspace3D() {
     let pedestalGroup = new THREE.Group();
     let avatarGroup = new THREE.Group();
     let acousticRingsGroup = new THREE.Group();
-    let floatingBadges = [];
+    let floatingTechOrbs = [];
     let codeTextureCanvas, codeTextureContext, codeTexture;
     let particlesMesh;
     let resizeObserver;
@@ -353,10 +356,10 @@ export default function Workspace3D() {
     let currentRotationY = 0;
 
     try {
-      const width = container.clientWidth || 600;
-      const height = container.clientHeight || 520;
+      const width = container.clientWidth || 700;
+      const height = container.clientHeight || 560;
 
-      // 1. Scene & Perspective Camera
+      // 1. Scene & Perspective Camera (Centered Stage)
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
       camera.position.set(0, 0.45, 4.4);
@@ -370,12 +373,12 @@ export default function Workspace3D() {
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // 3. Lighting Setup (Atmospheric Deep Navy, Crisp Key Light, Cyan & Cobalt Rims, Burnt Orange Accent)
+      // 3. Lighting Setup (Atmospheric Key, Cyan & Cobalt Rims, Burnt Orange Accent)
       const ambientLight = new THREE.AmbientLight(0xf8fafc, 0.95);
       scene.add(ambientLight);
 
       const mainLight = new THREE.DirectionalLight(0xffffff, 1.4);
-      mainLight.position.set(3, 5, 4);
+      mainLight.position.set(2.5, 5, 4);
       mainLight.castShadow = true;
       scene.add(mainLight);
 
@@ -389,9 +392,9 @@ export default function Workspace3D() {
       rimLightCyan.position.set(3, 1.5, -0.5);
       scene.add(rimLightCyan);
 
-      // Burnt orange subtle rim light (Brand accent)
-      const rimLightOrange = new THREE.PointLight(0xD95D39, 2.5, 8);
-      rimLightOrange.position.set(0, -1, 2);
+      // Burnt orange rim light (Brand accent)
+      const rimLightOrange = new THREE.PointLight(0xD95D39, 2.8, 8);
+      rimLightOrange.position.set(0, -1, 2.2);
       scene.add(rimLightOrange);
 
       // Front focus light
@@ -420,12 +423,12 @@ export default function Workspace3D() {
       scene.add(particlesMesh);
 
       // ==========================================
-      // 5. MODERN MINIMALIST WORKSPACE (DESK & LIVE MONITORS)
+      // 5. CODING WORKSPACE: FLANKING MONITORS & DESK
       // ==========================================
-      deskGroup.position.set(-0.75, -0.35, -0.3);
+      deskGroup.position.set(0, -0.45, -0.55);
 
       // Standing Desk Top Slab
-      const deskTopGeo = new THREE.BoxGeometry(2.4, 0.08, 1.2);
+      const deskTopGeo = new THREE.BoxGeometry(2.8, 0.08, 1.1);
       const deskMat = new THREE.MeshStandardMaterial({
         color: 0x141824,
         roughness: 0.35,
@@ -439,14 +442,14 @@ export default function Workspace3D() {
       const legMat = new THREE.MeshStandardMaterial({ color: 0x090b10, roughness: 0.5, metalness: 0.8 });
       const legGeo = new THREE.BoxGeometry(0.08, 1.1, 0.08);
       const legLeft = new THREE.Mesh(legGeo, legMat);
-      legLeft.position.set(-1.0, -0.3, 0);
+      legLeft.position.set(-1.25, -0.3, 0);
       deskGroup.add(legLeft);
 
       const legRight = new THREE.Mesh(legGeo, legMat);
-      legRight.position.set(1.0, -0.3, 0);
+      legRight.position.set(1.25, -0.3, 0);
       deskGroup.add(legRight);
 
-      // Dual Monitors Setup
+      // Dual High-Tech Coding Monitors Setup
       const monitorsGroup = new THREE.Group();
       codeTextureCanvas = document.createElement('canvas');
       codeTextureCanvas.width = 512;
@@ -457,11 +460,11 @@ export default function Workspace3D() {
       const screenBezelMat = new THREE.MeshStandardMaterial({ color: 0x07090e, roughness: 0.2, metalness: 0.85 });
       const screenMat = new THREE.MeshBasicMaterial({ map: codeTexture });
 
-      // Left Monitor (Curved slightly towards Yashwanth - Live Code Editor)
+      // Left Monitor (Angled towards Yashwanth - Live Code Editor)
       const monitorGeo = new THREE.BoxGeometry(1.15, 0.72, 0.03);
       const leftScreen = new THREE.Mesh(monitorGeo, screenBezelMat);
-      leftScreen.position.set(-0.55, 0.78, -0.15);
-      leftScreen.rotation.y = 0.24;
+      leftScreen.position.set(-1.08, 0.82, -0.1);
+      leftScreen.rotation.y = 0.32;
 
       const leftDisplay = new THREE.Mesh(new THREE.PlaneGeometry(1.10, 0.67), screenMat);
       leftDisplay.position.set(0, 0, 0.016);
@@ -470,14 +473,14 @@ export default function Workspace3D() {
 
       // Left Monitor Stand
       const standPoleGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.45, 16);
-      const standPole = new THREE.Mesh(standPoleGeo, legMat);
-      standPole.position.set(-0.55, 0.48, -0.2);
-      monitorsGroup.add(standPole);
+      const standPoleLeft = new THREE.Mesh(standPoleGeo, legMat);
+      standPoleLeft.position.set(-1.08, 0.52, -0.15);
+      monitorsGroup.add(standPoleLeft);
 
-      // Right Monitor (React UI Preview & Metrics)
+      // Right Monitor (Angled towards Yashwanth - React Engine Telemetry)
       const rightScreen = new THREE.Mesh(monitorGeo, screenBezelMat);
-      rightScreen.position.set(0.55, 0.78, -0.15);
-      rightScreen.rotation.y = -0.24;
+      rightScreen.position.set(1.08, 0.82, -0.1);
+      rightScreen.rotation.y = -0.32;
 
       const rightCanvas = document.createElement('canvas');
       rightCanvas.width = 512;
@@ -523,47 +526,47 @@ export default function Workspace3D() {
       rightScreen.add(rightDisplay);
       monitorsGroup.add(rightScreen);
 
-      const rightStandPole = new THREE.Mesh(standPoleGeo, legMat);
-      rightStandPole.position.set(0.55, 0.48, -0.2);
-      monitorsGroup.add(rightStandPole);
+      const standPoleRight = new THREE.Mesh(standPoleGeo, legMat);
+      standPoleRight.position.set(1.08, 0.52, -0.15);
+      monitorsGroup.add(standPoleRight);
 
       deskGroup.add(monitorsGroup);
       mainGroup.add(deskGroup);
 
       // ==========================================
-      // 6. FUTURISTIC HOLOGRAPHIC PEDESTAL
+      // 6. ILLUMINATED CIRCULAR PEDESTAL (CENTERED)
       // ==========================================
-      pedestalGroup.position.set(0.55, -0.92, 0.15);
+      pedestalGroup.position.set(0, -0.95, 0.1);
 
-      // Concentric Cyan & Cobalt Rings
-      const ringMatCyan = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
-      const ringMatCobalt = new THREE.MeshBasicMaterial({ color: 0x2563eb, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
-      const ringMatOuter = new THREE.MeshBasicMaterial({ color: 0xD95D39, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
+      // Concentric Cyan, Cobalt & Brand Rings
+      const ringMatCyan = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
+      const ringMatCobalt = new THREE.MeshBasicMaterial({ color: 0x2563eb, side: THREE.DoubleSide, transparent: true, opacity: 0.8 });
+      const ringMatOuter = new THREE.MeshBasicMaterial({ color: 0xD95D39, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
 
-      // Inner ring
-      const innerRingGeo = new THREE.RingGeometry(0.46, 0.52, 48);
+      // Inner cyan ring
+      const innerRingGeo = new THREE.RingGeometry(0.52, 0.60, 64);
       const innerRing = new THREE.Mesh(innerRingGeo, ringMatCyan);
       innerRing.rotation.x = -Math.PI / 2;
       pedestalGroup.add(innerRing);
 
       // Middle cobalt ring
-      const middleRingGeo = new THREE.RingGeometry(0.66, 0.73, 48);
+      const middleRingGeo = new THREE.RingGeometry(0.74, 0.83, 64);
       const middleRing = new THREE.Mesh(middleRingGeo, ringMatCobalt);
       middleRing.rotation.x = -Math.PI / 2;
       pedestalGroup.add(middleRing);
 
       // Outer glowing pulse ring
-      const outerRingGeo = new THREE.RingGeometry(0.86, 0.92, 48);
+      const outerRingGeo = new THREE.RingGeometry(0.98, 1.08, 64);
       const outerRing = new THREE.Mesh(outerRingGeo, ringMatOuter);
       outerRing.rotation.x = -Math.PI / 2;
       pedestalGroup.add(outerRing);
 
       // Upward vertical holographic beam cylinder
-      const holoCylinderGeo = new THREE.CylinderGeometry(0.82, 0.65, 0.45, 32, 1, true);
+      const holoCylinderGeo = new THREE.CylinderGeometry(0.95, 0.72, 0.45, 32, 1, true);
       const holoCylinderMat = new THREE.MeshBasicMaterial({
         color: 0x38bdf8,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.14,
         side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending
       });
@@ -574,9 +577,9 @@ export default function Workspace3D() {
       mainGroup.add(pedestalGroup);
 
       // ==========================================
-      // 7. OFFICIAL 3D AVATAR (CUTOUT RENDER)
+      // 7. OFFICIAL 3D AVATAR (CENTER STAGE)
       // ==========================================
-      avatarGroup.position.set(0.55, -0.92, 0.15);
+      avatarGroup.position.set(0, -0.95, 0.1);
 
       const textureLoader = new THREE.TextureLoader();
       textureLoader.load(
@@ -611,9 +614,9 @@ export default function Workspace3D() {
       );
 
       // =========================================================================
-      // DYNAMIC ACOUSTIC WAVEFORM AURA RINGS (Pulses around laptop/chest area)
+      // DYNAMIC ACOUSTIC WAVEFORM AURA RINGS (Around chest/laptop area)
       // =========================================================================
-      acousticRingsGroup.position.set(0, 1.42, 0.06);
+      acousticRingsGroup.position.set(0, 1.40, 0.06);
 
       const auraMat1 = new THREE.MeshBasicMaterial({
         color: 0xD95D39, // Burnt orange brand glow
@@ -644,10 +647,10 @@ export default function Workspace3D() {
         blending: THREE.AdditiveBlending
       });
 
-      const auraMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.33, 48), auraMat1);
-      const auraMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.52, 48), auraMat2);
-      const auraMesh3 = new THREE.Mesh(new THREE.RingGeometry(0.66, 0.73, 48), auraMat3);
-      const auraMesh4 = new THREE.Mesh(new THREE.RingGeometry(0.88, 0.96, 48), auraMat4);
+      const auraMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.34, 48), auraMat1);
+      const auraMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.48, 0.55, 48), auraMat2);
+      const auraMesh3 = new THREE.Mesh(new THREE.RingGeometry(0.70, 0.78, 48), auraMat3);
+      const auraMesh4 = new THREE.Mesh(new THREE.RingGeometry(0.92, 1.02, 48), auraMat4);
 
       acousticRingsGroup.add(auraMesh1);
       acousticRingsGroup.add(auraMesh2);
@@ -658,45 +661,77 @@ export default function Workspace3D() {
       mainGroup.add(avatarGroup);
 
       // ==========================================
-      // 8. FLOATING 3D TECH BADGES
+      // 8. FLOATING 3D TECH ORBS WITH SPINNING RINGS
       // ==========================================
-      const techBadges = [
-        { name: 'React', color: '#00d8ff', bg: '#082f49', pos: [-1.4, 1.3, 0.4], speed: 1.4, offset: 0 },
-        { name: 'JavaScript', color: '#f7df1e', bg: '#422006', pos: [-1.2, 0.2, 0.5], speed: 1.8, offset: 1.2 },
-        { name: 'Node.js', color: '#4ade80', bg: '#052e16', pos: [1.5, 1.5, 0.3], speed: 1.6, offset: 2.1 },
-        { name: 'Java', color: '#fb923c', bg: '#431407', pos: [1.7, 0.5, 0.4], speed: 2.0, offset: 3.0 },
-        { name: 'Tailwind', color: '#38bdf8', bg: '#0c4a6e', pos: [0.0, 1.8, -0.2], speed: 1.5, offset: 4.2 },
+      const techOrbsData = [
+        { name: 'React', color: 0x00d8ff, hex: '#00d8ff', bg: '#082f49', pos: [-1.55, 1.35, 0.3], speed: 1.4, offset: 0 },
+        { name: 'JavaScript', color: 0xf7df1e, hex: '#f7df1e', bg: '#422006', pos: [-1.45, 0.25, 0.4], speed: 1.8, offset: 1.2 },
+        { name: 'Node.js', color: 0x4ade80, hex: '#4ade80', bg: '#052e16', pos: [1.55, 1.45, 0.3], speed: 1.6, offset: 2.1 },
+        { name: 'Java', color: 0xfb923c, hex: '#fb923c', bg: '#431407', pos: [1.65, 0.4, 0.4], speed: 2.0, offset: 3.0 },
+        { name: 'Tailwind', color: 0x38bdf8, hex: '#38bdf8', bg: '#0c4a6e', pos: [0.0, 1.95, -0.3], speed: 1.5, offset: 4.2 },
       ];
 
-      techBadges.forEach((tech) => {
+      techOrbsData.forEach((tech) => {
+        const orbGroup = new THREE.Group();
+        orbGroup.position.set(...tech.pos);
+
+        // 1. Glowing central sphere
+        const sphereGeo = new THREE.SphereGeometry(0.08, 16, 16);
+        const sphereMat = new THREE.MeshStandardMaterial({
+          color: tech.color,
+          emissive: tech.color,
+          emissiveIntensity: 0.8,
+          roughness: 0.2,
+          metalness: 0.8
+        });
+        const sphere = new THREE.Mesh(sphereGeo, sphereMat);
+        orbGroup.add(sphere);
+
+        // 2. Orbital spinning ring
+        const ringGeo = new THREE.TorusGeometry(0.14, 0.01, 8, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: tech.color,
+          transparent: true,
+          opacity: 0.75,
+          side: THREE.DoubleSide
+        });
+        const orbitalRing = new THREE.Mesh(ringGeo, ringMat);
+        orbitalRing.rotation.x = Math.PI / 3;
+        orbGroup.add(orbitalRing);
+
+        // 3. Tech Badge Label
         const badgeCanvas = document.createElement('canvas');
         badgeCanvas.width = 256;
-        badgeCanvas.height = 96;
+        badgeCanvas.height = 80;
         const bCtx = badgeCanvas.getContext('2d');
-
-        // Rounded pill background
         bCtx.fillStyle = tech.bg;
-        bCtx.strokeStyle = tech.color;
-        bCtx.lineWidth = 4;
+        bCtx.strokeStyle = tech.hex;
+        bCtx.lineWidth = 3;
         bCtx.beginPath();
-        bCtx.roundRect(8, 8, 240, 80, 40);
+        bCtx.roundRect(6, 6, 244, 68, 34);
         bCtx.fill();
         bCtx.stroke();
-
-        // Text
         bCtx.fillStyle = '#ffffff';
-        bCtx.font = 'bold 30px monospace';
+        bCtx.font = 'bold 28px monospace';
         bCtx.textAlign = 'center';
         bCtx.textBaseline = 'middle';
-        bCtx.fillText(tech.name, 128, 48);
+        bCtx.fillText(tech.name, 128, 40);
 
         const badgeTexture = new THREE.CanvasTexture(badgeCanvas);
         const badgeMat = new THREE.MeshBasicMaterial({ map: badgeTexture, transparent: true, side: THREE.DoubleSide });
-        const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.21), badgeMat);
-        badgeMesh.position.set(...tech.pos);
-        badgeMesh.userData = { initialY: tech.pos[1], speed: tech.speed, offset: tech.offset };
-        mainGroup.add(badgeMesh);
-        floatingBadges.push(badgeMesh);
+        const badgeMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 0.16), badgeMat);
+        badgeMesh.position.set(0, -0.16, 0);
+        orbGroup.add(badgeMesh);
+
+        orbGroup.userData = {
+          initialY: tech.pos[1],
+          speed: tech.speed,
+          offset: tech.offset,
+          orbitalRing: orbitalRing
+        };
+
+        mainGroup.add(orbGroup);
+        floatingTechOrbs.push(orbGroup);
       });
 
       scene.add(mainGroup);
@@ -726,7 +761,6 @@ export default function Workspace3D() {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
       window.addEventListener('resize', handleResize);
 
-      // Use ResizeObserver for instant container responsiveness
       if (typeof ResizeObserver !== 'undefined') {
         resizeObserver = new ResizeObserver(() => {
           handleResize();
@@ -761,19 +795,23 @@ export default function Workspace3D() {
           avatarMesh.rotation.y = currentRotationY * 0.25;
         }
 
-        // Holographic pedestal rings rotation
+        // Concentric futuristic pedestal rings rotation
         middleRing.rotation.z = -elapsedTime * 0.4;
         innerRing.rotation.z = elapsedTime * 0.5;
         const pulseScale = 1.0 + Math.sin(elapsedTime * 3) * 0.06;
         outerRing.scale.set(pulseScale, pulseScale, pulseScale);
-        outerRing.material.opacity = 0.3 + Math.sin(elapsedTime * 3) * 0.15;
-        holoCylinder.material.opacity = 0.08 + Math.sin(elapsedTime * 4) * 0.04;
+        outerRing.material.opacity = 0.35 + Math.sin(elapsedTime * 3) * 0.15;
+        holoCylinder.material.opacity = 0.10 + Math.sin(elapsedTime * 4) * 0.04;
 
-        // Floating tech badges sinusoidal bobbing
-        floatingBadges.forEach((badge) => {
-          const { initialY, speed, offset } = badge.userData;
-          badge.position.y = initialY + Math.sin(elapsedTime * speed + offset) * 0.08;
-          badge.rotation.y = currentRotationY * 0.6;
+        // Floating tech orbs sinusoidal bobbing & ring spin
+        floatingTechOrbs.forEach((orb) => {
+          const { initialY, speed, offset, orbitalRing } = orb.userData;
+          orb.position.y = initialY + Math.sin(elapsedTime * speed + offset) * 0.08;
+          orb.rotation.y = currentRotationY * 0.5;
+          if (orbitalRing) {
+            orbitalRing.rotation.x += 0.02;
+            orbitalRing.rotation.y += 0.03;
+          }
         });
 
         // Ambient particles drift
@@ -884,7 +922,7 @@ export default function Workspace3D() {
 
       {/* Floating Glassmorphism Speech Bubble & Voice Greeting Controls */}
       {showSpeechBubble && (
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 max-w-[270px] sm:max-w-[330px] z-20 transition-all duration-300">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 max-w-[280px] sm:max-w-[340px] z-20 transition-all duration-300">
           <div className="relative rounded-2xl bg-[#0a0f18]/92 backdrop-blur-xl border border-[#D95D39]/30 p-3 sm:p-3.5 shadow-2xl text-[#F5F2EB]">
             {/* Header: Avatar identity + Equalizer bars */}
             <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
@@ -940,7 +978,7 @@ export default function Workspace3D() {
                 type="button"
                 onClick={toggleSpeech}
                 onMouseEnter={() => sound.playPop()}
-                className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 shadow-md ${
+                className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 shadow-md cursor-pointer ${
                   isSpeaking
                     ? 'bg-black/60 text-[#D95D39] border border-[#D95D39]/40 hover:bg-black'
                     : 'bg-gradient-to-r from-[#D95D39] to-orange-600 hover:from-orange-500 hover:to-orange-600 text-white shadow-[#D95D39]/30 hover:scale-[1.02]'
@@ -954,7 +992,7 @@ export default function Workspace3D() {
                 ) : (
                   <>
                     <Play className="w-3.5 h-3.5 fill-current" />
-                    <span>▶ Hear Voice Intro</span>
+                    <span>▶ Play Voice Intro</span>
                   </>
                 )}
               </button>
@@ -967,7 +1005,7 @@ export default function Workspace3D() {
                     stopSpeech();
                   }
                 }}
-                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#F5F2EB] transition-colors border border-white/10"
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#F5F2EB] transition-colors border border-white/10 cursor-pointer"
                 title={sound.isMuted() ? 'Unmute Audio' : 'Mute Audio'}
                 aria-label="Toggle Sound"
               >
@@ -975,7 +1013,7 @@ export default function Workspace3D() {
               </button>
             </div>
 
-            {/* Bubble tail pointing toward Yashwanth's 3D avatar */}
+            {/* Bubble tail */}
             <div className="absolute -bottom-2 right-12 w-4 h-4 bg-[#0a0f18]/92 border-r border-b border-[#D95D39]/30 transform rotate-45" />
           </div>
         </div>

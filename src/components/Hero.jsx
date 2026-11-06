@@ -1,19 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowDown,
   Download,
   Volume2,
   Terminal,
-  ExternalLink
+  ExternalLink,
+  Play,
+  Sparkles
 } from 'lucide-react';
 import Workspace3D from './Workspace3D';
 import { personalInfo } from '../data/portfolioData';
 import { sound } from '../utils/audio';
 
 export default function Hero() {
+  const [videoAvailable, setVideoAvailable] = useState(false);
+  const [activeMediaMode, setActiveMediaMode] = useState('3d'); // '3d' | 'video'
+
+  useEffect(() => {
+    // Check if user has placed their custom AI intro video at yashwanth-intro.mp4
+    const videoUrl = personalInfo.introVideoPath || './yashwanth-intro.mp4';
+    fetch(videoUrl, { method: 'HEAD' })
+      .then((res) => {
+        if (res.ok) {
+          setVideoAvailable(true);
+          setActiveMediaMode('video');
+        }
+      })
+      .catch(() => {
+        setVideoAvailable(false);
+      });
+  }, []);
+
   const handlePlayVoiceIntro = () => {
     sound.playClick();
-    window.dispatchEvent(new CustomEvent('trigger-avatar-speech'));
+    if (activeMediaMode === 'video') {
+      const vid = document.getElementById('yashwanth-avatar-video');
+      if (vid) {
+        vid.currentTime = 0;
+        vid.muted = false;
+        vid.play().catch(() => {});
+      }
+    } else {
+      window.dispatchEvent(new CustomEvent('trigger-avatar-speech'));
+    }
   };
 
   return (
@@ -157,15 +186,82 @@ export default function Hero() {
           </div>
 
           {/* =================================================== */}
-          {/* RIGHT COLUMN: Frameless 3D Avatar Centerpiece       */}
+          {/* RIGHT COLUMN: Frameless 3D Avatar / Video Centerpiece */}
           {/* =================================================== */}
-          <div className="lg:col-span-6 relative w-full h-[520px] sm:h-[580px] lg:h-[640px] flex items-center justify-center">
+          <div className="lg:col-span-6 relative w-full h-[520px] sm:h-[580px] lg:h-[640px] flex flex-col items-center justify-center">
             {/* Ambient amber backdrop halo */}
             <div className="absolute w-[80%] h-[80%] bg-[#D95D39]/20 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Seamless 3D Avatar Workspace */}
-            <div className="relative w-full h-full">
-              <Workspace3D />
+            {/* Mode Switcher Pill (Shown only when user video is uploaded) */}
+            {videoAvailable && (
+              <div className="relative z-30 mb-2 inline-flex p-1 rounded-full bg-black/60 border border-white/15 backdrop-blur-md">
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playPop();
+                    setActiveMediaMode('video');
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono font-semibold transition-all ${
+                    activeMediaMode === 'video'
+                      ? 'bg-[#D95D39] text-white shadow-md'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  <span>AI Video</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.playPop();
+                    setActiveMediaMode('3d');
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-mono font-semibold transition-all ${
+                    activeMediaMode === '3d'
+                      ? 'bg-[#D95D39] text-white shadow-md'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  <span>3D Interactive</span>
+                </button>
+              </div>
+            )}
+
+            {/* Seamless Display: 3D Workspace or AI Video */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              {activeMediaMode === 'video' && videoAvailable ? (
+                <div className="relative w-full h-full rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-black/80 flex items-center justify-center">
+                  <video
+                    id="yashwanth-avatar-video"
+                    src={personalInfo.introVideoPath || './yashwanth-intro.mp4'}
+                    poster="./avatar-3d.jpg"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const vid = document.getElementById('yashwanth-avatar-video');
+                        if (vid) {
+                          vid.muted = !vid.muted;
+                          sound.playClick();
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#1e0d08]/90 hover:bg-[#2b140b] text-white text-xs font-mono font-bold border border-[#D95D39]/50 shadow-xl backdrop-blur-md cursor-pointer"
+                    >
+                      <Volume2 className="w-3.5 h-3.5 text-[#D95D39]" />
+                      <span>Click to Unmute / Mute</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Workspace3D />
+              )}
             </div>
           </div>
 

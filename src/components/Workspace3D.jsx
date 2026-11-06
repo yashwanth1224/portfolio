@@ -3,8 +3,8 @@ import * as THREE from 'three';
 import { Volume2, VolumeX, Sparkles, Play, Pause } from 'lucide-react';
 import { sound } from '../utils/audio';
 
-const GREETING_SCRIPT = "Hello! I'm Yashwanth. I'm a frontend developer and software engineer. I am passionate about building scalable web applications, responsive interactive user interfaces, and modern digital experiences. Welcome to my portfolio!";
-const SCRIPT_WORDS = GREETING_SCRIPT.split(' ');
+const GREETING_SCRIPT = "Hi there! I'm Yashwanth, a frontend developer and software engineer based in Bengaluru. I craft high-performance, pixel-perfect web applications and have delivered live commercial platforms like Zisti and Astrovedic Jyotishya Kendra. Explore my work below!";
+const SCRIPT_WORDS = GREETING_SCRIPT.split(/\s+/);
 
 export default function Workspace3D() {
   const mountRef = useRef(null);
@@ -20,13 +20,37 @@ export default function Workspace3D() {
   const speechUtteranceRef = useRef(null);
   const fallbackIntervalRef = useRef(null);
   const hasStartedSpeechRef = useRef(false);
+  const voicesRef = useRef([]);
 
   // Synchronize ref with state
   useEffect(() => {
     isSpeakingRef.current = isSpeaking;
   }, [isSpeaking]);
 
-  // Procedural Web Audio fallback voice synth (for environments with restricted SpeechSynthesis)
+  // Load and cache voices when SpeechSynthesis is available
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+    const updateVoices = () => {
+      try {
+        const availableVoices = window.speechSynthesis.getVoices();
+        if (availableVoices && availableVoices.length > 0) {
+          voicesRef.current = availableVoices;
+        }
+      } catch {
+        // Silently catch
+      }
+    };
+
+    updateVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', updateVoices);
+
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', updateVoices);
+    };
+  }, []);
+
+  // Enhanced Procedural Web Audio fallback voice synth (with male formant filters & vocal tract resonance)
   const playProceduralPhoneme = useCallback((word, index) => {
     try {
       sound.init();
@@ -34,31 +58,39 @@ export default function Workspace3D() {
       if (!ctx || sound.isMuted()) return;
       const now = ctx.currentTime;
 
-      // Fundamental vocal cord pitch (~125-145Hz male speech)
+      // Natural male vocal cord fundamental pitch (~120Hz to 140Hz)
+      const baseFreq = 120 + Math.sin(index * 0.8) * 16;
       const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      const baseFreq = 125 + Math.sin(index * 0.7) * 20;
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(baseFreq, now);
-      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.94, now + 0.16);
+      osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.92, now + 0.18);
 
-      // Vocal formant filter (simulating vocal tract resonance)
-      filter.type = 'bandpass';
-      const formants = [520, 780, 1120, 1420, 880];
-      filter.frequency.setValueAtTime(formants[index % formants.length], now);
-      filter.Q.setValueAtTime(3.8, now);
+      // Male vocal formant filter F1 (Vocal tract resonance: 450Hz - 700Hz)
+      const formantF1 = ctx.createBiquadFilter();
+      formantF1.type = 'bandpass';
+      const f1Frequencies = [500, 680, 420, 560, 620];
+      formantF1.frequency.setValueAtTime(f1Frequencies[index % f1Frequencies.length], now);
+      formantF1.Q.setValueAtTime(4.2, now);
 
-      gain.gain.setValueAtTime(0.045, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      // Male vocal formant filter F2 (Oral cavity resonance: 1100Hz - 1800Hz)
+      const formantF2 = ctx.createBiquadFilter();
+      formantF2.type = 'bandpass';
+      const f2Frequencies = [1150, 1550, 1850, 1350, 1650];
+      formantF2.frequency.setValueAtTime(f2Frequencies[index % f2Frequencies.length], now);
+      formantF2.Q.setValueAtTime(5.0, now);
 
-      osc.connect(filter);
-      filter.connect(gain);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.042, now);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.20);
+
+      osc.connect(formantF1);
+      formantF1.connect(gain);
+      osc.connect(formantF2);
+      formantF2.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start(now);
-      osc.stop(now + 0.18);
+      osc.stop(now + 0.20);
     } catch {
       // AudioContext policy fallback
     }
@@ -103,38 +135,67 @@ export default function Workspace3D() {
         const utterance = new SpeechSynthesisUtterance(GREETING_SCRIPT);
         speechUtteranceRef.current = utterance;
 
-        // Select the most natural English voice available
-        const voices = synth.getVoices();
-        const englishVoice = voices.find(v =>
-          v.lang.startsWith('en') && (
-            v.name.includes('Google UK English Male') ||
-            v.name.includes('Natural') ||
-            v.name.includes('David') ||
-            v.name.includes('George') ||
-            v.name.includes('Guy') ||
-            v.name.includes('Male')
-          )
-        ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+        // Enhanced natural male voice selection across all platforms
+        const availableVoices = (voicesRef.current && voicesRef.current.length > 0)
+          ? voicesRef.current
+          : synth.getVoices();
 
-        if (englishVoice) {
-          utterance.voice = englishVoice;
+        const englishVoices = availableVoices.filter(v => v.lang.startsWith('en'));
+
+        const preferredMaleNames = [
+          'google uk english male',
+          'microsoft guy online (natural)',
+          'microsoft guy',
+          'microsoft david online (natural)',
+          'microsoft david',
+          'microsoft mark online (natural)',
+          'microsoft mark',
+          'google us english',
+          'english (america)+natural',
+          'daniel',
+          'alex',
+          'en-us-neural2-d',
+          'en-us-standard-b',
+          'male'
+        ];
+
+        let chosenVoice = null;
+        for (const pref of preferredMaleNames) {
+          const match = englishVoices.find(v => v.name.toLowerCase().includes(pref));
+          if (match) {
+            chosenVoice = match;
+            break;
+          }
         }
 
+        if (!chosenVoice) {
+          chosenVoice = englishVoices.find(v => v.name.toLowerCase().includes('male'))
+            || englishVoices[0]
+            || availableVoices[0];
+        }
+
+        if (chosenVoice) {
+          utterance.voice = chosenVoice;
+        }
+
+        // Natural male voice pitch and 0.95 pacing
         utterance.rate = 0.95; // Crisp, charismatic pacing
-        utterance.pitch = 1.0;
+        utterance.pitch = 0.98; // Natural male voice pitch
 
         utterance.onstart = () => {
           hasStartedSpeechRef.current = true;
           setIsSpeaking(true);
           isSpeakingRef.current = true;
           setCurrentWordIndex(0);
+          wordProgressRef.current = 0;
         };
 
+        // Synchronize karaoke word highlighting on speech boundary
         utterance.onboundary = (e) => {
           if (e.name === 'word') {
             const charIdx = e.charIndex;
             const textSoFar = GREETING_SCRIPT.substring(0, charIdx);
-            const wordIdx = textSoFar.trim().split(/\s+/).length - 1;
+            const wordIdx = textSoFar.trim() === '' ? 0 : textSoFar.trim().split(/\s+/).length - 1;
             const safeIdx = Math.max(0, Math.min(wordIdx, SCRIPT_WORDS.length - 1));
             setCurrentWordIndex(safeIdx);
             wordProgressRef.current = safeIdx;
@@ -142,12 +203,20 @@ export default function Workspace3D() {
         };
 
         utterance.onend = () => {
+          if (fallbackIntervalRef.current) {
+            clearInterval(fallbackIntervalRef.current);
+            fallbackIntervalRef.current = null;
+          }
           setIsSpeaking(false);
           isSpeakingRef.current = false;
           setCurrentWordIndex(-1);
         };
 
         utterance.onerror = () => {
+          if (fallbackIntervalRef.current) {
+            clearInterval(fallbackIntervalRef.current);
+            fallbackIntervalRef.current = null;
+          }
           setIsSpeaking(false);
           isSpeakingRef.current = false;
           setCurrentWordIndex(-1);
@@ -155,7 +224,7 @@ export default function Workspace3D() {
 
         // Fallback progress interval to guarantee live caption progression across all browsers
         let simulatedIndex = 0;
-        const totalDuration = 10500;
+        const totalDuration = 13500; // ~13.5 seconds for 35 words at 0.95 rate
         const intervalTime = totalDuration / SCRIPT_WORDS.length;
 
         fallbackIntervalRef.current = setInterval(() => {
@@ -164,8 +233,10 @@ export default function Workspace3D() {
             setCurrentWordIndex(prev => Math.max(prev, simulatedIndex));
             wordProgressRef.current = simulatedIndex;
           } else {
-            clearInterval(fallbackIntervalRef.current);
-            fallbackIntervalRef.current = null;
+            if (fallbackIntervalRef.current) {
+              clearInterval(fallbackIntervalRef.current);
+              fallbackIntervalRef.current = null;
+            }
           }
         }, intervalTime);
 
@@ -192,7 +263,7 @@ export default function Workspace3D() {
         } else {
           stopSpeech();
         }
-      }, 340);
+      }, 380);
     }
   }, [stopSpeech, playProceduralPhoneme]);
 
@@ -274,6 +345,7 @@ export default function Workspace3D() {
     let floatingBadges = [];
     let codeTextureCanvas, codeTextureContext, codeTexture;
     let particlesMesh;
+    let resizeObserver;
 
     let targetRotationX = 0;
     let targetRotationY = 0;
@@ -298,7 +370,7 @@ export default function Workspace3D() {
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       container.appendChild(renderer.domElement);
 
-      // 3. Lighting Setup (Atmospheric Deep Navy, Crisp Key Light, Cyan & Cobalt Rims)
+      // 3. Lighting Setup (Atmospheric Deep Navy, Crisp Key Light, Cyan & Cobalt Rims, Burnt Orange Accent)
       const ambientLight = new THREE.AmbientLight(0xf8fafc, 0.95);
       scene.add(ambientLight);
 
@@ -307,15 +379,20 @@ export default function Workspace3D() {
       mainLight.castShadow = true;
       scene.add(mainLight);
 
-      // Cobalt blue rim light (Brand accent glow)
+      // Cobalt blue rim light
       const rimLightCobalt = new THREE.PointLight(0x2563eb, 3.5, 10);
       rimLightCobalt.position.set(-3, 2, -1);
       scene.add(rimLightCobalt);
 
-      // Cyan rim light (Modern digital tech glow)
+      // Cyan rim light
       const rimLightCyan = new THREE.PointLight(0x38bdf8, 3.2, 10);
       rimLightCyan.position.set(3, 1.5, -0.5);
       scene.add(rimLightCyan);
+
+      // Burnt orange subtle rim light (Brand accent)
+      const rimLightOrange = new THREE.PointLight(0xD95D39, 2.5, 8);
+      rimLightOrange.position.set(0, -1, 2);
+      scene.add(rimLightOrange);
 
       // Front focus light
       const frontLight = new THREE.PointLight(0xffffff, 1.1, 8);
@@ -427,7 +504,7 @@ export default function Workspace3D() {
       rightCtx.fillText('99.98%', 24, 128);
       rightCtx.fillStyle = '#10b981';
       rightCtx.fillText('HEALTHY', 190, 128);
-      rightCtx.fillStyle = '#2563eb';
+      rightCtx.fillStyle = '#D95D39';
       rightCtx.fillText('STABLE', 356, 128);
       // Chart Line
       rightCtx.strokeStyle = '#38bdf8';
@@ -461,7 +538,7 @@ export default function Workspace3D() {
       // Concentric Cyan & Cobalt Rings
       const ringMatCyan = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
       const ringMatCobalt = new THREE.MeshBasicMaterial({ color: 0x2563eb, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
-      const ringMatOuter = new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
+      const ringMatOuter = new THREE.MeshBasicMaterial({ color: 0xD95D39, side: THREE.DoubleSide, transparent: true, opacity: 0.45 });
 
       // Inner ring
       const innerRingGeo = new THREE.RingGeometry(0.46, 0.52, 48);
@@ -533,18 +610,49 @@ export default function Workspace3D() {
         }
       );
 
-      // Dynamic Audio Waveform Acoustic Aura (around laptop/chest area)
-      acousticRingsGroup.position.set(0, 1.45, 0.08);
-      const auraRingMat1 = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
-      const auraRingMat2 = new THREE.MeshBasicMaterial({ color: 0x2563eb, transparent: true, opacity: 0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
-      const auraRingMat3 = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+      // =========================================================================
+      // DYNAMIC ACOUSTIC WAVEFORM AURA RINGS (Pulses around laptop/chest area)
+      // =========================================================================
+      acousticRingsGroup.position.set(0, 1.42, 0.06);
 
-      const auraMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.35, 0.38, 36), auraRingMat1);
-      const auraMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.58, 36), auraRingMat2);
-      const auraMesh3 = new THREE.Mesh(new THREE.RingGeometry(0.75, 0.78, 36), auraRingMat3);
+      const auraMat1 = new THREE.MeshBasicMaterial({
+        color: 0xD95D39, // Burnt orange brand glow
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      const auraMat2 = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8, // Electric cyan tech glow
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      const auraMat3 = new THREE.MeshBasicMaterial({
+        color: 0x2563eb, // Cobalt blue accent
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+      const auraMat4 = new THREE.MeshBasicMaterial({
+        color: 0xf97316, // Amber orange warmth
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending
+      });
+
+      const auraMesh1 = new THREE.Mesh(new THREE.RingGeometry(0.28, 0.33, 48), auraMat1);
+      const auraMesh2 = new THREE.Mesh(new THREE.RingGeometry(0.46, 0.52, 48), auraMat2);
+      const auraMesh3 = new THREE.Mesh(new THREE.RingGeometry(0.66, 0.73, 48), auraMat3);
+      const auraMesh4 = new THREE.Mesh(new THREE.RingGeometry(0.88, 0.96, 48), auraMat4);
+
       acousticRingsGroup.add(auraMesh1);
       acousticRingsGroup.add(auraMesh2);
       acousticRingsGroup.add(auraMesh3);
+      acousticRingsGroup.add(auraMesh4);
       avatarGroup.add(acousticRingsGroup);
 
       mainGroup.add(avatarGroup);
@@ -609,6 +717,7 @@ export default function Workspace3D() {
         if (!container || !renderer || !camera) return;
         const newWidth = container.clientWidth;
         const newHeight = container.clientHeight;
+        if (newWidth === 0 || newHeight === 0) return;
         camera.aspect = newWidth / newHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(newWidth, newHeight);
@@ -616,6 +725,14 @@ export default function Workspace3D() {
 
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
       window.addEventListener('resize', handleResize);
+
+      // Use ResizeObserver for instant container responsiveness
+      if (typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(() => {
+          handleResize();
+        });
+        resizeObserver.observe(container);
+      }
 
       // ==========================================
       // 10. 60FPS THREE.JS ANIMATION LOOP
@@ -667,22 +784,28 @@ export default function Workspace3D() {
 
         // Dynamic Acoustic Aura Rings (Waveform pulses when speaking)
         if (speakingNow) {
-          const wave1 = (elapsedTime * 3.5) % 1;
-          const wave2 = ((elapsedTime * 3.5) + 0.33) % 1;
-          const wave3 = ((elapsedTime * 3.5) + 0.66) % 1;
+          const speed = 3.6;
+          const wave1 = (elapsedTime * speed) % 1;
+          const wave2 = (elapsedTime * speed + 0.25) % 1;
+          const wave3 = (elapsedTime * speed + 0.5) % 1;
+          const wave4 = (elapsedTime * speed + 0.75) % 1;
 
-          auraMesh1.scale.set(1 + wave1 * 1.2, 1 + wave1 * 1.2, 1);
-          auraRingMat1.opacity = (1 - wave1) * 0.8;
+          auraMesh1.scale.set(1 + wave1 * 1.4, 1 + wave1 * 1.4, 1);
+          auraMat1.opacity = (1 - wave1) * 0.85;
 
-          auraMesh2.scale.set(1 + wave2 * 1.2, 1 + wave2 * 1.2, 1);
-          auraRingMat2.opacity = (1 - wave2) * 0.7;
+          auraMesh2.scale.set(1 + wave2 * 1.4, 1 + wave2 * 1.4, 1);
+          auraMat2.opacity = (1 - wave2) * 0.75;
 
-          auraMesh3.scale.set(1 + wave3 * 1.2, 1 + wave3 * 1.2, 1);
-          auraRingMat3.opacity = (1 - wave3) * 0.6;
+          auraMesh3.scale.set(1 + wave3 * 1.4, 1 + wave3 * 1.4, 1);
+          auraMat3.opacity = (1 - wave3) * 0.65;
+
+          auraMesh4.scale.set(1 + wave4 * 1.4, 1 + wave4 * 1.4, 1);
+          auraMat4.opacity = (1 - wave4) * 0.55;
         } else {
-          auraRingMat1.opacity += (0 - auraRingMat1.opacity) * 0.1;
-          auraRingMat2.opacity += (0 - auraRingMat2.opacity) * 0.1;
-          auraRingMat3.opacity += (0 - auraRingMat3.opacity) * 0.1;
+          auraMat1.opacity += (0 - auraMat1.opacity) * 0.15;
+          auraMat2.opacity += (0 - auraMat2.opacity) * 0.15;
+          auraMat3.opacity += (0 - auraMat3.opacity) * 0.15;
+          auraMat4.opacity += (0 - auraMat4.opacity) * 0.15;
         }
 
         // Live code editor line scrolling on Left Monitor
@@ -707,11 +830,11 @@ export default function Workspace3D() {
             { text: "import React, { useState } from 'react';", color: '#93c5fd' },
             { text: "import { Canvas } from '@three/engine';", color: '#93c5fd' },
             { text: "export function YashwanthAvatar() {", color: '#38bdf8' },
-            { text: "  const [focus] = useState('Architecture');", color: '#fbbf24' },
+            { text: "  const [focus] = useState('Frontend & Systems');", color: '#fbbf24' },
             { text: "  return (", color: '#f472b6' },
             { text: "    <InteractiveStage fps={60}>", color: '#4ade80' },
-            { text: "      <HolographicPedestal cyan rings />", color: '#38bdf8' },
-            { text: "      <VoiceSynthesizer active={true} />", color: '#a78bfa' },
+            { text: "      <HolographicPedestal burntOrange />", color: '#D95D39' },
+            { text: "      <VoiceSynthesizer active={speaking} />", color: '#a78bfa' },
             { text: "    </InteractiveStage>", color: '#4ade80' },
             { text: "  );", color: '#f472b6' },
             { text: "}", color: '#38bdf8' }
@@ -742,6 +865,7 @@ export default function Workspace3D() {
         cancelAnimationFrame(animationFrameId);
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('resize', handleResize);
+        if (resizeObserver) resizeObserver.disconnect();
         if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
           container.removeChild(renderer.domElement);
           renderer.dispose();
@@ -754,73 +878,77 @@ export default function Workspace3D() {
   }, []);
 
   return (
-    <div id="workspace-3d-scene" className="relative w-full h-[420px] sm:h-[500px] lg:h-[580px] flex items-center justify-center select-none">
+    <div id="workspace-3d-scene" className="relative w-full h-full min-h-[440px] sm:min-h-[500px] lg:min-h-[560px] flex items-center justify-center select-none overflow-hidden">
       {/* Three.js Canvas Container */}
       <div ref={mountRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
 
       {/* Floating Glassmorphism Speech Bubble & Voice Greeting Controls */}
       {showSpeechBubble && (
-        <div className="absolute top-3 right-3 sm:top-5 sm:right-5 max-w-[280px] sm:max-w-[340px] z-20 transition-all duration-300">
-          <div className="relative rounded-2xl bg-[#07111A]/90 backdrop-blur-xl border border-sky-400/30 p-3.5 sm:p-4 shadow-2xl text-cream">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 max-w-[270px] sm:max-w-[330px] z-20 transition-all duration-300">
+          <div className="relative rounded-2xl bg-[#0a0f18]/92 backdrop-blur-xl border border-[#D95D39]/30 p-3 sm:p-3.5 shadow-2xl text-[#F5F2EB]">
             {/* Header: Avatar identity + Equalizer bars */}
             <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <span className={`w-2.5 h-2.5 rounded-full ${isSpeaking ? 'bg-sky-400 animate-ping' : 'bg-emerald-400'}`} />
-                <span className="text-xs font-mono font-bold tracking-wide text-cream">
+                <span className={`w-2.5 h-2.5 rounded-full ${isSpeaking ? 'bg-[#D95D39] animate-ping' : 'bg-emerald-400'}`} />
+                <span className="text-xs font-mono font-bold tracking-wide text-white">
                   Yashwanth (3D Avatar)
                 </span>
               </div>
 
-              {/* Animated Audio Equalizer with Cyan and Blue Bars */}
-              <div className="flex items-end gap-1 h-3.5 px-1.5 py-0.5 rounded bg-black/50 border border-white/10">
-                <span className={`w-0.5 bg-sky-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3 animate-pulse' : 'h-1'}`} />
-                <span className={`w-0.5 bg-blue-500 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-1.5'}`} style={{ animationDuration: '300ms' }} />
-                <span className={`w-0.5 bg-cyan-300 rounded-full transition-all duration-150 ${isSpeaking ? 'h-2.5' : 'h-1'}`} style={{ animationDuration: '450ms' }} />
+              {/* Animated Audio Equalizer with Burnt Orange and Cyan Bars */}
+              <div className="flex items-end gap-1 h-3.5 px-1.5 py-0.5 rounded bg-black/60 border border-white/10">
+                <span className={`w-0.5 bg-[#D95D39] rounded-full transition-all duration-150 ${isSpeaking ? 'h-3 animate-pulse' : 'h-1'}`} />
+                <span className={`w-0.5 bg-sky-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-1.5'}`} style={{ animationDuration: '300ms' }} />
+                <span className={`w-0.5 bg-orange-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-2.5' : 'h-1'}`} style={{ animationDuration: '450ms' }} />
                 <span className={`w-0.5 bg-emerald-400 rounded-full transition-all duration-150 ${isSpeaking ? 'h-3.5' : 'h-2'}`} style={{ animationDuration: '200ms' }} />
               </div>
             </div>
 
-            {/* Speech Script & Live Word Highlighting */}
-            <div className="text-xs sm:text-[13px] leading-relaxed font-sans text-cream/90 max-h-[96px] overflow-y-auto pr-1">
+            {/* Speech Script & Synchronized Karaoke Word Highlighting */}
+            <div className="text-xs leading-relaxed font-sans max-h-[110px] overflow-y-auto pr-1 select-text">
               {isSpeaking ? (
-                <span>
-                  {SCRIPT_WORDS.map((word, idx) => (
-                    <span
-                      key={idx}
-                      className={`inline-block mr-1 transition-colors duration-150 ${
-                        idx === currentWordIndex
-                          ? 'text-sky-400 font-bold scale-110 drop-shadow-[0_0_8px_rgba(56,189,248,0.8)]'
-                          : idx < currentWordIndex
-                          ? 'text-cream font-medium'
-                          : 'text-cream/50'
-                      }`}
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </span>
+                <div className="flex flex-wrap">
+                  {SCRIPT_WORDS.map((word, idx) => {
+                    const isCurrent = idx === currentWordIndex;
+                    const isPast = idx < currentWordIndex;
+                    return (
+                      <span
+                        key={idx}
+                        className={`inline-block mr-1 my-0.5 transition-all duration-150 ${
+                          isCurrent
+                            ? 'text-white font-extrabold px-1.5 py-0.5 rounded-md bg-[#D95D39] shadow-[0_0_12px_rgba(217,93,57,0.9)] scale-105'
+                            : isPast
+                            ? 'text-white font-medium'
+                            : 'text-white/40'
+                        }`}
+                      >
+                        {word}
+                      </span>
+                    );
+                  })}
+                </div>
               ) : (
-                <p className="text-cream/80 italic">
+                <p className="text-white/80 italic text-xs leading-relaxed">
                   "👋 Hi, I'm Yashwanth! Welcome to my portfolio. Tap below to hear my 3D voice introduction!"
                 </p>
               )}
             </div>
 
             {/* Interactive Action Button: Play/Pause Voice Intro */}
-            <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between gap-2">
+            <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
               <button
                 type="button"
                 onClick={toggleSpeech}
                 onMouseEnter={() => sound.playPop()}
-                className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 shadow-md ${
+                className={`flex-1 inline-flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-300 shadow-md ${
                   isSpeaking
-                    ? 'bg-navy-dark text-sky-400 border border-sky-400/40 hover:bg-black'
-                    : 'bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-sky-500/25 hover:scale-[1.02]'
+                    ? 'bg-black/60 text-[#D95D39] border border-[#D95D39]/40 hover:bg-black'
+                    : 'bg-gradient-to-r from-[#D95D39] to-orange-600 hover:from-orange-500 hover:to-orange-600 text-white shadow-[#D95D39]/30 hover:scale-[1.02]'
                 }`}
               >
                 {isSpeaking ? (
                   <>
-                    <Pause className="w-3.5 h-3.5 animate-pulse text-sky-400" />
+                    <Pause className="w-3.5 h-3.5 animate-pulse text-[#D95D39]" />
                     <span>Pause Voice Intro</span>
                   </>
                 ) : (
@@ -839,16 +967,16 @@ export default function Workspace3D() {
                     stopSpeech();
                   }
                 }}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-cream transition-colors border border-white/10"
+                className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#F5F2EB] transition-colors border border-white/10"
                 title={sound.isMuted() ? 'Unmute Audio' : 'Mute Audio'}
                 aria-label="Toggle Sound"
               >
-                {sound.isMuted() ? <VolumeX className="w-3.5 h-3.5 text-sky-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
+                {sound.isMuted() ? <VolumeX className="w-3.5 h-3.5 text-[#D95D39]" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
               </button>
             </div>
 
             {/* Bubble tail pointing toward Yashwanth's 3D avatar */}
-            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-[#07111A]/90 border-r border-b border-sky-400/30 transform rotate-45" />
+            <div className="absolute -bottom-2 right-12 w-4 h-4 bg-[#0a0f18]/92 border-r border-b border-[#D95D39]/30 transform rotate-45" />
           </div>
         </div>
       )}
@@ -858,21 +986,21 @@ export default function Workspace3D() {
         <button
           type="button"
           onClick={() => startSpeech(true)}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-mono text-xs sm:text-sm font-semibold shadow-2xl shadow-sky-500/50 border border-white/30 backdrop-blur-md animate-bounce cursor-pointer z-30 transition-all hover:scale-105 active:scale-95"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-[#D95D39] to-orange-600 hover:from-orange-500 hover:to-orange-600 text-white font-mono text-xs font-semibold shadow-xl shadow-[#D95D39]/40 border border-white/20 backdrop-blur-md animate-bounce cursor-pointer z-30 transition-all hover:scale-105 active:scale-95 text-center whitespace-nowrap"
         >
-          <Sparkles className="w-4 h-4 text-sky-200 animate-spin" style={{ animationDuration: '3s' }} />
-          <span>👋 Click anywhere to hear Yashwanth's 3D Voice Intro 🔊</span>
+          <Sparkles className="w-3.5 h-3.5 text-orange-200" />
+          <span>👋 Hear Yashwanth's 3D Voice Intro 🔊</span>
         </button>
       )}
 
       {/* Fallback if WebGL isn't supported */}
       {loadError && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-obsidian-surface/80 backdrop-blur-md rounded-2xl border border-white/10 text-center">
-          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-sky-400 mb-4 shadow-xl">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-[#141414]/90 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-[#D95D39] mb-4 shadow-xl">
             <img src="./avatar-3d.png" alt="Yashwanth S - 3D Avatar" className="w-full h-full object-contain" />
           </div>
-          <h3 className="text-xl font-serif font-bold text-cream">Yashwanth S</h3>
-          <p className="text-sm text-cream/70 max-w-sm mt-1">
+          <h3 className="text-xl font-heading font-bold text-white">Yashwanth S</h3>
+          <p className="text-xs sm:text-sm text-white/70 max-w-sm mt-1">
             Frontend Developer & Software Engineer passionate about interactive 3D WebGL interfaces and clean code architecture.
           </p>
         </div>

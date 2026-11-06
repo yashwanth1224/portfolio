@@ -110,6 +110,21 @@ export default function Projects() {
             </div>
           </div>
         );
+      case 'engine-3d-sim':
+        return (
+          <div className="w-full h-36 bg-gradient-to-br from-[#1b2229] via-[#1a1a1a] to-[#121c25] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">
+            <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px] opacity-20" />
+            <div className="absolute w-28 h-28 rounded-full bg-cyan-500/15 blur-xl" />
+            <div className="relative z-10 flex flex-col items-center gap-2 text-center">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-heading font-black text-xl shadow-lg">
+                ⚡
+              </div>
+              <span className="text-[11px] font-mono tracking-wider text-white/80 uppercase font-semibold">
+                Transparent IC Engine Kinematics
+              </span>
+            </div>
+          </div>
+        );
       default:
         return (
           <div className="w-full h-36 bg-gradient-to-br from-[#222222] via-[#1a1a1a] to-[#202020] rounded-xl relative overflow-hidden flex items-center justify-center p-4 border border-white/5">

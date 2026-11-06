@@ -11,6 +11,7 @@ export default function Certificates() {
     Briefcase,
     HeartHandshake,
     Sparkles,
+    CheckCircle,
   };
 
   return (
@@ -32,12 +33,12 @@ export default function Certificates() {
             <span className="text-[#D95D39]">Distinctions</span>
           </h2>
           <p className="text-[#F5F2EB]/75 text-base sm:text-lg mt-3">
-            Recognitions spanning national athletics, all-India competitive academic merit, professional full-stack credentials, and industrial internships.
+            Recognitions spanning national athletics, all-India competitive academic merit, professional full-stack credentials, computing excellence, and industrial internships.
           </p>
         </div>
 
-        {/* Certificates Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Certificates Responsive 3-Column Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {certifications.map((cert) => {
             const IconComponent = iconMap[cert.icon] || Award;
 
@@ -76,7 +77,7 @@ export default function Certificates() {
                 <div className="pt-4 mt-6 border-t border-white/10 flex items-center justify-between text-xs font-mono text-white/40">
                   <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
                     <CheckCircle className="w-3.5 h-3.5" />
-                    Verified
+                    Verified Credential
                   </span>
                   <span>ID: {cert.id}</span>
                 </div>

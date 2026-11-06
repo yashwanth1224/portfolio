@@ -3,7 +3,7 @@
 export const personalInfo = {
   name: "Yashwanth S",
   tagline: "Building fast, accessible web applications.",
-  heroSubtitle: "Building fast, accessible web applications.",
+  heroSubtitle: "Software Developer | Frontend React.js",
   role: "Frontend Developer & Software Engineer",
   email: "YashuYashn1224@gmail.com",
   phone: "+91 9902688480",
@@ -16,6 +16,7 @@ export const personalInfo = {
   resumePath: "./Yashwanth_Resume.pdf",
   photoPath: "./yashwanth.jpg",
   avatarPath: "./avatar-3d.png",
+  introVideoPath: "./avatar-intro.mp4",
   bio: `I am a frontend developer and software engineer who bridges analytical engineering rigor with modern web craftsmanship. With an engineering foundation in Mechanical Engineering from East West Institute of Technology (VTU) and intensive full-stack software development at JSPIDERS Bengaluru, I construct responsive, highly performant web applications using React, JavaScript, Tailwind CSS, and Node.js. I have architected and shipped live commercial production applications including Zisti (India's new on-demand food delivery platform) and Astrovedic Jyotishya Kendra (sidereal astrology & consultation booking portal). My background gives me an obsession with precision, structural integrity, and clean code that scales seamlessly.`,
   stats: [
     { label: "Location", value: "Bengaluru, India", sub: "Karnataka" },
@@ -26,57 +27,166 @@ export const personalInfo = {
   heroStats: [
     { label: "Location", value: "Bengaluru, India" },
     { label: "Focus", value: "Frontend Development" },
-    { label: "Background", value: "B.E. Mechanical Transitioned to Tech" }
+    { label: "Background", value: "B.E. Mechanical → Tech" }
+  ],
+  languages: [
+    { name: "Kannada", level: "Native / Mother Tongue", fluency: "100%", tag: "Native" },
+    { name: "English", level: "Professional Working Proficiency", fluency: "92%", tag: "Professional" },
+    { name: "Hindi", level: "Working Proficiency", fluency: "82%", tag: "Working" },
+    { name: "Telugu", level: "Conversational Proficiency", fluency: "76%", tag: "Conversational" }
+  ],
+  interests: [
+    { name: "Music", icon: "Music", desc: "Passionate audio listener, rhythm appreciation, and sound design." },
+    { name: "Acting", icon: "Film", desc: "Stage drama, expressive performance, and public communication." },
+    { name: "Traveling", icon: "Compass", desc: "Exploring regional cultures, architectural landscapes, and new horizons." }
   ]
 };
+
+export const education = [
+  {
+    id: "ewit-be",
+    degree: "B.E. in Mechanical Engineering",
+    institution: "East West Institute of Technology (VTU)",
+    location: "Bengaluru, India",
+    period: "2021 — July 2025",
+    badge: "Graduation: July 2025",
+    type: "Degree Education",
+    highlights: [
+      "Rigorous 4-year engineering curriculum focused on mathematical modeling, thermodynamics, computational mechanics, and control systems.",
+      "Engineered capstone projects including the Pneumatic Bicycle operated using slider-crank inversion and 3D Transparent IC Engine mechanism simulation.",
+      "Transitioned analytical problem-solving foundation directly into modern frontend web engineering and algorithms.",
+      "Represented Karnataka state at the 29th Junior Men National Championship in athletics."
+    ],
+    skills: ["Applied Mathematics", "Analytical Problem Solving", "Systems Design", "Thermodynamics", "CAD/CAM"]
+  },
+  {
+    id: "shantidhama-puc",
+    degree: "Pre-University Course (PUC — Science PCMB)",
+    institution: "Shantidhama Pu College",
+    location: "Bengaluru, India",
+    period: "2016 — 2018",
+    badge: "Science (PCMB)",
+    type: "Pre-University",
+    highlights: [
+      "Completed senior secondary pre-university coursework with specialization in Physics, Chemistry, Mathematics, and Biology (PCMB).",
+      "Built strong quantitative and analytical reasoning skills leading to engineering entrance qualification.",
+      "Participated actively in collegiate science exhibitions and state sports."
+    ],
+    skills: ["Physics", "Chemistry", "Mathematics", "Biology"]
+  },
+  {
+    id: "alfred-nobel-sslc",
+    degree: "Secondary School Leaving Certificate (SSLC — 10th Standard)",
+    institution: "Alfred Nobel Public High School",
+    location: "Bengaluru, India",
+    period: "2016",
+    badge: "SSLC (10th)",
+    type: "Secondary School",
+    highlights: [
+      "Graduated secondary high school with academic distinction across all curriculum subjects.",
+      "Secured recognition in All India General Knowledge Examination and inter-school academic bowls.",
+      "Active leader in school athletics squad and youth development forums."
+    ],
+    skills: ["Foundational Sciences", "Mathematics", "Communication", "Teamwork"]
+  }
+];
 
 export const experiences = [
   {
     id: "jspiders",
-    role: "Full Stack Java & Frontend Trainee",
+    role: "Java Full Stack Developer Trainee",
     company: "JSPIDERS",
     location: "Bengaluru, India",
     period: "2024 — Present",
-    type: "Professional Training",
-    badge: "Current",
+    type: "Internship & Professional Training",
+    category: "internship",
+    badge: "Current / Software",
     highlights: [
       "Mastering enterprise-grade frontend development with React.js, modern ES6+, HTML5 semantic structures, and advanced CSS3 / Tailwind layouts.",
       "Engineered and shipped live production commercial web platforms including Zisti (zisti.in — on-demand food delivery app) and Astrovedic Jyotishya Kendra (astrovedicjothishyakendra.in — sidereal astrology & appointment system).",
       "Developing scalable server-side solutions with Core Java, Object-Oriented Programming (OOP) paradigms, JDBC, and SQL Server / MySQL databases.",
       "Building full-stack CRUD applications with decoupled REST API architectures, token-based state, and clean modular component design."
     ],
-    skills: ["React.js", "JavaScript (ES6+)", "Core Java", "SQL", "Tailwind CSS", "HTML5/CSS3"]
+    skills: ["React.js", "JavaScript (ES6+)", "Core Java", "SQL Server / MySQL", "Tailwind CSS", "REST APIs"]
+  },
+  {
+    id: "tqs-lab",
+    role: "Sentiment Analysis ML Intern",
+    company: "TQS Lab",
+    location: "Bengaluru, India",
+    period: "2023 — 2024",
+    type: "Internship",
+    category: "internship",
+    badge: "AI / ML & NLP",
+    highlights: [
+      "Engineered a Sentiment Analysis machine learning model evaluating text polarity, emotional keywords, and word count statistics.",
+      "Mapped calculated sentiment scores directly to 1 to 5 star rating evaluations for real-time customer feedback categorization.",
+      "Built responsive web interface using React.js and Node.js for instant user testing, tokenization, and live visualization."
+    ],
+    skills: ["Sentiment Analysis", "NLP", "Machine Learning", "React.js", "Node.js", "JavaScript"]
   },
   {
     id: "manjushree",
-    role: "Industrial Engineering Intern",
+    role: "Injection Moulding Process Intern",
     company: "Manjushree Enterprises",
     location: "Bengaluru, India",
     period: "2023 — 2024",
     type: "Internship",
-    badge: "Engineering",
+    category: "internship",
+    badge: "Industrial Process",
     highlights: [
-      "Analyzed precision manufacturing workflows and quality assurance pipelines, identifying operational bottlenecks to improve throughput.",
-      "Collaborated with cross-functional technical teams to digitize production log sheets and inventory monitoring systems.",
-      "Applied computer-aided design (CAD) tolerances and strict specification compliance methodologies directly to engineering operations."
+      "Conducted comprehensive industrial internship studying plastic injection moulding processes, tooling setup, and machine parameters.",
+      "Monitored clamping force, injection pressures, and cooling cycles to minimize moulding defects and improve throughput.",
+      "Assisted in quality control inspection routines, engineering tolerance verification, and operational documentation."
     ],
-    skills: ["Process Optimization", "Solid Edge CAD", "Quality Engineering", "Workflow Digitization"]
+    skills: ["Injection Moulding", "Process Optimization", "Quality Assurance", "CAD Tolerances", "Industrial Operations"]
   },
   {
     id: "ewit",
-    role: "Bachelor of Engineering (Mechanical)",
+    role: "B.E. in Mechanical Engineering",
     company: "East West Institute of Technology, VTU",
     location: "Bengaluru, India",
-    period: "2021 — 2025",
+    period: "2021 — July 2025",
     type: "Degree Education",
-    badge: "Graduation: 2025",
+    category: "education",
+    badge: "Graduation: July 2025",
     highlights: [
       "Rigorous 4-year engineering curriculum focused on mathematical modeling, thermodynamics, computational mechanics, and control systems.",
       "Maintained First Class with Distinction (8.2 CGPA equivalent), leading academic capstone projects in pneumatic mobility and 3D simulation.",
       "Successfully transitioned analytical problem-solving foundation into modern frontend web engineering.",
-      "Spearheaded tech symposiums and served on the athletics squad representing the institution at the national level."
+      "Spearheaded tech symposiums and served on the athletics squad representing Karnataka at the national level."
     ],
     skills: ["Applied Mathematics", "Analytical Problem Solving", "Systems Design", "Leadership"]
+  },
+  {
+    id: "shantidhama",
+    role: "Pre-University Course (PUC — Science PCMB)",
+    company: "Shantidhama Pu College",
+    location: "Bengaluru, India",
+    period: "2016 — 2018",
+    type: "Pre-University",
+    category: "education",
+    badge: "Science (PCMB)",
+    highlights: [
+      "Completed senior secondary pre-university coursework with specialization in Physics, Chemistry, Mathematics, and Biology (PCMB).",
+      "Developed high-proficiency quantitative problem solving, scientific inquiry, and laboratory experimental discipline."
+    ],
+    skills: ["Physics", "Chemistry", "Mathematics", "Biology"]
+  },
+  {
+    id: "alfred-nobel",
+    role: "Secondary School Leaving Certificate (SSLC)",
+    company: "Alfred Nobel Public High School",
+    location: "Bengaluru, India",
+    period: "2016",
+    type: "Secondary School",
+    category: "education",
+    badge: "SSLC (10th)",
+    highlights: [
+      "Graduated secondary high school with academic distinction across all curriculum subjects.",
+      "Active leader in inter-school competitions, team sports, and state athletics."
+    ],
+    skills: ["Foundational Sciences", "Mathematics", "Communication", "Teamwork"]
   }
 ];
 
@@ -127,21 +237,21 @@ export const projects = [
   },
   {
     id: "sentiment-engine",
-    title: "Sentiment Analysis Web Interface",
-    subtitle: "Real-Time NLP Polarity Classifier & Review Engine",
+    title: "Sentiment Analysis ML",
+    subtitle: "Real-Time NLP Polarity Classifier & Review Engine (TQS Lab)",
     featured: true,
-    tag: "Node.js & Machine Learning",
-    description: "An interactive sentiment scoring system that analyzes text input in real-time, calculates sentiment polarity, extracts key emotional triggers, and estimates a 1 to 5 star customer satisfaction rating with word frequency visualization.",
-    techStack: ["Node.js", "Express", "JavaScript", "NLP Lexicon", "Tailwind CSS", "Web Audio API"],
+    tag: "TQS Lab Internship Project",
+    description: "An interactive machine learning sentiment analysis system developed during the TQS Lab internship. It analyzes text input in real-time, calculates sentiment polarity, extracts key emotional triggers, maps inputs to a 1 to 5 star rating, and displays live word count statistics.",
+    techStack: ["React.js", "Node.js", "Express", "NLP Lexicon", "JavaScript", "Tailwind CSS"],
     metrics: [
-      { label: "Accuracy", value: "94.2%" },
-      { label: "Inference Time", value: "< 45ms" },
-      { label: "Lexicon Words", value: "5,000+" }
+      { label: "Rating Scale", value: "1 - 5 Stars" },
+      { label: "Word Count", value: "Real-time" },
+      { label: "Inference Time", value: "< 45ms" }
     ],
     highlights: [
-      "Real-time tokenization and sentiment weighting algorithm based on an optimized AFINN-inspired lexicon.",
-      "Dynamic emotional temperature gauge showing positive, neutral, and critical sentiment breakdown.",
-      "Interactive live tester embedded right in the portfolio with instant score feedback and celebration triggers!"
+      "Real-time tokenization and sentiment scoring algorithm classifying text into positive, neutral, and critical categories.",
+      "Automated 1 to 5 star customer satisfaction conversion based on weighted polarity and word frequencies.",
+      "Interactive live tester embedded in the portfolio with instant score feedback and celebratory animations."
     ],
     demoType: "sentiment-tester",
     githubUrl: "https://github.com/yashwanth1224"
@@ -162,49 +272,49 @@ export const projects = [
     highlights: [
       "Synthesized sound engine using browser Web Audio API oscillator nodes without downloading external MP3s.",
       "Dynamic scroll-aware navigation switching between crisp white and charcoal depending on background luminosity.",
-      "Interactive 3D avatar with real-time phoneme lip-sync and speech synthesis greeting."
+      "Interactive 3D avatar with speech synthesis greeting and synchronized karaoke word highlighting."
     ],
     demoType: "portfolio-overview",
     githubUrl: "https://github.com/yashwanth1224"
   },
   {
     id: "pneumatic-mobility",
-    title: "Pneumatic Bicycle",
-    subtitle: "Zero-Emission Compressed Air Micro-Mobility Vehicle",
+    title: "Pneumatic Bicycle Operated Using Inversion of Slider Crank",
+    subtitle: "Zero-Emission Compressed Air Vehicle (2023)",
     featured: true,
-    tag: "IoT & Embedded Hardware",
-    description: "A sustainable zero-emission personal mobility bicycle propelled by regulated compressed air, controlled via an Arduino microcontroller, digital solenoid manifold, and throttle hall-effect sensor.",
-    techStack: ["Arduino C++", "Embedded Sensors", "Solenoid Automation", "Pneumatic Circuits", "Solid Edge CAD"],
+    tag: "Capstone Engineering 2023",
+    description: "A zero-emission sustainable micro-mobility vehicle propelled by regulated compressed air utilizing the kinematic inversion of a slider-crank mechanism. Governed by an Arduino microcontroller, 12V high-speed solenoid valves, and Hall-effect speed sensing.",
+    techStack: ["Arduino C++", "Slider-Crank Inversion", "Solenoid Valves", "Pneumatics", "Solid Edge CAD"],
     metrics: [
-      { label: "Range / Charge", value: "5.2 km" },
-      { label: "Emissions", value: "0.00 g/km" },
-      { label: "Max Speed", value: "24 km/h" }
+      { label: "Range / Tank", value: "5 km" },
+      { label: "Year", value: "2023" },
+      { label: "Emissions", value: "0.00 g/km" }
     ],
     highlights: [
-      "Engineered automated high-pressure solenoid valve timing sequence for optimum pneumatic torque output.",
-      "Implemented safety auto-cutoff logic for pressure threshold management and low-tank alerts.",
-      "Recognized by East West Institute of Technology engineering faculty as a standout sustainable capstone."
+      "Fabricated functional working prototype utilizing inversion of slider-crank mechanism to convert linear pneumatic thrust into rotational torque.",
+      "Integrated Arduino electronic valve timing system with pulse-width modulation for throttle control and safety cutoffs.",
+      "Delivered 5 km zero-emission urban micro-mobility range on a single compressed air charge."
     ],
     demoType: "pneumatic-detail",
     githubUrl: "https://github.com/yashwanth1224"
   },
   {
     id: "engine-3d-sim",
-    title: "Interactive 3D Engine Mechanism Simulator",
-    subtitle: "High-Performance WebGL Mechanism Kinematics",
+    title: "Transparent IC Engine Mechanism",
+    subtitle: "4-Stroke Kinematic Simulator & Transparent Model (2022)",
     featured: false,
-    tag: "Three.js & WebGL",
-    description: "A hardware-accelerated 3D simulator demonstrating internal combustion four-stroke kinematics (Intake, Compression, Power, Exhaust) with a transparent cylinder casing, dynamic piston-crank coupling, and live RPM control.",
-    techStack: ["Three.js", "WebGL", "React 18", "Tailwind CSS", "Mathematical Kinematics"],
+    tag: "Academic Project 2022",
+    description: "An engineering physical model and WebGL 3D kinematic simulation of an internal combustion engine featuring a transparent cylinder casing, dynamic piston-connecting rod-crank coupling, and real-time visualization of the 4-stroke cycle.",
+    techStack: ["Three.js", "WebGL", "Kinematics", "Solid Edge CAD", "React 18"],
     metrics: [
-      { label: "Frame Rate", value: "60 FPS" },
-      { label: "Rendering", value: "Direct WebGL" },
-      { label: "Interactive Controls", value: "Full 360°" }
+      { label: "Year", value: "2022" },
+      { label: "Mechanism", value: "4-Stroke" },
+      { label: "Rendering", value: "60 FPS 3D" }
     ],
     highlights: [
-      "Custom procedural Three.js cylinder, piston head, connecting rod, and crankshaft geometries.",
-      "Real-time slider controlling engine RPM from idle 600 RPM up to 6000 RPM with synchronized cycle state.",
-      "Color-coded thermal stroke indicators showing fuel burn ignition and exhaust displacement."
+      "Constructed physical transparent cylinder IC engine display demonstrating intake, compression, power, and exhaust strokes.",
+      "Developed interactive WebGL 3D model with real-time slider controlling RPM from 600 to 6000.",
+      "Visualized thermal cycle transitions with color-coded ignition spark and exhaust gas dispersion."
     ],
     demoType: "engine-sim",
     githubUrl: "https://github.com/yashwanth1224"
@@ -293,7 +403,7 @@ export const certifications = [
   {
     id: "national-sports",
     title: "29th Junior Men Tug-of-War National Championship",
-    issuer: "Tug-of-War Federation of India",
+    issuer: "Tug-of-War Federation of India (Karnataka State)",
     year: "National Level Athlete",
     badge: "National Sports Achievement",
     description: "Represented Karnataka state at the prestigious 29th Junior National Tug-of-War Championship. Honed extreme grit, team synchronization, strategic endurance, and athletic dedication under high pressure.",
@@ -303,7 +413,7 @@ export const certifications = [
   },
   {
     id: "jspiders-cert",
-    title: "Java Full Stack Development Professional",
+    title: "Java Full Stack Developer Certification",
     issuer: "JSPIDERS Bengaluru",
     year: "2024 — 2025",
     badge: "Software Engineering",
@@ -314,9 +424,9 @@ export const certifications = [
   },
   {
     id: "gk-merit",
-    title: "All India General Knowledge Examination (Merit Level 3)",
+    title: "All India General Knowledge Examination",
     issuer: "HRD Foundation / National Educational Board",
-    year: "National Merit Holder",
+    year: "National Merit",
     badge: "Academic Merit",
     description: "Secured top merit percentile nationwide in advanced analytical aptitude, critical thinking, global economics, and general scientific proficiency.",
     color: "from-neutral-700/30 to-neutral-800/30",
@@ -325,13 +435,35 @@ export const certifications = [
   },
   {
     id: "manjushree-cert",
-    title: "Industrial Engineering & Quality Certification",
+    title: "Certificate of Internship — Injection Moulding Process",
     issuer: "Manjushree Enterprises",
     year: "2023 — 2024",
-    badge: "Industrial Experience",
-    description: "Hands-on industrial certification in manufacturing operations, computerized workflow integration, quality engineering assurance, and design tolerances.",
+    badge: "Industrial Internship",
+    description: "Certified completion of industrial training in high-precision injection moulding machinery, tooling parameters, cycle optimization, and quality control.",
     color: "from-neutral-700/30 to-neutral-800/30",
     border: "border-neutral-700",
     icon: "Briefcase"
+  },
+  {
+    id: "spoorthy-cert",
+    title: "Advanced Computer Course",
+    issuer: "Spoorthy Computer Education",
+    year: "Certified",
+    badge: "Computing Credentials",
+    description: "Certified proficiency in computer applications, fundamental programming logic, operating systems, and office automation software.",
+    color: "from-neutral-700/30 to-neutral-800/30",
+    border: "border-neutral-700",
+    icon: "CheckCircle"
+  },
+  {
+    id: "gandhi-smarak",
+    title: "Karnataka Gandhi Smarak Nidhi Distinction",
+    issuer: "Karnataka Gandhi Smarak Nidhi",
+    year: "State Recognition",
+    badge: "State Distinction",
+    description: "Awarded recognition for meritorious essay composition, social values, and leadership ethics by the Karnataka Gandhi Smarak Nidhi board.",
+    color: "from-neutral-700/30 to-neutral-800/30",
+    border: "border-neutral-700",
+    icon: "HeartHandshake"
   }
 ];

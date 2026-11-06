@@ -1,12 +1,30 @@
 import React, { useState } from 'react';
-import { skillCategories } from '../data/portfolioData';
+import { skillCategories, personalInfo } from '../data/portfolioData';
 import { sound } from '../utils/audio';
-import { Layout, Database, Wrench, Cpu, Terminal, Code2 } from 'lucide-react';
+import {
+  Layout,
+  Database,
+  Wrench,
+  Cpu,
+  Terminal,
+  Code2,
+  Globe2,
+  Music,
+  Film,
+  Compass,
+  Sparkles
+} from 'lucide-react';
 
 export default function Skills() {
   const [activeTab, setActiveTab] = useState(0);
 
   const icons = [Layout, Database, Wrench, Cpu];
+
+  const interestIconMap = {
+    Music: Music,
+    Film: Film,
+    Compass: Compass
+  };
 
   return (
     <section id="skills" className="relative bg-[#1A1A1A] text-[#F5F2EB] py-24 lg:py-32 overflow-hidden border-t border-white/10 font-sans">
@@ -27,7 +45,7 @@ export default function Skills() {
             <span className="text-[#D95D39]">Engineering Mastery</span>
           </h2>
           <p className="text-[#F5F2EB]/75 text-base sm:text-lg mt-3">
-            A comprehensive inventory of modern languages, component frameworks, database management, and engineering competencies.
+            A comprehensive inventory of modern frameworks, database management, core engineering competencies, languages, and personal pursuits.
           </p>
         </div>
 
@@ -68,7 +86,7 @@ export default function Skills() {
         </div>
 
         {/* Active Tab Skills Grid */}
-        <div className="bg-[#222222] rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl">
+        <div className="bg-[#222222] rounded-3xl p-6 sm:p-10 border border-white/10 shadow-2xl mb-12">
           
           <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-8 border-b border-white/10 gap-2">
             <div>
@@ -113,6 +131,121 @@ export default function Skills() {
                 </div>
               </div>
             ))}
+          </div>
+
+        </div>
+
+        {/* ======================================================== */}
+        {/* Languages & Personal Interests Dual Showcase Row          */}
+        {/* ======================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Left Column: Languages Known */}
+          <div className="lg:col-span-6 bg-[#222222] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[#D95D39]">
+                    <Globe2 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-lg sm:text-xl font-bold text-white">
+                      Languages Known
+                    </h3>
+                    <p className="text-xs font-mono text-white/50 mt-0.5">
+                      Multilingual communication proficiency
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#D95D39]/10 text-[#D95D39] border border-[#D95D39]/30">
+                  4 Languages
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {personalInfo.languages.map((lang) => (
+                  <div
+                    key={lang.name}
+                    onMouseEnter={() => sound.playPop()}
+                    className="p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D95D39]/30 transition-all"
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-heading font-semibold text-white text-sm sm:text-base">
+                        {lang.name}
+                      </span>
+                      <span className="text-xs font-mono text-[#D95D39] font-bold">
+                        {lang.tag} • {lang.fluency}
+                      </span>
+                    </div>
+
+                    <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden mb-1.5">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#D95D39] to-orange-400"
+                        style={{ width: lang.fluency }}
+                      />
+                    </div>
+
+                    <div className="text-[11px] font-mono text-white/50">
+                      {lang.level}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Personal Interests & Creative Pursuits */}
+          <div className="lg:col-span-6 bg-[#222222] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-xl flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[#D95D39]">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-heading text-lg sm:text-xl font-bold text-white">
+                      Interests & Creative Pursuits
+                    </h3>
+                    <p className="text-xs font-mono text-white/50 mt-0.5">
+                      Personal passions outside of engineering
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-[#D95D39]/10 text-[#D95D39] border border-[#D95D39]/30">
+                  Life & Arts
+                </span>
+              </div>
+
+              <div className="space-y-4">
+                {personalInfo.interests.map((interest) => {
+                  const Icon = interestIconMap[interest.icon] || Compass;
+                  return (
+                    <div
+                      key={interest.name}
+                      onMouseEnter={() => sound.playPop()}
+                      className="p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-[#D95D39]/30 transition-all flex items-start gap-4"
+                    >
+                      <div className="p-2.5 rounded-xl bg-[#D95D39]/15 border border-[#D95D39]/30 text-[#D95D39] shrink-0 mt-0.5">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-bold text-white text-base mb-1">
+                          {interest.name}
+                        </h4>
+                        <p className="text-xs text-[#F5F2EB]/70 leading-relaxed">
+                          {interest.desc}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-4 mt-6 border-t border-white/10 text-xs font-mono text-white/40 flex items-center justify-between">
+              <span>Balance of Athletic Discipline, Code & Creative Expression</span>
+              <span className="text-[#D95D39]">Yashwanth S</span>
+            </div>
           </div>
 
         </div>

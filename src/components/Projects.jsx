@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { projects } from '../data/portfolioData';
 import ProjectModal from './ProjectModal';
+import DepthCard3D from './DepthCard3D';
+import ThreeStage from '../three/ThreeStage';
+import { getProjectStageFactory } from '../three/stages/projectArtifactStage';
 import { sound } from '../utils/audio';
 import { ExternalLink, Github, Sparkles, FolderKanban, Play, ArrowUpRight, Cpu, Layers, Globe, Bot } from 'lucide-react';
 
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
   const [filter, setFilter] = useState('All');
+  const [hoveredProjectId, setHoveredProjectId] = useState(null);
 
   const categories = ['All', 'Live Websites', 'Frontend & Full Stack', 'AI & Machine Learning', 'Hardware & 3D'];
 
@@ -24,7 +28,6 @@ export default function Projects() {
     setSelectedProject(project);
   };
 
-  // Helper to render abstract graphic patterns for cards
   const renderAbstractGraphic = (projectId) => {
     switch (projectId) {
       case 'zisti':
@@ -151,16 +154,17 @@ export default function Projects() {
       <div className="absolute top-1/4 right-0 w-[550px] h-[550px] bg-[#D95D39]/10 rounded-full blur-[170px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[450px] h-[450px] bg-[#D95D39]/8 rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      {/* Inner section container without restrictive z-10 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         
         {/* Section Header Tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F5F2EB] font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[#F5F2EB] font-mono text-xs uppercase tracking-widest font-bold mb-6 shadow-sm relative z-20">
           <FolderKanban className="w-3.5 h-3.5 text-[#D95D39]" />
           <span>FEATURED PORTFOLIO WORKS</span>
         </div>
 
         {/* Section Heading */}
-        <div className="mb-16">
+        <div className="mb-16 relative z-20">
           <h2 className="font-heading text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white leading-tight">
             Things I’ve <span className="text-[#D95D39]">built.</span>
           </h2>
@@ -170,7 +174,7 @@ export default function Projects() {
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-12">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 mb-12 relative z-20">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -190,24 +194,48 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* Projects Grid: Card grid with abstract graphics, hover scale, burnt orange border */}
+        {/* Projects Grid: DepthCard3D with 3D WebGL Previews */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {filteredProjects.map((project, index) => (
-            <div
+            <DepthCard3D
               key={project.id}
-              onMouseEnter={() => sound.playPop()}
-              className="group relative bg-[#222222] rounded-2xl border border-white/10 hover:border-[#D95D39] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl hover:scale-[1.02] hover:-translate-y-1"
+              intensity={5}
+              glareColor="#D95D39"
+              hoverSound={true}
+              onMouseEnter={() => setHoveredProjectId(project.id)}
+              onMouseLeave={() => setHoveredProjectId(null)}
+              className="group bg-[#222222] rounded-2xl border border-white/10 hover:border-[#D95D39] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl"
             >
               {/* Burnt Orange Top Indicator Bar */}
               <div className="h-1.5 w-full bg-[#D95D39] opacity-80 group-hover:opacity-100 transition-opacity" />
 
               <div className="p-6 sm:p-7 flex-1 flex flex-col justify-between space-y-4">
                 
-                {/* Abstract Graphic Preview */}
-                {renderAbstractGraphic(project.id)}
+                {/* 3D WebGL Preview Viewport */}
+                <ThreeStage
+                  stageId={`project-preview-${project.id}`}
+                  factory={getProjectStageFactory(project.id)}
+                  state={{ isHovered: hoveredProjectId === project.id }}
+                  interactive="parallax"
+                  fallback={renderAbstractGraphic(project.id)}
+                  className="w-full h-36 rounded-xl bg-gradient-to-br from-[#201a18] via-[#1a1a1a] to-[#161a1e] border border-white/5 overflow-hidden"
+                >
+                  {project.id === 'zisti' && (
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1 z-20 pointer-events-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      LIVE IN PRODUCTION
+                    </div>
+                  )}
+                  {project.id === 'astrovedic' && (
+                    <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1 z-20 pointer-events-none">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      LIVE CLIENT HUB
+                    </div>
+                  )}
+                </ThreeStage>
 
                 {/* Header Tag and Index */}
-                <div>
+                <div className="relative z-20">
                   <div className="flex items-center justify-between mb-2.5 mt-2">
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-mono font-medium uppercase tracking-wider border ${
                       project.liveUrl
@@ -237,7 +265,7 @@ export default function Projects() {
                 </div>
 
                 {/* Tech Stack Chips */}
-                <div className="flex flex-wrap gap-1.5 pt-2">
+                <div className="flex flex-wrap gap-1.5 pt-2 relative z-20">
                   {project.techStack.slice(0, 4).map((tech) => (
                     <span
                       key={tech}
@@ -254,7 +282,7 @@ export default function Projects() {
                 </div>
 
                 {/* Interactive Action Footer */}
-                <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3">
+                <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-3 relative z-20">
                   <button
                     type="button"
                     onClick={() => handleOpenModal(project)}
@@ -299,7 +327,7 @@ export default function Projects() {
                 </div>
 
               </div>
-            </div>
+            </DepthCard3D>
           ))}
         </div>
 

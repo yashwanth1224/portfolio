@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { X, ExternalLink, Github, Sparkles, Star, ThumbsUp, ThumbsDown, Activity, Play, Pause, Gauge, Check, Globe, ShieldCheck, CheckCircle2, Copy, Zap } from 'lucide-react';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
-import * as THREE from 'three';
+import ThreeStage from '../three/ThreeStage.jsx';
+import { createEngineSimStage } from '../three/stages/engineSimStage.js';
 
 export default function ProjectModal({ project, isOpen, onClose }) {
   if (!isOpen || !project) return null;
@@ -187,7 +188,6 @@ function SentimentTesterWidget() {
   );
   const [sentimentResult, setSentimentResult] = useState(null);
 
-  // AFINN-inspired Lexicon evaluator
   const analyzeSentiment = (text) => {
     const positiveWords = [
       'great', 'good', 'exceptional', 'fast', 'smooth', 'intuitive', 'incredible', 'love', 'amazing',
@@ -214,7 +214,6 @@ function SentimentTesterWidget() {
       }
     });
 
-    // Rating normalized 1 to 5
     let starRating = 3;
     let label = 'Neutral';
     let color = 'text-amber-400';
@@ -301,7 +300,6 @@ function SentimentTesterWidget() {
 
       {sentimentResult && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white/5 p-4 rounded-xl border border-white/10">
-          {/* Star rating output */}
           <div className="flex flex-col items-center justify-center border-b sm:border-b-0 sm:border-r border-white/10 pb-3 sm:pb-0">
             <div className="flex items-center gap-1 text-amber-400 mb-1">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -318,7 +316,6 @@ function SentimentTesterWidget() {
             </span>
           </div>
 
-          {/* Lexicon indicators */}
           <div className="sm:col-span-2 flex flex-col justify-center space-y-2 text-xs font-mono">
             <div className="flex items-center justify-between text-cream/70">
               <span>Token Count: <strong className="text-cream">{sentimentResult.wordCount}</strong></span>
@@ -356,135 +353,45 @@ function SentimentTesterWidget() {
   );
 }
 
-// 2. INTERACTIVE 3D ENGINE MECHANISM SIMULATOR WIDGET
+// 2. 2D ENGINE SCHEMATIC FALLBACK COMPONENT
+function EngineSchematicFallback({ rpm, isRunning, strokeStage }) {
+  return (
+    <div className="w-full h-[240px] rounded-xl bg-obsidian-surface/60 border border-white/10 flex flex-col items-center justify-center p-6 text-center space-y-3">
+      <div className="relative w-20 h-28 border-2 border-dashed border-[#38bdf8]/50 rounded-lg flex flex-col items-center justify-between p-2">
+        <div className="w-3 h-2 bg-[#D95D39] rounded-t-sm" />
+        <div className="w-14 h-8 bg-[#D95D39]/80 rounded border border-[#D95D39] shadow-md flex items-center justify-center text-[10px] font-mono text-white font-bold">
+          PISTON
+        </div>
+        <div className="w-1 h-10 bg-white/40 rounded-full" />
+        <div className="w-6 h-6 rounded-full border-2 border-[#D95D39] flex items-center justify-center text-[8px] font-mono text-cream/70">
+          CRK
+        </div>
+      </div>
+      <div className="space-y-1">
+        <div className="font-mono text-xs text-white/90 font-semibold">
+          {isRunning ? `Running at ${rpm} RPM` : 'Engine Simulation Paused'}
+        </div>
+        <div className="text-[11px] font-mono text-[#D95D39]">
+          {strokeStage}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// 3. INTERACTIVE 3D ENGINE MECHANISM SIMULATOR WIDGET (Migrated to ThreeStage)
 function EngineSimulatorWidget() {
-  const mountRef = useRef(null);
   const [rpm, setRpm] = useState(1800);
   const [isRunning, setIsRunning] = useState(true);
   const [strokeStage, setStrokeStage] = useState('Power Stroke');
 
-  useEffect(() => {
-    const container = mountRef.current;
-    if (!container) return;
+  const engineState = useMemo(() => ({ rpm, isRunning }), [rpm, isRunning]);
 
-    let scene, camera, renderer, animId;
-    let crankGroup, pistonMesh, rodMesh;
-
-    try {
-      const width = container.clientWidth || 600;
-      const height = 280;
-
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 50);
-      camera.position.set(0, 0, 5);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(width, height);
-      container.appendChild(renderer.domElement);
-
-      // Lights
-      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-      const dirLight = new THREE.DirectionalLight(0xff5a36, 1.5);
-      dirLight.position.set(2, 4, 3);
-      scene.add(dirLight);
-
-      // Transparent Cylinder Casing
-      const cylGeo = new THREE.CylinderGeometry(0.85, 0.85, 2.2, 32, 1, true);
-      const cylMat = new THREE.MeshPhysicalMaterial({
-        color: 0x38bdf8,
-        transparent: true,
-        opacity: 0.25,
-        roughness: 0.1,
-        transmission: 0.8,
-        wireframe: true,
-      });
-      const cylinder = new THREE.Mesh(cylGeo, cylMat);
-      cylinder.position.y = 0.5;
-      scene.add(cylinder);
-
-      // Piston Head
-      const pistonGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.5, 32);
-      const pistonMat = new THREE.MeshStandardMaterial({
-        color: 0xAF4426,
-        metalness: 0.8,
-        roughness: 0.3,
-      });
-      pistonMesh = new THREE.Mesh(pistonGeo, pistonMat);
-      scene.add(pistonMesh);
-
-      // Connecting Rod
-      const rodGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.4, 16);
-      const rodMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, metalness: 0.9, roughness: 0.2 });
-      rodMesh = new THREE.Mesh(rodGeo, rodMat);
-      scene.add(rodMesh);
-
-      // Crankshaft
-      crankGroup = new THREE.Group();
-      const crankGeo = new THREE.BoxGeometry(0.15, 0.6, 0.15);
-      const crankMesh = new THREE.Mesh(crankGeo, pistonMat);
-      crankMesh.position.y = 0.3;
-      crankGroup.add(crankMesh);
-      crankGroup.position.y = -1.1;
-      scene.add(crankGroup);
-
-      let angle = 0;
-      let clock = new THREE.Clock();
-
-      const animate = () => {
-        animId = requestAnimationFrame(animate);
-        const delta = clock.getDelta();
-
-        if (isRunning) {
-          // Angular velocity based on RPM
-          const angularSpeed = (rpm / 60) * Math.PI * 2 * 0.15;
-          angle += angularSpeed * delta;
-        }
-
-        // Crank angle
-        crankGroup.rotation.z = angle;
-
-        // Kinematic slider-crank position
-        const crankRadius = 0.35;
-        const rodLength = 1.4;
-        const crankPinY = -1.1 + Math.cos(angle) * crankRadius;
-        const crankPinX = -Math.sin(angle) * crankRadius;
-
-        // Piston Y calculation (y = crankPinY + sqrt(rodLength^2 - crankPinX^2))
-        const pistonY = crankPinY + Math.sqrt(rodLength * rodLength - crankPinX * crankPinX);
-        pistonMesh.position.y = pistonY;
-
-        // Rod orientation
-        rodMesh.position.set((crankPinX + 0) / 2, (crankPinY + pistonY) / 2, 0);
-        rodMesh.rotation.z = Math.atan2(crankPinX, pistonY - crankPinY);
-
-        // Update stroke stage text
-        const normalizedAngle = (angle % (Math.PI * 4) + Math.PI * 4) % (Math.PI * 4);
-        if (normalizedAngle < Math.PI) {
-          setStrokeStage('1. Intake Stroke (Fuel-Air Induction)');
-        } else if (normalizedAngle < Math.PI * 2) {
-          setStrokeStage('2. Compression Stroke (High Pressure)');
-        } else if (normalizedAngle < Math.PI * 3) {
-          setStrokeStage('3. Power Stroke (Ignition & Expansion)');
-        } else {
-          setStrokeStage('4. Exhaust Stroke (Scavenging)');
-        }
-
-        renderer.render(scene, camera);
-      };
-
-      animate();
-
-      return () => {
-        cancelAnimationFrame(animId);
-        if (renderer && renderer.domElement && container.contains(renderer.domElement)) {
-          container.removeChild(renderer.domElement);
-          renderer.dispose();
-        }
-      };
-    } catch (err) {
-      console.warn("Simulator initialization error:", err);
+  const handleEngineInteract = (event) => {
+    if (event?.type === 'telemetry' && event.strokeLabel) {
+      setStrokeStage(event.strokeLabel);
     }
-  }, [rpm, isRunning]);
+  };
 
   return (
     <div className="bg-obsidian p-4 rounded-2xl border border-white/15 space-y-3">
@@ -500,8 +407,23 @@ function EngineSimulatorWidget() {
         </span>
       </div>
 
-      {/* 3D Canvas container */}
-      <div ref={mountRef} className="w-full h-[240px] rounded-xl bg-obsidian-surface/60 overflow-hidden" />
+      {/* 3D WebGL Engine Simulation Viewport */}
+      <ThreeStage
+        stageId="modal-engine-sim"
+        layer="modal"
+        factory={createEngineSimStage}
+        state={engineState}
+        interactive="orbit-xy"
+        onInteract={handleEngineInteract}
+        fallback={
+          <EngineSchematicFallback
+            rpm={rpm}
+            isRunning={isRunning}
+            strokeStage={strokeStage}
+          />
+        }
+        className="w-full h-[240px] rounded-xl bg-obsidian-surface/60 cursor-grab active:cursor-grabbing"
+      />
 
       {/* RPM controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
@@ -533,7 +455,7 @@ function EngineSimulatorWidget() {
   );
 }
 
-// 3. PNEUMATIC MOBILITY SCHEMATIC WIDGET
+// 4. PNEUMATIC MOBILITY SCHEMATIC WIDGET
 function PneumaticDetailWidget() {
   return (
     <div className="bg-obsidian p-5 rounded-2xl border border-white/15 space-y-4 font-mono text-xs">
@@ -576,7 +498,7 @@ function PneumaticDetailWidget() {
   );
 }
 
-// 4. LIVE PRODUCTION WEBSITE SHOWCASE WIDGET
+// 5. LIVE PRODUCTION WEBSITE SHOWCASE WIDGET
 function LiveWebsiteWidget({ project }) {
   const [copied, setCopied] = useState(false);
 

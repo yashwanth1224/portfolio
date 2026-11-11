@@ -60,14 +60,14 @@ export default function Hero() {
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:32px_32px] opacity-[0.035]" />
       </div>
 
-      <div className="w-full max-w-7xl mx-auto relative z-10">
+      <div className="w-full max-w-7xl mx-auto relative">
         {/* Split Two-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           {/* =================================================== */}
           {/* LEFT COLUMN: Identity, Bio, Chips & CTA Buttons     */}
           {/* =================================================== */}
-          <div className="lg:col-span-6 flex flex-col justify-center space-y-6 text-left">
+          <div className="lg:col-span-6 relative z-[16] flex flex-col justify-center space-y-6 text-left">
             
             {/* 1. Terminal Role Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/95 font-mono text-xs sm:text-sm tracking-wider uppercase backdrop-blur-md shadow-sm w-fit">

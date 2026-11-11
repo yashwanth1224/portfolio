@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { experiences } from '../data/portfolioData';
 import { sound } from '../utils/audio';
 import { Briefcase, Calendar, MapPin, ChevronRight, GraduationCap, Building2 } from 'lucide-react';
+import DepthCard3D from './DepthCard3D.jsx';
+import ThreeStage from '../three/ThreeStage.jsx';
+import { createCareerHelixStage } from '../three/stages/careerHelixStage.js';
 
 export default function Experience() {
   const [activeExp, setActiveExp] = useState(experiences[0].id);
@@ -11,6 +14,15 @@ export default function Experience() {
     if (filter === 'all') return true;
     return exp.category === filter;
   });
+
+  const helixState = useMemo(
+    () => ({
+      experiences,
+      activeId: activeExp,
+      filter,
+    }),
+    [activeExp, filter]
+  );
 
   return (
     <section
@@ -92,108 +104,150 @@ export default function Experience() {
           </div>
         </div>
 
-        {/* Reverse-Chronological Vertical Timeline Layout */}
-        <div className="relative border-l-2 border-[#D8CBB2] ml-4 sm:ml-8 lg:ml-36 pl-6 sm:pl-10 lg:pl-12 space-y-10">
+        {/* 12-Column Grid: Sticky 3D Career Helix on Desktop (col-span-4) + Timeline Cards (col-span-8) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
           
-          {filteredExperiences.map((exp) => {
-            const isSelected = activeExp === exp.id;
+          {/* Desktop Sticky 3D Career Helix */}
+          <div className="hidden lg:block lg:col-span-4 sticky top-28 space-y-3">
+            <div className="flex items-center justify-between text-xs font-mono text-[#1A1A1A]/70 uppercase tracking-wider px-1">
+              <span className="font-bold text-[#1A1A1A]">Career Helix 3D</span>
+              <span className="text-[#D95D39] font-semibold">Click Node</span>
+            </div>
 
-            return (
-              <div
-                key={exp.id}
-                onMouseEnter={() => {
+            <ThreeStage
+              stageId="experience-helix"
+              factory={createCareerHelixStage}
+              state={helixState}
+              interactive="orbit-x"
+              onInteract={(e) => {
+                if (e.type === 'select' && e.itemId) {
                   sound.playPop();
-                  setActiveExp(exp.id);
-                }}
-                className="relative group transition-all duration-300"
-              >
-                {/* Burnt Orange Timeline Node Indicator Dot */}
-                <div 
-                  className={`absolute -left-[33px] sm:-left-[49px] lg:-left-[57px] top-3 w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
-                    isSelected
-                      ? 'bg-[#D95D39] border-white scale-125 shadow-lg shadow-[#D95D39]/50'
-                      : 'bg-[#F5F2EB] border-[#D95D39] group-hover:bg-[#D95D39] group-hover:scale-110'
-                  }`}
-                >
-                  <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#D95D39]'}`} />
+                  setActiveExp(e.itemId);
+                }
+              }}
+              className="w-full h-[540px] rounded-2xl bg-[#1A1A1A] border border-[#D8CBB2] shadow-xl overflow-hidden cursor-grab active:cursor-grabbing"
+              fallback={
+                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center bg-[#1A1A1A] text-white">
+                  <svg viewBox="0 0 100 240" className="w-24 h-48 stroke-[#D95D39] fill-none stroke-2">
+                    <path d="M 30,20 Q 70,60 30,100 T 30,180 T 30,220" />
+                    <path d="M 70,20 Q 30,60 70,100 T 70,180 T 70,220" stroke="#38bdf8" />
+                    <line x1="30" y1="20" x2="70" y2="20" stroke="#fff" strokeWidth="1" />
+                    <line x1="30" y1="60" x2="70" y2="60" stroke="#fff" strokeWidth="1" />
+                    <line x1="30" y1="100" x2="70" y2="100" stroke="#fff" strokeWidth="1" />
+                    <line x1="30" y1="140" x2="70" y2="140" stroke="#fff" strokeWidth="1" />
+                    <line x1="30" y1="180" x2="70" y2="180" stroke="#fff" strokeWidth="1" />
+                    <line x1="30" y1="220" x2="70" y2="220" stroke="#fff" strokeWidth="1" />
+                  </svg>
+                  <p className="font-mono text-xs uppercase tracking-wider text-[#D95D39] font-bold mt-2">
+                    Career Helix Timeline
+                  </p>
                 </div>
+              }
+            />
 
-                {/* Left Absolute Period Tag for Large Screens */}
-                <div className="hidden lg:block absolute -left-48 top-2.5 w-36 text-right">
-                  <span className={`font-mono text-xs font-semibold uppercase tracking-wider transition-colors duration-200 ${
-                    isSelected ? 'text-[#D95D39]' : 'text-[#1A1A1A]/70'
-                  }`}>
-                    {exp.period}
-                  </span>
-                </div>
+            <p className="text-[11px] font-mono text-[#1A1A1A]/60 text-center">
+              Double-helix spine synchronizes with active timeline card.
+            </p>
+          </div>
 
-                {/* Timeline Card */}
-                <div
-                  className={`p-6 sm:p-8 rounded-2xl transition-all duration-300 border ${
-                    isSelected
-                      ? 'bg-white border-[#D95D39]/40 shadow-xl shadow-black/5 -translate-y-1'
-                      : 'bg-[#F5F2EB] border-[#D8CBB2] hover:border-[#D95D39]/30 hover:bg-white'
-                  }`}
-                >
-                  {/* Card Header */}
-                  <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-                    <div>
-                      {/* Mobile period display */}
-                      <span className="lg:hidden inline-flex items-center gap-1.5 text-xs font-mono text-[#D95D39] font-semibold mb-1">
-                        <Calendar className="w-3.5 h-3.5" />
-                        {exp.period}
-                      </span>
-                      
-                      <h3 className="font-heading text-xl sm:text-2xl font-bold text-[#1A1A1A] group-hover:text-[#D95D39] transition-colors">
-                        {exp.role}
-                      </h3>
-                      
-                      <div className="flex items-center gap-3 mt-1.5 text-sm text-[#1A1A1A]/80">
-                        <span className="font-bold text-[#1A1A1A]">{exp.company}</span>
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#D95D39]" />
-                        <span className="flex items-center gap-1 text-xs text-[#1A1A1A]/70">
-                          <MapPin className="w-3.5 h-3.5 text-[#D95D39]" />
-                          {exp.location}
-                        </span>
-                      </div>
+          {/* Timeline Cards Column */}
+          <div className="lg:col-span-8 w-full">
+            <div className="relative border-l-2 border-[#D8CBB2] ml-4 sm:ml-8 pl-6 sm:pl-10 space-y-10">
+              {filteredExperiences.map((exp) => {
+                const isSelected = activeExp === exp.id;
+
+                return (
+                  <div
+                    key={exp.id}
+                    onMouseEnter={() => {
+                      sound.playPop();
+                      setActiveExp(exp.id);
+                    }}
+                    className="relative group transition-all duration-300"
+                  >
+                    {/* Burnt Orange Timeline Node Indicator Dot */}
+                    <div
+                      className={`absolute -left-[33px] sm:-left-[49px] top-3 w-5 h-5 rounded-full border-2 transition-all duration-300 flex items-center justify-center ${
+                        isSelected
+                          ? 'bg-[#D95D39] border-white scale-125 shadow-lg shadow-[#D95D39]/50'
+                          : 'bg-[#F5F2EB] border-[#D95D39] group-hover:bg-[#D95D39] group-hover:scale-110'
+                      }`}
+                    >
+                      <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-[#D95D39]'}`} />
                     </div>
 
-                    {/* Badge */}
-                    <span className={`px-3 py-1 rounded-full text-xs font-mono font-semibold tracking-wide uppercase border ${
-                      isSelected
-                        ? 'bg-[#D95D39]/10 text-[#D95D39] border-[#D95D39]/30'
-                        : 'bg-white text-[#1A1A1A]/70 border-[#D8CBB2]'
-                    }`}>
-                      {exp.badge}
-                    </span>
+                    {/* Timeline Card wrapped in DepthCard3D */}
+                    <DepthCard3D
+                      active={isSelected}
+                      intensity={5}
+                      glareColor="#D95D39"
+                      className={`p-6 sm:p-8 rounded-2xl transition-all duration-300 border ${
+                        isSelected
+                          ? 'bg-white border-[#D95D39]/40 shadow-xl shadow-black/5 -translate-y-1'
+                          : 'bg-[#F5F2EB] border-[#D8CBB2] hover:border-[#D95D39]/30 hover:bg-white'
+                      }`}
+                    >
+                      {/* Card Header */}
+                      <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                        <div>
+                          <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#D95D39] font-semibold mb-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            {exp.period}
+                          </span>
+
+                          <h3 className="font-heading text-xl sm:text-2xl font-bold text-[#1A1A1A] group-hover:text-[#D95D39] transition-colors">
+                            {exp.role}
+                          </h3>
+
+                          <div className="flex items-center gap-3 mt-1.5 text-sm text-[#1A1A1A]/80">
+                            <span className="font-bold text-[#1A1A1A]">{exp.company}</span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#D95D39]" />
+                            <span className="flex items-center gap-1 text-xs text-[#1A1A1A]/70">
+                              <MapPin className="w-3.5 h-3.5 text-[#D95D39]" />
+                              {exp.location}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Badge */}
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-mono font-semibold tracking-wide uppercase border ${
+                            isSelected
+                              ? 'bg-[#D95D39]/10 text-[#D95D39] border-[#D95D39]/30'
+                              : 'bg-white text-[#1A1A1A]/70 border-[#D8CBB2]'
+                          }`}
+                        >
+                          {exp.badge}
+                        </span>
+                      </div>
+
+                      {/* Highlights Bullet Points */}
+                      <ul className="space-y-2.5 my-5 text-sm text-[#1A1A1A]/85">
+                        {exp.highlights.map((highlight, hIdx) => (
+                          <li key={hIdx} className="flex items-start gap-2.5">
+                            <ChevronRight className="w-4 h-4 text-[#D95D39] shrink-0 mt-0.5" />
+                            <span className="leading-relaxed">{highlight}</span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {/* Skills Pill Tags */}
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-[#D8CBB2]/60">
+                        {exp.skills.map((skill) => (
+                          <span
+                            key={skill}
+                            className="px-2.5 py-1 rounded-md text-xs font-mono bg-white text-[#1A1A1A] border border-[#D8CBB2] hover:border-[#D95D39] transition-colors"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </DepthCard3D>
                   </div>
-
-                  {/* Highlights Bullet Points */}
-                  <ul className="space-y-2.5 my-5 text-sm text-[#1A1A1A]/85">
-                    {exp.highlights.map((highlight, hIdx) => (
-                      <li key={hIdx} className="flex items-start gap-2.5">
-                        <ChevronRight className="w-4 h-4 text-[#D95D39] shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Skills Pill Tags */}
-                  <div className="flex flex-wrap gap-2 pt-3 border-t border-[#D8CBB2]/60">
-                    {exp.skills.map((skill) => (
-                      <span
-                        key={skill}
-                        className="px-2.5 py-1 rounded-md text-xs font-mono bg-white text-[#1A1A1A] border border-[#D8CBB2] hover:border-[#D95D39] transition-colors"
-                      >
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                </div>
-              </div>
-            );
-          })}
+                );
+              })}
+            </div>
+          </div>
 
         </div>
 

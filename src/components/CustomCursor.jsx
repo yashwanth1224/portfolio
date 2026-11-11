@@ -18,8 +18,10 @@ export default function CustomCursor() {
       if (!isVisible) setIsVisible(true);
 
       const target = e.target;
-      const isInteractive = target.closest('a, button, input, textarea, select, [role="button"], .interactive-element');
-      setIsPointer(!!isInteractive);
+      const isInteractive =
+        typeof target?.closest === 'function' &&
+        target.closest('a, button, input, textarea, select, [role="button"], .interactive-element');
+      setIsPointer(Boolean(isInteractive));
     };
 
     const handleMouseDown = () => setIsHovered(true);

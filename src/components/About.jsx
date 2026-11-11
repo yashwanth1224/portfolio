@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { personalInfo } from '../data/portfolioData';
 import { sound } from '../utils/audio';
-import { Award, Compass, Cpu, Layers, Sparkles, User, CheckCircle2 } from 'lucide-react';
+import { Award, Compass, Cpu, Layers, Sparkles, User } from 'lucide-react';
+import DepthCard3D from './DepthCard3D.jsx';
+import ThreeStage from '../three/ThreeStage.jsx';
+import { createAboutMorphStage } from '../three/stages/aboutMorphStage.js';
 
 export default function About() {
   const [photoMode, setPhotoMode] = useState('avatar'); // 'avatar' | 'real'
@@ -28,6 +31,8 @@ export default function About() {
       desc: "Represented Karnataka as a national championship athlete; bringing grit, team synergy, and composure under tight delivery timelines."
     }
   ];
+
+  const aboutStageState = useMemo(() => ({ photoMode }), [photoMode]);
 
   return (
     <section
@@ -63,10 +68,11 @@ export default function About() {
               {/* Tape sticker effect */}
               <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#E8DEC9] border border-[#D8CBB2] shadow-sm rotate-2 z-20 pointer-events-none rounded-sm opacity-90" />
 
-              {/* Card Container */}
-              <div 
-                onMouseEnter={() => sound.playPop()}
-                className="bg-white p-4 sm:p-5 pb-7 rounded-2xl shadow-xl border border-[#E8DEC9] transition-all duration-300 transform hover:-translate-y-1"
+              {/* Card Container wrapped in DepthCard3D */}
+              <DepthCard3D
+                intensity={6}
+                glareColor="#D95D39"
+                className="bg-white p-4 sm:p-5 pb-7 rounded-2xl shadow-xl border border-[#E8DEC9] transition-all duration-300"
               >
                 {/* Toggle: 3D Avatar vs Real Photo */}
                 <div className="flex items-center justify-center mb-3">
@@ -143,12 +149,12 @@ export default function About() {
                     Bengaluru, India • Frontend & Software Engineer
                   </p>
                 </div>
-              </div>
+              </DepthCard3D>
 
             </div>
           </div>
 
-          {/* Right Column: Engineering Bio Narrative */}
+          {/* Right Column: Engineering Bio Narrative & 3D Morph Stage */}
           <div className="lg:col-span-7 flex flex-col justify-between space-y-8">
             
             {/* Bio Paragraphs */}
@@ -166,13 +172,39 @@ export default function About() {
               </p>
             </div>
 
+            {/* Interactive 3D Mechanical -> Software Morph Stage */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between text-xs font-mono text-[#1A1A1A]/70 uppercase tracking-wider px-1">
+                <span className="font-bold text-[#1A1A1A]">Interactive 3D Mechanical → Software Morph</span>
+                <span className="text-[#D95D39] font-semibold">Drag to Orbit</span>
+              </div>
+              <ThreeStage
+                stageId="about-morph"
+                factory={createAboutMorphStage}
+                state={aboutStageState}
+                interactive="orbit-xy"
+                className="w-full h-[250px] sm:h-[290px] rounded-2xl bg-[#1A1A1A] border border-[#D8CBB2] shadow-lg overflow-hidden cursor-grab active:cursor-grabbing"
+                fallback={
+                  <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center bg-[#1A1A1A] text-white/80">
+                    <p className="font-mono text-xs uppercase tracking-wider text-[#D95D39] font-bold">
+                      Mechanical → Software Evolution
+                    </p>
+                    <p className="text-xs text-white/60 mt-1">
+                      EWIT VTU Kinematics to React.js Architectures
+                    </p>
+                  </div>
+                }
+              />
+            </div>
+
             {/* Quick Stat Metric Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 pt-4 border-t border-[#1A1A1A]/10">
               {personalInfo.stats.map((stat, idx) => (
-                <div
+                <DepthCard3D
                   key={idx}
-                  onMouseEnter={() => sound.playPop()}
-                  className="bg-white p-4 rounded-xl border border-[#E8DEC9] shadow-sm hover:border-[#D95D39]/50 transition-colors"
+                  intensity={4}
+                  glareColor="#D95D39"
+                  className="bg-white p-4 rounded-xl border border-[#E8DEC9] shadow-sm hover:border-[#D95D39]/50 transition-colors h-full"
                 >
                   <div className="font-heading text-2xl sm:text-3xl font-extrabold text-[#1A1A1A] tracking-tight">
                     {stat.value}
@@ -183,7 +215,7 @@ export default function About() {
                   <div className="text-[11px] text-[#1A1A1A]/60 mt-0.5 truncate">
                     {stat.sub}
                   </div>
-                </div>
+                </DepthCard3D>
               ))}
             </div>
 
@@ -192,10 +224,11 @@ export default function About() {
               {pillars.map((pillar, i) => {
                 const IconComponent = pillar.icon;
                 return (
-                  <div
+                  <DepthCard3D
                     key={i}
-                    onMouseEnter={() => sound.playPop()}
-                    className="p-4 rounded-xl bg-white border border-[#E8DEC9] hover:shadow-md hover:border-[#D95D39]/40 transition-all duration-300"
+                    intensity={4}
+                    glareColor="#D95D39"
+                    className="p-4 rounded-xl bg-white border border-[#E8DEC9] hover:shadow-md hover:border-[#D95D39]/40 transition-all duration-300 h-full"
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <div className="w-8 h-8 rounded-lg bg-[#E8DEC9] text-[#D95D39] flex items-center justify-center font-bold">
@@ -206,7 +239,7 @@ export default function About() {
                     <p className="text-xs text-[#1A1A1A]/70 leading-normal">
                       {pillar.desc}
                     </p>
-                  </div>
+                  </DepthCard3D>
                 );
               })}
             </div>

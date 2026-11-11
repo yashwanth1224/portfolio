@@ -358,6 +358,10 @@ export class ScissorEngine {
     loader.load(
       url,
       (tex) => {
+        if (entry.refs <= 0) {
+          tex.dispose();
+          return;
+        }
         tex.colorSpace = THREE.SRGBColorSpace;
         entry.texture = tex;
         resolvePromise(tex);

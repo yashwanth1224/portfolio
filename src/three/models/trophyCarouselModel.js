@@ -375,5 +375,3 @@ export function createTrophyCarouselModel(ctx) {
 
   return { group, update, pick, syncState, dispose };
 }
-
-export const createTrophyCarouselGroup = createTrophyCarouselModel;

@@ -269,5 +269,3 @@ export function createContactBeaconModel(ctx) {
 
   return { group, update, syncState, dispose };
 }
-
-export const createContactBeaconGroup = createContactBeaconModel;

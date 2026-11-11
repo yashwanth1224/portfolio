@@ -10,10 +10,9 @@ const SCRIPT_WORDS = GREETING_SCRIPT.split(/\s+/);
 export default function Workspace3D() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [currentWordIndex, setCurrentWordIndex] = useState(-1);
-  const [, setHasInteracted] = useState(false);
+  const [isMuted, setIsMuted] = useState(sound.isMuted());
 
   const isSpeakingRef = useRef(false);
-  const wordProgressRef = useRef(0);
   const speechUtteranceRef = useRef(null);
   const fallbackIntervalRef = useRef(null);
   const hasStartedSpeechRef = useRef(false);
@@ -22,6 +21,10 @@ export default function Workspace3D() {
   useEffect(() => {
     isSpeakingRef.current = isSpeaking;
   }, [isSpeaking]);
+
+  useEffect(() => {
+    return sound.subscribe(setIsMuted);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
@@ -101,14 +104,11 @@ export default function Workspace3D() {
   }, []);
 
   const startSpeech = useCallback((isUserInitiated = true) => {
-    if (isUserInitiated) {
-      setHasInteracted(true);
-    }
     stopSpeech();
 
-    if (sound.isMuted()) {
+    if (isUserInitiated && sound.isMuted()) {
       sound.toggleMute();
-    } else {
+    } else if (!sound.isMuted()) {
       sound.init();
     }
 
@@ -174,7 +174,6 @@ export default function Workspace3D() {
           setIsSpeaking(true);
           isSpeakingRef.current = true;
           setCurrentWordIndex(0);
-          wordProgressRef.current = 0;
         };
 
         utterance.onboundary = (e) => {
@@ -185,7 +184,6 @@ export default function Workspace3D() {
             const wordIdx = textSoFar.trim() === '' ? 0 : textSoFar.trim().split(/\s+/).length - 1;
             const safeIdx = Math.max(0, Math.min(wordIdx, SCRIPT_WORDS.length - 1));
             setCurrentWordIndex(safeIdx);
-            wordProgressRef.current = safeIdx;
           }
         };
 
@@ -218,7 +216,6 @@ export default function Workspace3D() {
             simulatedIndex++;
             if (simulatedIndex < SCRIPT_WORDS.length) {
               setCurrentWordIndex(simulatedIndex);
-              wordProgressRef.current = simulatedIndex;
             } else {
               if (fallbackIntervalRef.current) {
                 clearInterval(fallbackIntervalRef.current);
@@ -244,7 +241,6 @@ export default function Workspace3D() {
       fallbackIntervalRef.current = setInterval(() => {
         if (wordIdx < SCRIPT_WORDS.length) {
           setCurrentWordIndex(wordIdx);
-          wordProgressRef.current = wordIdx;
           playProceduralPhoneme(SCRIPT_WORDS[wordIdx], wordIdx);
           wordIdx++;
         } else {
@@ -253,6 +249,12 @@ export default function Workspace3D() {
       }, 360);
     }
   }, [stopSpeech, playProceduralPhoneme]);
+
+  useEffect(() => {
+    return () => {
+      stopSpeech();
+    };
+  }, [stopSpeech]);
 
   const toggleSpeech = useCallback(() => {
     if (isSpeaking) {
@@ -465,9 +467,9 @@ export default function Workspace3D() {
                 }
               }}
               className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/10 cursor-pointer"
-              title={sound.isMuted() ? 'Unmute Audio' : 'Mute Audio'}
+              title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
             >
-              {sound.isMuted() ? (
+              {isMuted ? (
                 <VolumeX className="w-4 h-4 text-white/50" />
               ) : (
                 <Volume2 className="w-4 h-4 text-[#D95D39]" />

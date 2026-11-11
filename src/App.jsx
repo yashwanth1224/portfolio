@@ -31,7 +31,7 @@ function FadeInSection({ children, className = '' }) {
           observer.unobserve(entry.target);
         }
       },
-      { rootMargin: '0px 0px -20px 0px' }
+      { rootMargin: '120px 0px 120px 0px' }
     );
 
     if (domRef.current) observer.observe(domRef.current);
@@ -41,8 +41,8 @@ function FadeInSection({ children, className = '' }) {
   return (
     <div
       ref={domRef}
-      className={`transition-all duration-700 ease-out transform ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      className={`transition-opacity duration-700 ease-out ${
+        isVisible ? 'opacity-100' : 'opacity-0'
       } ${className}`}
     >
       {children}

@@ -21,9 +21,7 @@ export function ThreeCanvasProvider({ children }) {
   const [health, setHealth] = useState(() => ({
     status: initialTier === 'fallback' ? 'fallback' : 'initializing',
     qualityTier: initialTier,
-    activeStageCount: 0,
     hasActiveModalStage: false,
-    overBudgetStages: 0,
   }));
 
   useEffect(() => {
@@ -31,7 +29,13 @@ export function ThreeCanvasProvider({ children }) {
     if (!canvas) return;
 
     const engine = new ScissorEngine(canvas, (nextHealth) => {
-      setHealth(nextHealth);
+      setHealth((prev) =>
+        prev.status === nextHealth.status &&
+        prev.qualityTier === nextHealth.qualityTier &&
+        prev.hasActiveModalStage === nextHealth.hasActiveModalStage
+          ? prev
+          : nextHealth
+      );
     });
 
     setEngineInstance(engine);
@@ -77,8 +81,6 @@ export function useThreeCapability() {
       status: 'fallback',
       qualityTier: 'fallback',
       hasActiveModalStage: false,
-      activeStageCount: 0,
-      overBudgetStages: 0,
     };
   }
   return context.health;
@@ -98,8 +100,6 @@ export function useScissorEngine() {
         status: 'fallback',
         qualityTier: 'fallback',
         hasActiveModalStage: false,
-        activeStageCount: 0,
-        overBudgetStages: 0,
       },
     };
   }

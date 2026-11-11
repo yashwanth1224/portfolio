@@ -72,6 +72,9 @@ export class CameraDirector {
   #fovVel = 0;
 
   #omega = 5.5;
+  #dragBaselineYaw = 0;
+  #dragBaselinePitch = 0;
+  #pendingBaselineCapture = false;
 
   /**
    * @param {THREE.PerspectiveCamera} camera
@@ -104,6 +107,9 @@ export class CameraDirector {
     this.#currentFov = f;
     this.#targetFov = f;
     this.#fovVel = 0;
+    this.#dragBaselineYaw = 0;
+    this.#dragBaselinePitch = 0;
+    this.#pendingBaselineCapture = false;
 
     this.#camera.position.copy(this.#currentPos);
     this.#camera.lookAt(this.#currentTarget);
@@ -137,6 +143,7 @@ export class CameraDirector {
     this.#targetPos.set(p[0], p[1], p[2]);
     this.#desiredTarget.set(t[0], t[1], t[2]);
     this.#targetFov = f;
+    this.#pendingBaselineCapture = true;
   }
 
   /**
@@ -174,8 +181,16 @@ export class CameraDirector {
     const baseTheta = Math.atan2(offsetX, offsetZ);
     const basePhi = Math.asin(Math.max(-0.999, Math.min(0.999, offsetY / radius)));
 
-    const dragYaw = pointer?.dragYaw || 0;
-    const dragPitch = pointer?.dragPitch || 0;
+    const rawDragYaw = pointer?.dragYaw || 0;
+    const rawDragPitch = pointer?.dragPitch || 0;
+    if (this.#pendingBaselineCapture) {
+      this.#dragBaselineYaw = rawDragYaw;
+      this.#dragBaselinePitch = rawDragPitch;
+      this.#pendingBaselineCapture = false;
+    }
+
+    const dragYaw = rawDragYaw - this.#dragBaselineYaw;
+    const dragPitch = rawDragPitch - this.#dragBaselinePitch;
 
     const finalTheta = baseTheta + dragYaw;
     const finalPhi = Math.max(-1.42, Math.min(1.42, basePhi + dragPitch));

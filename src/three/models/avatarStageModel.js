@@ -39,6 +39,7 @@ export function createAvatarStageModel(ctx) {
   let targetRotationY = 0;
   let currentRotationX = 0;
   let currentRotationY = 0;
+  let lastCodeDrawTime = -1;
 
   // 1. Ambient Particles
   const particleCount = ctx.qualityTier === 'mobile' ? 45 : 120;
@@ -353,37 +354,40 @@ export function createAvatarStageModel(ctx) {
       auraMat4.opacity += (0 - auraMat4.opacity) * 0.15;
     }
 
-    // Scroll code on left monitor
-    codeTextureContext.fillStyle = '#080d17';
-    codeTextureContext.fillRect(0, 0, 512, 320);
+    if (lastCodeDrawTime < 0 || elapsed - lastCodeDrawTime >= 0.08) {
+      lastCodeDrawTime = elapsed;
 
-    codeTextureContext.fillStyle = '#1e293b';
-    codeTextureContext.fillRect(0, 0, 512, 28);
-    codeTextureContext.fillStyle = '#ef4444';
-    codeTextureContext.beginPath(); codeTextureContext.arc(16, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
-    codeTextureContext.fillStyle = '#eab308';
-    codeTextureContext.beginPath(); codeTextureContext.arc(32, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
-    codeTextureContext.fillStyle = '#22c55e';
-    codeTextureContext.beginPath(); codeTextureContext.arc(48, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
+      codeTextureContext.fillStyle = '#080d17';
+      codeTextureContext.fillRect(0, 0, 512, 320);
 
-    codeTextureContext.fillStyle = '#64748b';
-    codeTextureContext.font = '11px monospace';
-    codeTextureContext.fillText('Workspace3D.jsx — Yashwanth Portfolio', 68, 18);
+      codeTextureContext.fillStyle = '#1e293b';
+      codeTextureContext.fillRect(0, 0, 512, 28);
+      codeTextureContext.fillStyle = '#ef4444';
+      codeTextureContext.beginPath(); codeTextureContext.arc(16, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
+      codeTextureContext.fillStyle = '#eab308';
+      codeTextureContext.beginPath(); codeTextureContext.arc(32, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
+      codeTextureContext.fillStyle = '#22c55e';
+      codeTextureContext.beginPath(); codeTextureContext.arc(48, 14, 5, 0, Math.PI * 2); codeTextureContext.fill();
 
-    const scrollOffset = (elapsed * 14) % 18;
-    for (let i = 0; i < CODE_LINES.length; i++) {
-      const line = CODE_LINES[i];
-      codeTextureContext.fillStyle = line.color;
-      codeTextureContext.font = '13px monospace';
-      codeTextureContext.fillText(line.text, 20, 52 + i * 22 - scrollOffset);
+      codeTextureContext.fillStyle = '#64748b';
+      codeTextureContext.font = '11px monospace';
+      codeTextureContext.fillText('Workspace3D.jsx — Yashwanth Portfolio', 68, 18);
+
+      const scrollOffset = (elapsed * 14) % 18;
+      for (let i = 0; i < CODE_LINES.length; i++) {
+        const line = CODE_LINES[i];
+        codeTextureContext.fillStyle = line.color;
+        codeTextureContext.font = '13px monospace';
+        codeTextureContext.fillText(line.text, 20, 52 + i * 22 - scrollOffset);
+      }
+
+      if (Math.sin(elapsed * 6) > 0) {
+        codeTextureContext.fillStyle = '#38bdf8';
+        codeTextureContext.fillRect(20, 275, 8, 14);
+      }
+
+      codeTexture.needsUpdate = true;
     }
-
-    if (Math.sin(elapsed * 6) > 0) {
-      codeTextureContext.fillStyle = '#38bdf8';
-      codeTextureContext.fillRect(20, 275, 8, 14);
-    }
-
-    codeTexture.needsUpdate = true;
   };
 
   const dispose = () => {
@@ -394,5 +398,3 @@ export function createAvatarStageModel(ctx) {
 
   return { group, update, dispose };
 }
-
-export const createAvatarStageGroup = createAvatarStageModel;

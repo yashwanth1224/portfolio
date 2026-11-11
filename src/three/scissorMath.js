@@ -75,28 +75,42 @@ export function computeScrollProgress(stageRect, viewportHeight) {
 }
 
 /**
- * Partitions visible stages into rendered vs over-budget sets based on modal preemption,
- * priority, and visible area.
+ * Partitions visible stages into rendered, over-budget, and modal-preempted sets
+ * based on visibility, modal preemption, priority, and visible area.
  *
- * @param {Array<{ id: string, layer?: 'page' | 'modal', priority?: number, visibleAreaPx?: number }>} entries
+ * @param {Array<{ id: string, layer?: 'page' | 'modal', priority?: number, visibleAreaPx?: number, scissor?: { visible?: boolean } }>} entries
  * @param {number} maxVisibleStages
- * @returns {{ renderedIds: Set<string>, overBudgetIds: Set<string> }}
+ * @returns {{ renderedIds: Set<string>, overBudgetIds: Set<string>, preemptedIds: Set<string> }}
  */
 export function selectBudgetedStages(entries, maxVisibleStages) {
   const renderedIds = new Set();
   const overBudgetIds = new Set();
+  const preemptedIds = new Set();
 
   if (!Array.isArray(entries) || entries.length === 0) {
-    return { renderedIds, overBudgetIds };
+    return { renderedIds, overBudgetIds, preemptedIds };
   }
 
-  const hasModal = entries.some((e) => e.layer === 'modal');
-  const candidates = [];
-
+  const visibleEntries = [];
   for (let i = 0; i < entries.length; i++) {
     const entry = entries[i];
+    if (!entry || (entry.visibleAreaPx ?? 0) <= 0 || entry.scissor?.visible === false) {
+      continue;
+    }
+    visibleEntries.push(entry);
+  }
+
+  if (visibleEntries.length === 0) {
+    return { renderedIds, overBudgetIds, preemptedIds };
+  }
+
+  const hasModal = visibleEntries.some((e) => e.layer === 'modal');
+  const candidates = [];
+
+  for (let i = 0; i < visibleEntries.length; i++) {
+    const entry = visibleEntries[i];
     if (hasModal && entry.layer !== 'modal') {
-      overBudgetIds.add(entry.id);
+      preemptedIds.add(entry.id);
     } else {
       candidates.push(entry);
     }
@@ -106,7 +120,7 @@ export function selectBudgetedStages(entries, maxVisibleStages) {
     for (let i = 0; i < candidates.length; i++) {
       overBudgetIds.add(candidates[i].id);
     }
-    return { renderedIds, overBudgetIds };
+    return { renderedIds, overBudgetIds, preemptedIds };
   }
 
   candidates.sort((a, b) => {
@@ -124,7 +138,7 @@ export function selectBudgetedStages(entries, maxVisibleStages) {
     }
   }
 
-  return { renderedIds, overBudgetIds };
+  return { renderedIds, overBudgetIds, preemptedIds };
 }
 
 /**

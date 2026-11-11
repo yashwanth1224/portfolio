@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { projects } from '../data/portfolioData';
 import ProjectModal from './ProjectModal';
-import DepthCard3D from './DepthCard3D';
 import ThreeStage from '../three/ThreeStage';
 import { getProjectStageFactory } from '../three/stages/projectArtifactStage';
 import { sound } from '../utils/audio';
-import { ExternalLink, Github, Sparkles, FolderKanban, Play, ArrowUpRight, Cpu, Layers, Globe, Bot } from 'lucide-react';
+import { Github, FolderKanban, Play, Cpu, Globe, Bot } from 'lucide-react';
 
 export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null);
@@ -194,17 +193,17 @@ export default function Projects() {
           ))}
         </div>
 
-        {/* Projects Grid: DepthCard3D with 3D WebGL Previews */}
+        {/* Projects Grid: 3D WebGL Previews */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {filteredProjects.map((project, index) => (
-            <DepthCard3D
+            <div
               key={project.id}
-              intensity={5}
-              glareColor="#D95D39"
-              hoverSound={true}
-              onMouseEnter={() => setHoveredProjectId(project.id)}
+              onMouseEnter={() => {
+                sound.playPop();
+                setHoveredProjectId(project.id);
+              }}
               onMouseLeave={() => setHoveredProjectId(null)}
-              className="group bg-[#222222] rounded-2xl border border-white/10 hover:border-[#D95D39] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl"
+              className="group relative bg-[#222222] rounded-2xl border border-white/10 hover:border-[#D95D39] transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-xl"
             >
               {/* Burnt Orange Top Indicator Bar */}
               <div className="h-1.5 w-full bg-[#D95D39] opacity-80 group-hover:opacity-100 transition-opacity" />
@@ -327,7 +326,7 @@ export default function Projects() {
                 </div>
 
               </div>
-            </DepthCard3D>
+            </div>
           ))}
         </div>
 

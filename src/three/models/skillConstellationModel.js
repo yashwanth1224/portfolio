@@ -335,5 +335,3 @@ export function createSkillConstellationModel(ctx) {
 
   return { group, update, pick, syncState, dispose };
 }
-
-export const createSkillConstellationGroup = createSkillConstellationModel;

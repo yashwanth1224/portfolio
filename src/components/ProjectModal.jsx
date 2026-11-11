@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ExternalLink, Github, Sparkles, Star, ThumbsUp, ThumbsDown, Activity, Play, Pause, Gauge, Check, Globe, ShieldCheck, CheckCircle2, Copy, Zap } from 'lucide-react';
+import { X, ExternalLink, Github, Sparkles, Star, Activity, Play, Pause, Gauge, Check, Globe, ShieldCheck, CheckCircle2, Copy, Zap } from 'lucide-react';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
 import ThreeStage from '../three/ThreeStage.jsx';
@@ -381,7 +381,7 @@ function SentimentTesterWidget() {
 }
 
 // 2. 2D ENGINE SCHEMATIC FALLBACK COMPONENT
-function EngineSchematicFallback({ rpm, isRunning, strokeStage }) {
+function EngineSchematicFallback({ rpm, isRunning, initialStrokeLabel = 'Power Stroke' }) {
   return (
     <div className="w-full h-[240px] rounded-xl bg-obsidian-surface/60 border border-white/10 flex flex-col items-center justify-center p-6 text-center space-y-3">
       <div className="relative w-20 h-28 border-2 border-dashed border-[#38bdf8]/50 rounded-lg flex flex-col items-center justify-between p-2">
@@ -399,7 +399,7 @@ function EngineSchematicFallback({ rpm, isRunning, strokeStage }) {
           {isRunning ? `Running at ${rpm} RPM` : 'Engine Simulation Paused'}
         </div>
         <div className="text-[11px] font-mono text-[#D95D39]">
-          {strokeStage}
+          {isRunning ? `4-Stroke Cycle • ${initialStrokeLabel}` : 'Simulation Paused'}
         </div>
       </div>
     </div>
@@ -410,13 +410,14 @@ function EngineSchematicFallback({ rpm, isRunning, strokeStage }) {
 function EngineSimulatorWidget() {
   const [rpm, setRpm] = useState(1800);
   const [isRunning, setIsRunning] = useState(true);
-  const [strokeStage, setStrokeStage] = useState('Power Stroke');
+  const [initialStrokeLabel] = useState('Power Stroke');
+  const strokeBadgeRef = useRef(null);
 
   const engineState = useMemo(() => ({ rpm, isRunning }), [rpm, isRunning]);
 
   const handleEngineInteract = (event) => {
-    if (event?.type === 'telemetry' && event.strokeLabel) {
-      setStrokeStage(event.strokeLabel);
+    if (event?.type === 'telemetry' && event.strokeLabel && strokeBadgeRef.current) {
+      strokeBadgeRef.current.textContent = event.strokeLabel;
     }
   };
 
@@ -429,8 +430,11 @@ function EngineSimulatorWidget() {
             3D WebGL Kinematic Mechanism
           </h4>
         </div>
-        <span className="text-xs font-mono text-coral bg-coral/10 px-2.5 py-1 rounded-full border border-coral/30">
-          {strokeStage}
+        <span
+          ref={strokeBadgeRef}
+          className="text-xs font-mono text-coral bg-coral/10 px-2.5 py-1 rounded-full border border-coral/30"
+        >
+          {initialStrokeLabel}
         </span>
       </div>
 
@@ -446,7 +450,7 @@ function EngineSimulatorWidget() {
           <EngineSchematicFallback
             rpm={rpm}
             isRunning={isRunning}
-            strokeStage={strokeStage}
+            initialStrokeLabel={initialStrokeLabel}
           />
         }
         className="w-full h-[240px] rounded-xl bg-obsidian-surface/60 cursor-grab active:cursor-grabbing"

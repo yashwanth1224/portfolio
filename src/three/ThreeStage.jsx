@@ -90,7 +90,28 @@ export default function ThreeStage({
   const pointerHandlers = useMemo(() => {
     if (interactive === 'none') return {};
 
+    const syncPointerCoords = (e) => {
+      const el = containerRef.current;
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) return false;
+
+      pointerRef.current.x = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width) * 2 - 1));
+      pointerRef.current.y = Math.max(-1, Math.min(1, -(((e.clientY - rect.top) / rect.height) * 2 - 1)));
+      return true;
+    };
+
+    const finishDrag = (e) => {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        e.currentTarget.releasePointerCapture?.(e.pointerId);
+      }
+      dragStartRef.current.active = false;
+      pointerRef.current.isDragging = false;
+    };
+
     const handlePointerDown = (e) => {
+      syncPointerCoords(e);
+      e.currentTarget.setPointerCapture?.(e.pointerId);
       dragStartRef.current = {
         startX: e.clientX,
         startY: e.clientY,
@@ -99,19 +120,15 @@ export default function ThreeStage({
         active: true,
       };
       pointerRef.current.isDragging = true;
+      pointerRef.current.isHovered = true;
+      if (engine && tokenRef.current !== null) {
+        engine.updateStagePointer(stageId, tokenRef.current, pointerRef.current);
+      }
     };
 
     const handlePointerMove = (e) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) return;
+      if (!syncPointerCoords(e)) return;
 
-      const normX = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width) * 2 - 1));
-      const normY = Math.max(-1, Math.min(1, -(((e.clientY - rect.top) / rect.height) * 2 - 1)));
-
-      pointerRef.current.x = normX;
-      pointerRef.current.y = normY;
       pointerRef.current.isHovered = true;
 
       if (dragStartRef.current.active) {
@@ -137,6 +154,7 @@ export default function ThreeStage({
     };
 
     const handlePointerUp = (e) => {
+      syncPointerCoords(e);
       if (dragStartRef.current.active) {
         const totalDist = Math.hypot(
           e.clientX - dragStartRef.current.startX,
@@ -145,9 +163,8 @@ export default function ThreeStage({
         if (totalDist < 6) {
           pointerRef.current.justClicked = true;
         }
-        dragStartRef.current.active = false;
       }
-      pointerRef.current.isDragging = false;
+      finishDrag(e);
 
       if (engine && tokenRef.current !== null) {
         engine.updateStagePointer(stageId, tokenRef.current, pointerRef.current);
@@ -162,7 +179,10 @@ export default function ThreeStage({
       }
     };
 
-    const handlePointerLeave = () => {
+    const handlePointerLeave = (e) => {
+      if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+        return;
+      }
       pointerRef.current.isHovered = false;
       pointerRef.current.isDragging = false;
       dragStartRef.current.active = false;
@@ -175,18 +195,27 @@ export default function ThreeStage({
       }
     };
 
+    const handlePointerCancel = (e) => {
+      finishDrag(e);
+      pointerRef.current.isHovered = false;
+      if (engine && tokenRef.current !== null) {
+        engine.updateStagePointer(stageId, tokenRef.current, pointerRef.current);
+      }
+    };
+
     return {
       onPointerDown: handlePointerDown,
       onPointerMove: handlePointerMove,
       onPointerUp: handlePointerUp,
       onPointerEnter: handlePointerEnter,
       onPointerLeave: handlePointerLeave,
-      onPointerCancel: handlePointerLeave,
+      onPointerCancel: handlePointerCancel,
     };
   }, [interactive, engine, stageId]);
 
   const shouldShowFallback =
     health.status === 'fallback' ||
+    health.status === 'context-lost' ||
     health.qualityTier === 'reduced' ||
     isOverBudget;
 
@@ -194,7 +223,10 @@ export default function ThreeStage({
     <div
       ref={containerRef}
       className={`relative ${className}`}
-      style={{ touchAction: 'pan-y' }}
+      style={{
+        touchAction:
+          interactive === 'orbit-xy' || interactive === 'orbit-x' ? 'none' : 'pan-y',
+      }}
       {...pointerHandlers}
     >
       {shouldShowFallback && fallback ? fallback : null}

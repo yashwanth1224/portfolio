@@ -39,12 +39,6 @@ function createProjectStageFactory(projectId) {
       update(dt, elapsed, pointer) {
         model.update(dt, elapsed, pointer, currentState);
       },
-      resize(width, height) {
-        if (height > 0) {
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
-        }
-      },
       dispose() {
         model.dispose();
         lighting.dispose();

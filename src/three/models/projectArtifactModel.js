@@ -138,11 +138,10 @@ export function createProjectArtifactModel(ctx, projectId) {
           color: 0x10b981,
           emissive: 0x059669,
           emissiveIntensity: 0.35,
-          roughness: 0.15,
-          metalness: 0.1,
+          roughness: 0.12,
+          metalness: 0.25,
           transparent: true,
-          opacity: 0.88,
-          transmission: 0.35,
+          opacity: 0.78,
         })
       );
       const wire = new THREE.Mesh(

@@ -92,6 +92,7 @@ export function createStudioDioramaStage(ctx) {
 
   let activeStationId = 'overview';
   let isSpeaking = false;
+  let activeSkillCategory = 0;
   const raycaster = new THREE.Raycaster();
   const mouse = new THREE.Vector2();
 
@@ -371,6 +372,11 @@ export function createStudioDioramaStage(ctx) {
         isSpeaking = state.isSpeaking;
       }
 
+      if (typeof state.activeSkillCategory === 'number') {
+        activeSkillCategory = state.activeSkillCategory;
+        skillsModel.syncState({ activeTab: activeSkillCategory });
+      }
+
       // Update pedestal glow feedback
       for (let i = 0; i < glowRings.length; i++) {
         const ring = glowRings[i];
@@ -406,16 +412,6 @@ export function createStudioDioramaStage(ctx) {
       skillsModel.update(dt, elapsed, null);
       trophyModel.update(dt, elapsed, null);
       beaconModel.update(dt, elapsed, null);
-
-      if (pointer?.justClicked) {
-        pick(pointer.x, pointer.y);
-      }
-    },
-
-    resize(w, h) {
-      if (h <= 0) return;
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
     },
 
     pick(ndcX, ndcY) {

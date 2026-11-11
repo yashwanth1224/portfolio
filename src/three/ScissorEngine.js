@@ -14,9 +14,7 @@ import {
  * @typedef {Object} CanvasHealth
  * @property {HealthStatus} status
  * @property {QualityTier} qualityTier
- * @property {number} activeStageCount
  * @property {boolean} hasActiveModalStage
- * @property {number} overBudgetStages
  *
  * @typedef {Object} NormalizedPointer
  * @property {number} x
@@ -121,9 +119,7 @@ export class ScissorEngine {
     this.#health = {
       status: this.#status,
       qualityTier: this.#qualityTier,
-      activeStageCount: 0,
       hasActiveModalStage: false,
-      overBudgetStages: 0,
     };
 
     if (this.#qualityTier === 'fallback') {
@@ -355,12 +351,15 @@ export class ScissorEngine {
           return;
         }
         tex.colorSpace = THREE.SRGBColorSpace;
+        tex.userData = { ...tex.userData, isShared: true };
         entry.texture = tex;
         resolvePromise(tex);
       },
       undefined,
       (err) => {
-        this.#sharedTextures.delete(url);
+        if (this.#sharedTextures.get(url) === entry) {
+          this.#sharedTextures.delete(url);
+        }
         rejectPromise(err);
       }
     );
@@ -403,9 +402,19 @@ export class ScissorEngine {
   }
 
   #startLoop() {
-    if (this.#isLoopRunning) return;
+    if (
+      this.#isLoopRunning ||
+      this.#status !== 'ready' ||
+      this.#qualityTier === 'reduced' ||
+      this.#qualityTier === 'fallback' ||
+      (typeof document !== 'undefined' && document.hidden)
+    ) {
+      return;
+    }
     this.#isLoopRunning = true;
     this.#lastFrameTime = 0;
+    this.#framesCounted = 0;
+    this.#telemetryTimer = typeof performance !== 'undefined' ? performance.now() : 0;
     this.#rafId = requestAnimationFrame(this.#renderLoop);
   }
 
@@ -419,9 +428,19 @@ export class ScissorEngine {
   }
 
   #renderLoop = (timestamp) => {
-    if (!this.#isLoopRunning) return;
+    if (
+      !this.#isLoopRunning ||
+      this.#status !== 'ready' ||
+      this.#qualityTier === 'reduced' ||
+      this.#qualityTier === 'fallback'
+    ) {
+      this.#stopLoop();
+      return;
+    }
     this.#renderFrame(timestamp);
-    this.#rafId = requestAnimationFrame(this.#renderLoop);
+    if (this.#isLoopRunning) {
+      this.#rafId = requestAnimationFrame(this.#renderLoop);
+    }
   };
 
   /**
@@ -476,18 +495,37 @@ export class ScissorEngine {
       this.#telemetryTimer = now;
     }
 
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw =
+      this.#canvas.clientWidth ||
+      (typeof document !== 'undefined' ? document.documentElement?.clientWidth : 0) ||
+      window.innerWidth;
+    const vh =
+      this.#canvas.clientHeight ||
+      (typeof document !== 'undefined' ? document.documentElement?.clientHeight : 0) ||
+      window.innerHeight;
 
     const entries = [];
     for (const reg of this.#stages.values()) {
-      if (!reg.element.isConnected) continue;
+      if (!reg.element.isConnected) {
+        if (reg.isOverBudget) {
+          reg.isOverBudget = false;
+          reg.onBudgetChange?.(false);
+        }
+        continue;
+      }
       const stageRect = reg.element.getBoundingClientRect();
       const scrollClipRect =
         reg.scrollClipRoot && reg.scrollClipRoot.isConnected
           ? reg.scrollClipRoot.getBoundingClientRect()
           : null;
       const scissor = computeScissorViewport(stageRect, scrollClipRect, vw, vh);
+      if (!scissor.visible || scissor.visibleAreaPx <= 0 || scissor.vpW <= 0 || scissor.vpH <= 0) {
+        if (reg.isOverBudget) {
+          reg.isOverBudget = false;
+          reg.onBudgetChange?.(false);
+        }
+        continue;
+      }
       const scrollProgress = computeScrollProgress(stageRect, vh);
 
       entries.push({
@@ -515,7 +553,6 @@ export class ScissorEngine {
 
     this.#lastRenderedCount = budgetResult.renderedIds.size;
     this.#lastOverBudgetCount = budgetResult.overBudgetIds.size;
-    this.#updateHealthSnapshot(budgetResult.overBudgetIds.size);
 
     if (budgetResult.renderedIds.size === 0) {
       if (this.#hasDrawnFrame) {
@@ -548,6 +585,7 @@ export class ScissorEngine {
       if (!budgetResult.renderedIds.has(entry.id)) continue;
 
       const { scissor, scrollProgress, reg } = entry;
+      if (scissor.vpW <= 0 || scissor.vpH <= 0) continue;
 
       if (reg.lastVpW !== scissor.vpW || reg.lastVpH !== scissor.vpH) {
         reg.lastVpW = scissor.vpW;
@@ -574,7 +612,7 @@ export class ScissorEngine {
     }
   }
 
-  #updateHealthSnapshot(overBudgetStages = 0) {
+  #updateHealthSnapshot() {
     let hasActiveModalStage = false;
     for (const reg of this.#stages.values()) {
       if (reg.layer === 'modal') {
@@ -583,23 +621,17 @@ export class ScissorEngine {
       }
     }
 
-    const nextHealth = {
-      status: this.#status,
-      qualityTier: this.#qualityTier,
-      activeStageCount: this.#stages.size,
-      hasActiveModalStage,
-      overBudgetStages,
-    };
-
     const prev = this.#health;
     if (
-      prev.status !== nextHealth.status ||
-      prev.qualityTier !== nextHealth.qualityTier ||
-      prev.activeStageCount !== nextHealth.activeStageCount ||
-      prev.hasActiveModalStage !== nextHealth.hasActiveModalStage ||
-      prev.overBudgetStages !== nextHealth.overBudgetStages
+      prev.status !== this.#status ||
+      prev.qualityTier !== this.#qualityTier ||
+      prev.hasActiveModalStage !== hasActiveModalStage
     ) {
-      this.#health = nextHealth;
+      this.#health = {
+        status: this.#status,
+        qualityTier: this.#qualityTier,
+        hasActiveModalStage,
+      };
       this.#onHealthChange?.(this.#health);
     }
   }
@@ -607,7 +639,7 @@ export class ScissorEngine {
   #handleVisibilityChange = () => {
     if (document.hidden) {
       this.#stopLoop();
-    } else if (this.#stages.size > 0 && this.#status === 'ready') {
+    } else if (this.#stages.size > 0) {
       this.#startLoop();
     }
   };
@@ -624,6 +656,7 @@ export class ScissorEngine {
   #handleContextLost = (event) => {
     event.preventDefault();
     this.#status = 'context-lost';
+    this.#stopLoop();
     this.#updateHealthSnapshot();
   };
 
@@ -633,6 +666,9 @@ export class ScissorEngine {
     this.#lastAppliedDpr = 0;
     this.#status = 'ready';
     this.#updateHealthSnapshot();
+    if (this.#stages.size > 0) {
+      this.#startLoop();
+    }
   };
 
   /**
@@ -658,6 +694,7 @@ export class ScissorEngine {
     this.#stages.clear();
 
     for (const entry of this.#sharedTextures.values()) {
+      entry.refs = 0;
       entry.texture?.dispose();
     }
     this.#sharedTextures.clear();

@@ -43,9 +43,8 @@ export function createEngineSimStage(ctx) {
   const cylMat = new THREE.MeshPhysicalMaterial({
     color: 0x38bdf8,
     transparent: true,
-    opacity: 0.28,
+    opacity: 0.22,
     roughness: 0.1,
-    transmission: 0.8,
     wireframe: true,
   });
   const cylinder = new THREE.Mesh(cylGeo, cylMat);
@@ -109,6 +108,7 @@ export function createEngineSimStage(ctx) {
   let isRunning = true;
   let angle = 0;
   let lastStrokeIndex = -1;
+  let lastTelemetryEmit = -1;
 
   const crankRadius = 0.35;
   const rodLength = 1.4;
@@ -131,8 +131,8 @@ export function createEngineSimStage(ctx) {
         angle += angularSpeed * dt;
       }
 
-      assembly.rotation.y = pointer.dragYaw;
-      assembly.rotation.x = pointer.dragPitch;
+      assembly.rotation.y = pointer?.dragYaw || 0;
+      assembly.rotation.x = pointer?.dragPitch || 0;
 
       crankGroup.rotation.z = angle;
 
@@ -163,19 +163,17 @@ export function createEngineSimStage(ctx) {
         sparkMesh.material.opacity = 0;
       }
 
-      if (strokeIndex !== lastStrokeIndex) {
+      if (
+        strokeIndex !== lastStrokeIndex &&
+        (lastTelemetryEmit < 0 || elapsed - lastTelemetryEmit >= 0.12)
+      ) {
         lastStrokeIndex = strokeIndex;
+        lastTelemetryEmit = elapsed;
         ctx.emitInteract({
           type: 'telemetry',
           strokeLabel: STROKE_LABELS[strokeIndex],
           strokeIndex,
         });
-      }
-    },
-    resize(width, height) {
-      if (height > 0) {
-        camera.aspect = width / height;
-        camera.updateProjectionMatrix();
       }
     },
     dispose() {

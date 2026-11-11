@@ -178,6 +178,7 @@ export function createCareerHelixModel(ctx) {
       id: exp.id,
       category: exp.category,
       nodeGroup,
+      hitMesh,
       sphereMat,
       ringMat,
       badgeMat,
@@ -189,37 +190,56 @@ export function createCareerHelixModel(ctx) {
 
   const raycaster = new THREE.Raycaster();
   const mouseVec = new THREE.Vector2();
+  const hiddenIds = new Set();
+  let activePickableMeshes = pickableMeshes;
 
   const syncState = (state) => {
     if (!state) return;
     const activeId = state.activeId || exps[0]?.id;
     const filter = state.filter || 'all';
+    const visibleIdSet =
+      state.visibleIds instanceof Set
+        ? state.visibleIds
+        : Array.isArray(state.visibleIds)
+        ? new Set(state.visibleIds)
+        : null;
+
+    hiddenIds.clear();
+    const nextPickable = [];
 
     for (let i = 0; i < milestoneNodes.length; i++) {
       const node = milestoneNodes[i];
       const isSelected = node.id === activeId;
-      const isFilteredOut = filter !== 'all' && node.category !== filter;
+      const hiddenByFilter = filter !== 'all' && node.category !== filter;
+      const hiddenByIds = visibleIdSet !== null && !visibleIdSet.has(node.id);
+      const isFilteredOut = hiddenByFilter || hiddenByIds;
 
       if (isFilteredOut) {
+        hiddenIds.add(node.id);
         node.targetScale = 0.7;
         node.sphereMat.opacity = 0.25;
         node.ringMat.opacity = 0.1;
         node.badgeMat.opacity = 0.2;
         node.sphereMat.emissiveIntensity = 0.1;
-      } else if (isSelected) {
-        node.targetScale = 1.35;
-        node.sphereMat.opacity = 1.0;
-        node.ringMat.opacity = 0.95;
-        node.badgeMat.opacity = 1.0;
-        node.sphereMat.emissiveIntensity = 1.0;
       } else {
-        node.targetScale = 1.0;
-        node.sphereMat.opacity = 0.85;
-        node.ringMat.opacity = 0.25;
-        node.badgeMat.opacity = 0.85;
-        node.sphereMat.emissiveIntensity = 0.25;
+        nextPickable.push(node.hitMesh);
+        if (isSelected) {
+          node.targetScale = 1.35;
+          node.sphereMat.opacity = 1.0;
+          node.ringMat.opacity = 0.95;
+          node.badgeMat.opacity = 1.0;
+          node.sphereMat.emissiveIntensity = 1.0;
+        } else {
+          node.targetScale = 1.0;
+          node.sphereMat.opacity = 0.85;
+          node.ringMat.opacity = 0.25;
+          node.badgeMat.opacity = 0.85;
+          node.sphereMat.emissiveIntensity = 0.25;
+        }
       }
     }
+
+    activePickableMeshes = nextPickable;
   };
 
   const pick = (ndcX, ndcY, camera) => {
@@ -227,12 +247,12 @@ export function createCareerHelixModel(ctx) {
     mouseVec.set(ndcX, ndcY);
     raycaster.setFromCamera(mouseVec, camera);
 
-    const intersects = raycaster.intersectObjects(pickableMeshes, false);
-    if (intersects.length > 0) {
-      const hit = intersects[0].object;
-      const itemId = hit.userData?.id;
-      if (itemId) {
+    const intersects = raycaster.intersectObjects(activePickableMeshes, false);
+    for (let i = 0; i < intersects.length; i++) {
+      const itemId = intersects[i].object.userData?.id;
+      if (itemId && !hiddenIds.has(itemId)) {
         ctx.emitInteract({ type: 'select', itemId });
+        return;
       }
     }
   };
@@ -265,5 +285,3 @@ export function createCareerHelixModel(ctx) {
 
   return { group, update, pick, syncState, dispose };
 }
-
-export const createCareerHelixGroup = createCareerHelixModel;

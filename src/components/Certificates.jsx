@@ -104,10 +104,7 @@ export default function Certificates() {
                     sound.playPop();
                     setActiveCert(cert.id);
                   }}
-                  onMouseEnter={() => {
-                    sound.playPop();
-                    setActiveCert(cert.id);
-                  }}
+                  onMouseEnter={() => setActiveCert(cert.id)}
                   className={`group relative bg-[#222222] p-6 rounded-2xl border transition-all duration-300 flex flex-col justify-between shadow-xl cursor-pointer h-full ${
                     isActive
                       ? 'border-[#D95D39] ring-1 ring-[#D95D39]/50 shadow-[#D95D39]/10'

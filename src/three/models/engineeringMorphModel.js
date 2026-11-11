@@ -243,12 +243,14 @@ export function createEngineeringMorphModel(ctx) {
       Math.cos(angC) * ringRadius
     );
 
-    // Morph state blending
-    const photoMode = state?.photoMode || 'avatar';
-    const scroll = typeof state?.scrollProgress === 'number' ? state.scrollProgress : 0.5;
-
-    let targetMorph = photoMode === 'real' ? 0.25 : 0.75;
-    targetMorph = Math.max(0, Math.min(1, targetMorph + (scroll - 0.5) * 0.3));
+    let targetMorph;
+    if (typeof state?.morphProgress === 'number' && Number.isFinite(state.morphProgress)) {
+      targetMorph = Math.max(0, Math.min(1, state.morphProgress));
+    } else {
+      const photoMode = state?.photoMode || 'avatar';
+      const scroll = typeof state?.scrollProgress === 'number' ? state.scrollProgress : 0.5;
+      targetMorph = Math.max(0, Math.min(1, (photoMode === 'real' ? 0.25 : 0.75) + (scroll - 0.5) * 0.3));
+    }
 
     currentMorph += (targetMorph - currentMorph) * 0.06;
 
@@ -290,5 +292,3 @@ export function createEngineeringMorphModel(ctx) {
 
   return { group, update, dispose };
 }
-
-export const createEngineeringMorphGroup = createEngineeringMorphModel;

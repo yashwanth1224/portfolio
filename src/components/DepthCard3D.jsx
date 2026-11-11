@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { sound } from '../utils/audio.js';
 
 /**
@@ -14,6 +14,7 @@ import { sound } from '../utils/audio.js';
 
 /**
  * GPU-composited CSS perspective 3D card tilt with specular glare overlay.
+ * Drives tilt and glare directly via CSS custom properties to avoid pointermove React re-renders.
  * Automatically disables under (pointer: coarse) or prefers-reduced-motion: reduce.
  *
  * @param {DepthCard3DProps} props
@@ -30,14 +31,19 @@ export default function DepthCard3D({
 }) {
   const cardRef = useRef(null);
   const [disabled, setDisabled] = useState(false);
-  const [tilt, setTilt] = useState({
-    rotX: 0,
-    rotY: 0,
-    glareX: 50,
-    glareY: 50,
-    glareOpacity: 0,
-  });
   const hasHoveredRef = useRef(false);
+
+  const resetTiltVars = useCallback(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.setProperty('--tilt-rx', '0deg');
+    el.style.setProperty('--tilt-ry', '0deg');
+    el.style.setProperty('--glare-x', '50%');
+    el.style.setProperty('--glare-y', '50%');
+    el.style.setProperty('--glare-opacity', '0');
+    el.style.setProperty('--tilt-duration', '0.4s');
+    el.style.willChange = 'auto';
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -62,6 +68,13 @@ export default function DepthCard3D({
     };
   }, []);
 
+  useEffect(() => {
+    if (disabled) {
+      hasHoveredRef.current = false;
+      resetTiltVars();
+    }
+  }, [disabled, resetTiltVars]);
+
   const handlePointerEnter = () => {
     if (disabled) return;
     if (hoverSound && !hasHoveredRef.current) {
@@ -71,8 +84,9 @@ export default function DepthCard3D({
   };
 
   const handlePointerMove = (e) => {
-    if (disabled || !cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
+    const el = cardRef.current;
+    if (disabled || !el) return;
+    const rect = el.getBoundingClientRect();
     if (rect.width <= 0 || rect.height <= 0) return;
 
     const nx = Math.max(-1, Math.min(1, ((e.clientX - rect.left) / rect.width) * 2 - 1));
@@ -83,36 +97,30 @@ export default function DepthCard3D({
     const glareX = ((e.clientX - rect.left) / rect.width) * 100;
     const glareY = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setTilt({
-      rotX,
-      rotY,
-      glareX,
-      glareY,
-      glareOpacity: 0.25,
-    });
+    el.style.setProperty('--tilt-rx', `${rotX.toFixed(2)}deg`);
+    el.style.setProperty('--tilt-ry', `${rotY.toFixed(2)}deg`);
+    el.style.setProperty('--glare-x', `${glareX.toFixed(2)}%`);
+    el.style.setProperty('--glare-y', `${glareY.toFixed(2)}%`);
+    el.style.setProperty('--glare-opacity', '0.25');
+    el.style.setProperty('--tilt-duration', '0.08s');
+    el.style.willChange = 'transform';
 
     onPointerTilt?.(nx, -ny);
   };
 
   const handlePointerLeave = () => {
     hasHoveredRef.current = false;
-    setTilt({
-      rotX: 0,
-      rotY: 0,
-      glareX: 50,
-      glareY: 50,
-      glareOpacity: 0,
-    });
+    resetTiltVars();
     onPointerTilt?.(0, 0);
   };
 
   const transformStyle = disabled
     ? undefined
     : {
-        transform: `perspective(900px) rotateX(${tilt.rotX.toFixed(2)}deg) rotateY(${tilt.rotY.toFixed(2)}deg) translateZ(0)`,
+        transform:
+          'perspective(900px) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg)) translateZ(0)',
         transformStyle: 'preserve-3d',
-        willChange: tilt.glareOpacity > 0 ? 'transform' : 'auto',
-        transition: tilt.glareOpacity > 0 ? 'transform 0.08s ease-out' : 'transform 0.4s ease-out',
+        transition: 'transform var(--tilt-duration, 0.4s) ease-out',
       };
 
   const resolvedGlare =
@@ -136,8 +144,8 @@ export default function DepthCard3D({
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[inherit] overflow-hidden transition-opacity duration-300"
           style={{
-            opacity: tilt.glareOpacity,
-            background: `radial-gradient(circle 350px at ${tilt.glareX}% ${tilt.glareY}%, ${resolvedGlare}, transparent 70%)`,
+            opacity: 'var(--glare-opacity, 0)',
+            background: `radial-gradient(circle 350px at var(--glare-x, 50%) var(--glare-y, 50%), ${resolvedGlare}, transparent 70%)`,
           }}
         />
       )}

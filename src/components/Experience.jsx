@@ -10,24 +10,37 @@ export default function Experience() {
   const [activeExp, setActiveExp] = useState(experiences[0].id);
   const [filter, setFilter] = useState('all'); // 'all' | 'internship' | 'education'
 
-  const filteredExperiences = experiences.filter((exp) => {
-    if (filter === 'all') return true;
-    return exp.category === filter;
-  });
+  const filteredExperiences = useMemo(
+    () =>
+      experiences.filter((exp) => (filter === 'all' ? true : exp.category === filter)),
+    [filter]
+  );
+
+  const handleFilterChange = (nextFilter) => {
+    sound.playPop();
+    setFilter(nextFilter);
+    const nextFiltered = experiences.filter((exp) =>
+      nextFilter === 'all' ? true : exp.category === nextFilter
+    );
+    if (nextFiltered.length > 0 && !nextFiltered.some((exp) => exp.id === activeExp)) {
+      setActiveExp(nextFiltered[0].id);
+    }
+  };
 
   const helixState = useMemo(
     () => ({
       experiences,
       activeId: activeExp,
       filter,
+      visibleIds: filteredExperiences.map((e) => e.id),
     }),
-    [activeExp, filter]
+    [activeExp, filter, filteredExperiences]
   );
 
   return (
     <section
       id="experience"
-      className="relative bg-[#E8DEC9] text-[#1A1A1A] py-24 lg:py-32 overflow-hidden border-b border-[#1A1A1A]/10 font-sans"
+      className="relative bg-[#E8DEC9] text-[#1A1A1A] py-24 lg:py-32 overflow-x-clip border-b border-[#1A1A1A]/10 font-sans"
     >
       {/* Decorative ambient subtle glow */}
       <div className="absolute top-1/2 left-0 w-96 h-96 bg-[#D95D39]/8 rounded-full blur-[140px] pointer-events-none" />
@@ -57,10 +70,7 @@ export default function Experience() {
           <div className="inline-flex p-1.5 rounded-2xl bg-[#D8CBB2]/50 border border-[#D8CBB2] shadow-inner self-start md:self-auto">
             <button
               type="button"
-              onClick={() => {
-                sound.playPop();
-                setFilter('all');
-              }}
+              onClick={() => handleFilterChange('all')}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all ${
                 filter === 'all'
                   ? 'bg-white text-[#1A1A1A] shadow-md border border-[#D8CBB2]'
@@ -72,10 +82,7 @@ export default function Experience() {
 
             <button
               type="button"
-              onClick={() => {
-                sound.playPop();
-                setFilter('internship');
-              }}
+              onClick={() => handleFilterChange('internship')}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
                 filter === 'internship'
                   ? 'bg-[#D95D39] text-white shadow-md'
@@ -88,10 +95,7 @@ export default function Experience() {
 
             <button
               type="button"
-              onClick={() => {
-                sound.playPop();
-                setFilter('education');
-              }}
+              onClick={() => handleFilterChange('education')}
               className={`px-4 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-1.5 ${
                 filter === 'education'
                   ? 'bg-[#1A1A1A] text-white shadow-md'

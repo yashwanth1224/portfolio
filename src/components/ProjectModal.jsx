@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ExternalLink, Github, Sparkles, Star, ThumbsUp, ThumbsDown, Activity, Play, Pause, Gauge, Check, Globe, ShieldCheck, CheckCircle2, Copy, Zap } from 'lucide-react';
 import { sound } from '../utils/audio';
 import confetti from 'canvas-confetti';
@@ -6,16 +7,38 @@ import ThreeStage from '../three/ThreeStage.jsx';
 import { createEngineSimStage } from '../three/stages/engineSimStage.js';
 
 export default function ProjectModal({ project, isOpen, onClose }) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!isOpen || !project) return undefined;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onCloseRef.current?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [isOpen, project]);
+
   if (!isOpen || !project) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div 
-        className="relative w-full max-w-4xl bg-obsidian-surface border border-white/15 rounded-3xl shadow-2xl overflow-hidden my-8"
+  const modalContent = (
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-[52] flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-y-auto bg-black/80 backdrop-blur-md animate-fadeIn"
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="relative w-full max-w-4xl bg-obsidian-surface border border-white/15 rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[calc(100vh-2rem)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-obsidian/70">
+        <div className="shrink-0 flex items-center justify-between px-6 py-4 border-b border-white/10 bg-obsidian/70">
           <div className="flex items-center gap-3">
             <span className={`w-2.5 h-2.5 rounded-full ${project.liveUrl ? 'bg-emerald-400' : 'bg-coral'} animate-ping`} />
             <span className={`font-mono text-xs uppercase tracking-wider font-semibold ${
@@ -59,7 +82,7 @@ export default function ProjectModal({ project, isOpen, onClose }) {
         </div>
 
         {/* Content body */}
-        <div className="p-6 sm:p-8 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar">
+        <div className="p-6 sm:p-8 space-y-6 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
           
           <div>
             <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -179,6 +202,10 @@ export default function ProjectModal({ project, isOpen, onClose }) {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined'
+    ? createPortal(modalContent, document.body)
+    : modalContent;
 }
 
 // 1. LIVE SENTIMENT ANALYSIS TESTER WIDGET

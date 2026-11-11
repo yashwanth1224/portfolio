@@ -311,7 +311,7 @@ export function createStudioDioramaStage(ctx) {
   // Station 5: Skills Reactor
   const skillsModel = createSkillConstellationModel(ctx);
   skillsModel.group.position.set(4.2, 1.25, 2.7);
-  skillsModel.group.scale.setScalar(0.65);
+  skillsModel.group.scale.setScalar(0.52);
   scene.add(skillsModel.group);
   disposables.push(skillsModel);
 

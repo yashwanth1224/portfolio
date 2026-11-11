@@ -120,17 +120,23 @@ export default function Navbar({
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 40);
 
-      const sections = ['hero', 'about', 'experience', 'projects', 'contact'];
-      const scrollPosition = window.scrollY + 120;
+      // FadeInSection wrappers apply CSS transforms that turn them into offsetParents (offsetTop === 0);
+      // measure viewport-relative top via getBoundingClientRect() so active-section tracking stays accurate.
+      const sections = [
+        'hero',
+        'about',
+        'experience',
+        'projects',
+        'skills',
+        'achievements',
+        'contact',
+      ];
 
       for (let i = sections.length - 1; i >= 0; i--) {
         const el = document.getElementById(sections[i]);
-        if (el) {
-          const top = el.offsetTop;
-          if (scrollPosition >= top) {
-            setActiveSection(sections[i]);
-            break;
-          }
+        if (el && el.getBoundingClientRect().top <= 120) {
+          setActiveSection(sections[i]);
+          break;
         }
       }
     };

@@ -50,24 +50,16 @@ import {
  * @returns {QualityTier}
  */
 export function probeQualityTier() {
-  if (typeof window === 'undefined') return 'fallback';
-
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    return 'reduced';
-  }
-
-  try {
-    const probeCanvas = document.createElement('canvas');
-    const gl =
-      probeCanvas.getContext('webgl2') ||
-      probeCanvas.getContext('webgl') ||
-      probeCanvas.getContext('experimental-webgl');
-    if (!gl) return 'fallback';
-  } catch {
+  // Avoid getContext() probing here so ScissorEngine's constructor owns the solitary WebGL context.
+  if (typeof window === 'undefined' || typeof window.WebGLRenderingContext === 'undefined') {
     return 'fallback';
   }
 
-  const isCoarse = window.matchMedia('(pointer: coarse)').matches;
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    return 'reduced';
+  }
+
+  const isCoarse = Boolean(window.matchMedia?.('(pointer: coarse)').matches);
   const isNarrow = window.innerWidth < 768;
   return isCoarse || isNarrow ? 'mobile' : 'high';
 }

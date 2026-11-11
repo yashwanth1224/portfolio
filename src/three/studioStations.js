@@ -35,9 +35,9 @@ export const STUDIO_STATIONS = Object.freeze([
     navSectionId: 'hero',
     anchorPos: [0, 0.95, 0],
     cameraPose: {
-      position: [0, 1.45, 3.6],
-      target: [0, 0.95, 0],
-      fov: 38,
+      position: [-1.45, 2.15, 3.45],
+      target: [0.65, 1.78, 0],
+      fov: 46,
     },
   },
   {

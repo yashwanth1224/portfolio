@@ -11,6 +11,9 @@ import { disposeObject3D } from './sceneUtils.js';
  */
 export function createCareerHelixModel(ctx) {
   const group = new THREE.Group();
+  // Isolate local bobbing and rotation from parent-stage pedestal offsets.
+  const contentGroup = new THREE.Group();
+  group.add(contentGroup);
 
   let targetYaw = 0;
   let currentYaw = 0;
@@ -57,7 +60,7 @@ export function createCareerHelixModel(ctx) {
   const strandMeshA = new THREE.Mesh(new THREE.TubeGeometry(curveA, 64, 0.026, 8, false), strandMatA);
   const strandMeshB = new THREE.Mesh(new THREE.TubeGeometry(curveB, 64, 0.026, 8, false), strandMatB);
 
-  group.add(strandMeshA, strandMeshB);
+  contentGroup.add(strandMeshA, strandMeshB);
 
   // 2. Milestone Rungs & Pickable Nodes
   const rungMat = new THREE.MeshStandardMaterial({
@@ -94,7 +97,7 @@ export function createCareerHelixModel(ctx) {
     rungMesh.position.set(0, y, 0);
     rungMesh.rotation.z = Math.PI / 2;
     rungMesh.rotation.y = -theta;
-    group.add(rungMesh);
+    contentGroup.add(rungMesh);
 
     // Pickable milestone node at posA
     const nodeGroup = new THREE.Group();
@@ -169,7 +172,7 @@ export function createCareerHelixModel(ctx) {
     badgeMesh.position.set(0, -0.22, 0);
     nodeGroup.add(badgeMesh);
 
-    group.add(nodeGroup);
+    contentGroup.add(nodeGroup);
 
     milestoneNodes.push({
       id: exp.id,
@@ -241,8 +244,8 @@ export function createCareerHelixModel(ctx) {
     targetYaw = autoYaw + dragYaw + parallaxYaw;
 
     currentYaw += (targetYaw - currentYaw) * 0.08;
-    group.rotation.y = currentYaw;
-    group.position.y = Math.sin(elapsed * 1.5) * 0.04;
+    contentGroup.rotation.y = currentYaw;
+    contentGroup.position.y = Math.sin(elapsed * 1.5) * 0.04;
 
     for (let i = 0; i < milestoneNodes.length; i++) {
       const node = milestoneNodes[i];

@@ -17,6 +17,9 @@ import { disposeObject3D } from './sceneUtils.js';
  */
 export function createSkillConstellationModel(ctx) {
   const group = new THREE.Group();
+  // Isolate local bobbing and rotation from parent-stage pedestal offsets.
+  const contentGroup = new THREE.Group();
+  group.add(contentGroup);
 
   let targetYaw = 0;
   let targetPitch = 0;
@@ -58,7 +61,7 @@ export function createSkillConstellationModel(ctx) {
   coreRingB.rotation.y = Math.PI / 3;
   coreGroup.add(coreRingA, coreRingB);
 
-  group.add(coreGroup);
+  contentGroup.add(coreGroup);
 
   // 2. Orbital Quadrant Clusters
   const clusterRadius = 1.6;
@@ -122,7 +125,7 @@ export function createSkillConstellationModel(ctx) {
     hubGroup.add(hubHit);
     pickableMeshes.push(hubHit);
 
-    group.add(hubGroup);
+    contentGroup.add(hubGroup);
 
     // Core to Hub connector line
     linePoints.push(0, 0, 0, hubX, hubY, hubZ);
@@ -168,7 +171,7 @@ export function createSkillConstellationModel(ctx) {
       skillGroup.add(skillHit);
       pickableMeshes.push(skillHit);
 
-      group.add(skillGroup);
+      contentGroup.add(skillGroup);
 
       // Hub to Skill filament line
       linePoints.push(hubX, hubY, hubZ, sx, sy, sz);
@@ -217,7 +220,7 @@ export function createSkillConstellationModel(ctx) {
     blending: THREE.AdditiveBlending,
   });
   const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
-  group.add(lineSegments);
+  contentGroup.add(lineSegments);
 
   const raycaster = new THREE.Raycaster();
   const mouseVec = new THREE.Vector2();
@@ -300,9 +303,9 @@ export function createSkillConstellationModel(ctx) {
     currentYaw += (effectiveTargetYaw - currentYaw) * 0.08;
     currentPitch += (effectiveTargetPitch - currentPitch) * 0.08;
 
-    group.rotation.y = currentYaw;
-    group.rotation.x = currentPitch;
-    group.position.y = Math.sin(elapsed * 1.5) * 0.035;
+    contentGroup.rotation.y = currentYaw;
+    contentGroup.rotation.x = currentPitch;
+    contentGroup.position.y = Math.sin(elapsed * 1.5) * 0.035;
 
     coreHalo.rotation.x = elapsed * 0.4;
     coreHalo.rotation.y = elapsed * 0.6;

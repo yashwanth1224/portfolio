@@ -31,6 +31,9 @@ const TECH_ORBS = [
  */
 export function createAvatarStageModel(ctx) {
   const group = new THREE.Group();
+  // Isolate local pointer/hover motion from parent-stage anchor transforms.
+  const rigGroup = new THREE.Group();
+  group.add(rigGroup);
 
   let targetRotationX = 0;
   let targetRotationY = 0;
@@ -55,7 +58,7 @@ export function createAvatarStageModel(ctx) {
     blending: THREE.AdditiveBlending,
   });
   const particlesMesh = new THREE.Points(particleGeo, particleMat);
-  group.add(particlesMesh);
+  rigGroup.add(particlesMesh);
 
   // 2. Desk & Dual Monitors
   const deskGroup = new THREE.Group();
@@ -160,7 +163,7 @@ export function createAvatarStageModel(ctx) {
   monitorsGroup.add(standPoleRight);
 
   deskGroup.add(monitorsGroup);
-  group.add(deskGroup);
+  rigGroup.add(deskGroup);
 
   // 3. Concentric Rotating Pedestal Rings
   const pedestalGroup = new THREE.Group();
@@ -181,7 +184,7 @@ export function createAvatarStageModel(ctx) {
   outerRing.rotation.x = -Math.PI / 2;
   pedestalGroup.add(outerRing);
 
-  group.add(pedestalGroup);
+  rigGroup.add(pedestalGroup);
 
   // 4. Avatar Plane & Waveform Aura
   const avatarGroup = new THREE.Group();
@@ -199,6 +202,8 @@ export function createAvatarStageModel(ctx) {
   const avatarMesh = new THREE.Mesh(avatarPlaneGeo, avatarPlaneMat);
   avatarMesh.position.set(0, 1.38, 0.02);
   avatarMesh.name = 'officialAvatarMesh';
+  // Hide avatar quad until texture finishes uploading so no blank fallback slab flashes.
+  avatarMesh.visible = false;
   avatarGroup.add(avatarMesh);
 
   // Load avatar texture via ScissorEngine shared texture pool
@@ -211,6 +216,7 @@ export function createAvatarStageModel(ctx) {
       texture.minFilter = THREE.LinearMipmapLinearFilter;
       avatarPlaneMat.map = texture;
       avatarPlaneMat.needsUpdate = true;
+      avatarMesh.visible = true;
     })
     .catch(() => {});
 
@@ -230,7 +236,7 @@ export function createAvatarStageModel(ctx) {
 
   acousticRingsGroup.add(auraMesh1, auraMesh2, auraMesh3, auraMesh4);
   avatarGroup.add(acousticRingsGroup);
-  group.add(avatarGroup);
+  rigGroup.add(avatarGroup);
 
   // 5. Floating Tech Orbs
   const floatingTechOrbs = [];
@@ -279,7 +285,7 @@ export function createAvatarStageModel(ctx) {
     orbGroup.add(badgeMesh);
 
     orbGroup.userData = { initialY: tech.pos[1], speed: tech.speed, offset: tech.offset, orbitalRing };
-    group.add(orbGroup);
+    rigGroup.add(orbGroup);
     floatingTechOrbs.push(orbGroup);
   });
 
@@ -293,9 +299,9 @@ export function createAvatarStageModel(ctx) {
     currentRotationX += (targetRotationX - currentRotationX) * 0.06;
     currentRotationY += (targetRotationY - currentRotationY) * 0.06;
 
-    group.rotation.y = currentRotationY;
-    group.rotation.x = currentRotationX;
-    group.position.x = currentRotationY * 0.22;
+    rigGroup.rotation.y = currentRotationY;
+    rigGroup.rotation.x = currentRotationX;
+    rigGroup.position.x = currentRotationY * 0.22;
 
     const breath = Math.sin(elapsed * 2.2) * 0.012;
     const speechPulse = isSpeaking ? Math.sin(elapsed * 12) * 0.015 : 0;

@@ -17,18 +17,30 @@ export default function Hero() {
   const [activeMediaMode, setActiveMediaMode] = useState('3d'); // '3d' | 'video'
 
   useEffect(() => {
+    let cancelled = false;
     // Check if user has placed their custom AI intro video at yashwanth-intro.mp4
     const videoUrl = personalInfo.introVideoPath || './yashwanth-intro.mp4';
     fetch(videoUrl, { method: 'HEAD' })
       .then((res) => {
-        if (res.ok) {
+        if (cancelled) return;
+        const contentType = (res.headers.get('content-type') || '').toLowerCase();
+        // Reject SPA HTML fallbacks (200 text/html) so missing video assets never hijack the 3D Hero
+        if (res.ok && contentType.startsWith('video/')) {
           setVideoAvailable(true);
           setActiveMediaMode('video');
+        } else {
+          setVideoAvailable(false);
         }
       })
       .catch(() => {
-        setVideoAvailable(false);
+        if (!cancelled) {
+          setVideoAvailable(false);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handlePlayVoiceIntro = () => {
@@ -134,7 +146,7 @@ export default function Hero() {
                 className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 rounded-xl font-heading font-bold text-xs sm:text-sm bg-gradient-to-r from-[#D95D39] to-orange-600 hover:from-orange-500 hover:to-[#D95D39] text-white shadow-xl shadow-[#D95D39]/30 hover:-translate-y-0.5 active:scale-95 transition-all duration-200 cursor-pointer"
               >
                 <Volume2 className="w-4 h-4 text-orange-100 animate-pulse" />
-                <span>🔊 Listen to Yashwanth</span>
+                <span>Listen to Yashwanth</span>
               </button>
 
               {/* Download Resume */}

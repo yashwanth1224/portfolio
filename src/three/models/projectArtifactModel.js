@@ -519,13 +519,13 @@ export function createProjectArtifactModel(ctx, projectId) {
   return {
     group,
     update(dt, elapsed, pointer, state) {
-      const isHovered = Boolean(state?.isHovered || pointer.isHovered);
+      const isHovered = Boolean(state?.isHovered || pointer?.isHovered);
       const speedMult = isHovered ? 2.2 : 1.0;
 
       updateArtifact?.(dt, elapsed, speedMult);
 
-      const targetRotX = -pointer.y * 0.35;
-      const targetRotY = pointer.x * 0.45;
+      const targetRotX = -(pointer?.y ?? 0) * 0.35;
+      const targetRotY = (pointer?.x ?? 0) * 0.45;
       currentRotX += (targetRotX - currentRotX) * Math.min(1, dt * 6);
       currentRotY += (targetRotY - currentRotY) * Math.min(1, dt * 6);
 
